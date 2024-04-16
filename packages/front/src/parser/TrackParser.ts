@@ -51,13 +51,22 @@ export class TrackParser {
       (statusByte & 0xf0) >= MidiEventType.NoteOff << 4 &&
       (statusByte & 0xf0) <= MidiEventType.PitchModulationWheel << 4
     ) {
-      this.events.push({ deltaTime, event: this.eatMidiEvent(statusByte) })
+      const event = this.eatMidiEvent(statusByte)
+
+      // Skip all events that dont have any player functionality anyway
+      if (
+        event.eventType !== MidiEventType.NoteOff &&
+        event.eventType !== MidiEventType.NoteOn
+      )
+        return
+      this.events.push({ deltaTime, event })
     }
   }
 
   eatMidiEvent(statusByte: number): MidiEvent {
     // Extract the upper nibble for event type
     const eventType = (statusByte >> 4) & 0x0f
+
     // Extract the lower nibble for MIDI channel
     const channel = statusByte & 0x0f
 

@@ -52,7 +52,7 @@ async function selectFile(event: any) {
   }
 }
 
-document.getElementById('display')!.addEventListener('touchstart', play)
+document.getElementById('display')!.addEventListener('touchend', play)
 document.getElementById('display')!.addEventListener('click', play)
 document.getElementById('input')!.addEventListener('change', selectFile)
 

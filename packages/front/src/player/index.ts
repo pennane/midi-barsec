@@ -5,7 +5,6 @@ const DEFAULT_TEMPO = 500_000 // Default tempo (500,000 μs per quarter note)
 const DEFAULT_DIVISION = 48 // Ticks per quarter note
 const MICROSEC_IN_SEC = 1_000_000 // Number of microseconds in a second
 
-// Calculate tick duration in milliseconds
 let currentTickDuration = DEFAULT_TEMPO / DEFAULT_DIVISION / MICROSEC_IN_SEC
 
 function* events(track: Track) {
@@ -123,7 +122,7 @@ export async function playMidi(
       gainNode,
       analyser,
       track,
-      currentTime + 0.25,
+      currentTime + 0.5,
       division,
       'sawtooth'
     )

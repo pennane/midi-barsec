@@ -7,8 +7,12 @@ import { ensureOnce } from './util'
 const audioCtx = new (window.AudioContext ||
   (window as any).webkitAudioContext)()
 
+const gainNode = audioCtx.createGain()
+gainNode.gain.value = 0.05
+gainNode.connect(audioCtx.destination)
+
 const play = ensureOnce(() => {
-  playMidi(audioCtx, analyser, midiFile as Midi)
+  playMidi(audioCtx, gainNode, analyser, midiFile as Midi)
 })
 
 document.addEventListener('click', play)
@@ -16,7 +20,7 @@ document.addEventListener('click', play)
 document.addEventListener('touchstart', play)
 
 const analyser = audioCtx.createAnalyser()
-analyser.connect(audioCtx.destination)
+analyser.connect(gainNode)
 
 analyser.fftSize = 2048
 const bufferLength = analyser.frequencyBinCount

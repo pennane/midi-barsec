@@ -30,6 +30,7 @@ function* events(track: Track) {
 
 async function playTrack(
   ctx: AudioContext,
+  gainNode: GainNode,
   analyzer: AnalyserNode,
   track: Track,
   startTime: number,
@@ -60,7 +61,7 @@ async function playTrack(
       }
 
       osc = ctx.createOscillator()
-      osc.connect(ctx.destination)
+      osc.connect(gainNode)
       osc.connect(analyzer)
 
       osc.type = type
@@ -74,6 +75,7 @@ async function playTrack(
 
 export async function playMidi(
   ctx: AudioContext,
+  gainNode: GainNode,
   analyser: AnalyserNode,
   midi: Midi
 ) {
@@ -83,6 +85,7 @@ export async function playMidi(
   midi.tracks.forEach((t, i) =>
     playTrack(
       ctx,
+      gainNode,
       analyser,
       t,
       currentTime + 0.25,

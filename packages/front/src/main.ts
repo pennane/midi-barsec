@@ -7,12 +7,13 @@ import { ensureOnce } from './util'
 const audioCtx = new (window.AudioContext ||
   (window as any).webkitAudioContext)()
 
-document.addEventListener(
-  'click',
-  ensureOnce(() => {
-    playMidi(audioCtx, analyser, midiFile as Midi)
-  })
-)
+const play = ensureOnce(() => {
+  playMidi(audioCtx, analyser, midiFile as Midi)
+})
+
+document.addEventListener('click', play)
+
+document.addEventListener('touchstart', play)
 
 const analyser = audioCtx.createAnalyser()
 analyser.connect(audioCtx.destination)

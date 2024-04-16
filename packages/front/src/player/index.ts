@@ -61,6 +61,7 @@ async function playTrack(
         ).readUIntBE(0, 3)
 
         currentTickDuration = newTempo / division / MICROSEC_IN_SEC
+        deltaTime = eventGroup[0].deltaTime * currentTickDuration
       }
 
       if (event.type !== EventType.Midi) {

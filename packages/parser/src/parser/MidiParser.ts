@@ -17,7 +17,6 @@ export class MidiParser {
 
   parse(): Midi {
     this.eatHeader()
-    console.log(this.header)
     while (this.pointer < this.buffer.length) {
       this.eatTrack()
     }

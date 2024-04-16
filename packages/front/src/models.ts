@@ -59,7 +59,8 @@ export type SysexEvent = {
 export enum MetaEventType {
   SequenceNumber = 0x00,
   TextEvent = 0x01,
-  EndOfTrack = 0x2f
+  EndOfTrack = 0x2f,
+  Tempo = 0x51
 }
 
 export type MetaEvent = {

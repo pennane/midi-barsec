@@ -1,5 +1,12 @@
-import { Track, EventType, MidiEventType, Midi } from '../models'
+import { Buffer } from 'buffer'
+import { Track, EventType, MidiEventType, Midi, MetaEventType } from '../models'
 import { midiNoteToFrequency } from '../util'
+
+const DEFAULT_TEMPO = 500_000 // / Default tempo (500,000 μs per quarter note)
+const DEFAULT_DIVISION = 498
+const MICROSEC_IN_SEC = 100_0000
+let currentTempo = DEFAULT_TEMPO
+let currentTickDuration = currentTempo / DEFAULT_DIVISION / MICROSEC_IN_SEC
 
 function* events(track: Track) {
   let eventIndex = 0
@@ -40,11 +47,25 @@ async function playTrack(
   let currentTime = startTime
   const channels = new Map<number, OscillatorNode>()
   for (const eventGroup of events(track)) {
-    const deltaTime = eventGroup[0].deltaTime / division
-    currentTime += deltaTime
-
+    let deltaTime = eventGroup[0].deltaTime * currentTickDuration
     for (const { event } of eventGroup) {
-      if (event.type !== EventType.Midi) continue
+      if (
+        event.type === EventType.Meta &&
+        event.metaType === MetaEventType.Tempo
+      ) {
+        const newTempo = (
+          event.buffer instanceof Buffer
+            ? event.buffer
+            : Buffer.from(event.buffer)
+        ).readUIntBE(0, 3)
+        currentTempo = newTempo
+        currentTickDuration = newTempo / division / MICROSEC_IN_SEC
+      }
+
+      if (event.type !== EventType.Midi) {
+        continue
+      }
+
       if (
         event.eventType !== MidiEventType.NoteOn &&
         event.eventType !== MidiEventType.NoteOff
@@ -55,12 +76,12 @@ async function playTrack(
       let osc = channels.get(event.channel)
 
       if (event.eventType === MidiEventType.NoteOff || event.otherData === 0) {
-        osc?.stop(currentTime)
+        osc?.stop(currentTime + deltaTime)
         channels.delete(event.channel)
         continue
       }
 
-      osc?.stop(currentTime)
+      osc?.stop(currentTime + deltaTime)
 
       osc = ctx.createOscillator()
       osc.connect(gainNode)
@@ -69,9 +90,13 @@ async function playTrack(
       osc.type = type
       channels.set(event.channel, osc)
 
-      osc.frequency.setValueAtTime(midiNoteToFrequency(event.data), currentTime)
-      osc.start(currentTime)
+      osc.frequency.setValueAtTime(
+        midiNoteToFrequency(event.data),
+        currentTime + deltaTime
+      )
+      osc.start(currentTime + deltaTime)
     }
+    currentTime += deltaTime
   }
 }
 
@@ -83,6 +108,7 @@ export async function playMidi(
 ) {
   const division = midi.header.division
   if (typeof division !== 'number') throw 'asdf sorry no support'
+
   let currentTime = ctx.currentTime
   midi.tracks.forEach((t, i) =>
     playTrack(
@@ -91,7 +117,7 @@ export async function playMidi(
       analyser,
       t,
       currentTime + 0.25,
-      division * 4.5,
+      division,
       (['sawtooth', 'sawtooth', 'sawtooth', 'sawtooth'] as const)[i % 4]
     )
   )

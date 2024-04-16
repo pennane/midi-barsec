@@ -10,7 +10,7 @@ const parser = new MidiParser(buffer)
 
 const midi = parser.parse()
 
-console.log(midi)
+console.info(midi)
 
 const now = Date.now()
 

@@ -8,7 +8,8 @@ import {
   MidiEvent,
   MidiEventType,
   SysexEvent,
-  Track
+  Track,
+  MetaEventType
 } from '../models'
 
 export class TrackParser {
@@ -47,6 +48,15 @@ export class TrackParser {
       this.lastStatusByte = statusByte
     }
 
+    if (statusByte === MidiEventType.Meta) {
+      const event = this.eatMetaEvent()
+
+      if (event.metaType === MetaEventType.Tempo) {
+        this.events.push({ deltaTime, event })
+      }
+      return
+    }
+
     if (
       (statusByte & 0xf0) >= MidiEventType.NoteOff << 4 &&
       (statusByte & 0xf0) <= MidiEventType.PitchModulationWheel << 4
@@ -55,11 +65,12 @@ export class TrackParser {
 
       // Skip all events that dont have any player functionality anyway
       if (
-        event.eventType !== MidiEventType.NoteOff &&
-        event.eventType !== MidiEventType.NoteOn
-      )
+        event.eventType === MidiEventType.NoteOff ||
+        event.eventType === MidiEventType.NoteOn
+      ) {
+        this.events.push({ deltaTime, event })
         return
-      this.events.push({ deltaTime, event })
+      }
     }
   }
 

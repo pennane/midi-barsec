@@ -8,7 +8,7 @@ export class HeaderParser {
   }
 
   eatDivision() {
-    const divisionBytes = this.eat(2).readUint16BE(0)
+    const divisionBytes = this.eat(2).readUInt16BE(0)
 
     if (divisionBytes & 0x8000) {
       const smpteFormat = -((divisionBytes >> 8) & 0x7f) // Extract SMPTE format and convert to signed
@@ -23,7 +23,7 @@ export class HeaderParser {
     if (this.chunk.type !== ChunkType.MThd) {
       throw new Error(`Expected ${ChunkType.MThd} got ${this.chunk.type}`)
     }
-    const format = this.eat(2).readUint16BE(0)
+    const format = this.eat(2).readUInt16BE(0)
 
     const numberOfTracks = this.eat(2).readUInt16BE(0)
 

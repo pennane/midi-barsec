@@ -1,12 +1,12 @@
 import { Buffer } from 'buffer'
 import { Track, EventType, MidiEventType, Midi, MetaEventType } from '../models'
 import { midiNoteToFrequency } from '../util'
+const DEFAULT_TEMPO = 500_000 // Default tempo (500,000 μs per quarter note)
+const DEFAULT_DIVISION = 48 // Ticks per quarter note
+const MICROSEC_IN_SEC = 1_000_000 // Number of microseconds in a second
 
-const DEFAULT_TEMPO = 500_000 // / Default tempo (500,000 μs per quarter note)
-const DEFAULT_DIVISION = 498
-const MICROSEC_IN_SEC = 100_0000
-let currentTempo = DEFAULT_TEMPO
-let currentTickDuration = currentTempo / DEFAULT_DIVISION / MICROSEC_IN_SEC
+// Calculate tick duration in milliseconds
+let currentTickDuration = DEFAULT_TEMPO / DEFAULT_DIVISION / MICROSEC_IN_SEC
 
 function* events(track: Track) {
   let eventIndex = 0
@@ -27,11 +27,11 @@ function* events(track: Track) {
       eventIndex++
     }
 
+    yield track.events.slice(start, eventIndex)
+
     if (eventIndex >= track.events.length) {
       return
     }
-
-    yield track.events.slice(start, eventIndex)
   }
 }
 
@@ -45,6 +45,7 @@ async function playTrack(
   type: OscillatorType
 ) {
   let currentTime = startTime
+
   const channels = new Map<number, OscillatorNode>()
   for (const eventGroup of events(track)) {
     let deltaTime = eventGroup[0].deltaTime * currentTickDuration
@@ -58,7 +59,7 @@ async function playTrack(
             ? event.buffer
             : Buffer.from(event.buffer)
         ).readUIntBE(0, 3)
-        currentTempo = newTempo
+
         currentTickDuration = newTempo / division / MICROSEC_IN_SEC
       }
 
@@ -110,15 +111,15 @@ export async function playMidi(
   if (typeof division !== 'number') throw 'asdf sorry no support'
 
   let currentTime = ctx.currentTime
-  midi.tracks.forEach((t, i) =>
+  for (const track of midi.tracks) {
     playTrack(
       ctx,
       gainNode,
       analyser,
-      t,
+      track,
       currentTime + 0.25,
       division,
-      (['sawtooth', 'sawtooth', 'sawtooth', 'sawtooth'] as const)[i % 4]
+      'sawtooth'
     )
-  )
+  }
 }

@@ -50,7 +50,6 @@ export class TrackParser {
 
     if (statusByte === MidiEventType.Meta) {
       const event = this.eatMetaEvent()
-
       if (event.metaType === MetaEventType.Tempo) {
         this.events.push({ deltaTime, event })
       }

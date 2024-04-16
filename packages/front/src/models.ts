@@ -5,6 +5,11 @@ export enum ChunkType {
   MTrk = 'MTrk'
 }
 
+type Buffer = {
+  type: 'buffer'
+  data: number[]
+}
+
 export type Chunk = {
   type: ChunkType
   buffer: Buffer

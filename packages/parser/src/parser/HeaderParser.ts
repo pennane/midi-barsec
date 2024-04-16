@@ -7,6 +7,18 @@ export class HeaderParser {
     this.pointer = 0
   }
 
+  eatDivision() {
+    const divisionBytes = this.eat(2).readUint16BE(0)
+
+    if (divisionBytes & 0x8000) {
+      const smpteFormat = -((divisionBytes >> 8) & 0x7f) // Extract SMPTE format and convert to signed
+      const ticksPerFrame = divisionBytes & 0xff // Extract ticks per frame
+      return { smpteFormat, ticksPerFrame }
+    }
+
+    return divisionBytes
+  }
+
   parse(): Header {
     if (this.chunk.type !== ChunkType.MThd) {
       throw new Error(`Expected ${ChunkType.MThd} got ${this.chunk.type}`)
@@ -15,8 +27,7 @@ export class HeaderParser {
 
     const numberOfTracks = this.eat(2).readUInt16BE(0)
 
-    const division = this.eat(2).readUint16BE(0)
-
+    const division = this.eatDivision()
     return {
       format,
       numberOfTracks,

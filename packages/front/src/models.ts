@@ -1,13 +1,10 @@
+import { Buffer } from 'buffer'
+
 export type Byte = number
 
 export enum ChunkType {
   MThd = 'MThd',
   MTrk = 'MTrk'
-}
-
-type Buffer = {
-  type: 'buffer'
-  data: number[]
 }
 
 export type Chunk = {

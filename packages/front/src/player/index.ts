@@ -60,6 +60,8 @@ async function playTrack(
         continue
       }
 
+      osc?.stop(currentTime)
+
       osc = ctx.createOscillator()
       osc.connect(gainNode)
       osc.connect(analyzer)

@@ -46,7 +46,7 @@ async function playTrack(
 ) {
   let currentTime = startTime
 
-  const channels = new Map<number, OscillatorNode>()
+  const channels = new Map<number, Map<number, OscillatorNode>>()
   for (const eventGroup of events(track)) {
     let deltaTime = eventGroup[0].deltaTime * currentTickDuration
     for (const { event } of eventGroup) {
@@ -74,11 +74,16 @@ async function playTrack(
         continue
       }
 
-      let osc = channels.get(event.channel)
+      let oscs = channels.get(event.channel)!
+      if (!oscs) {
+        oscs = new Map()
+        channels.set(event.channel, oscs)
+      }
+      let osc = oscs.get(event.data)!
 
       if (event.eventType === MidiEventType.NoteOff || event.otherData === 0) {
         osc?.stop(currentTime + deltaTime)
-        channels.delete(event.channel)
+        oscs.delete(event.data)
         continue
       }
 
@@ -89,7 +94,7 @@ async function playTrack(
       osc.connect(analyzer)
 
       osc.type = type
-      channels.set(event.channel, osc)
+      oscs.set(event.data, osc)
 
       osc.frequency.setValueAtTime(
         midiNoteToFrequency(event.data),

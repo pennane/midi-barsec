@@ -27,10 +27,6 @@ function* events(track: Track) {
     }
 
     yield track.events.slice(start, eventIndex)
-
-    if (eventIndex >= track.events.length) {
-      return
-    }
   }
 }
 

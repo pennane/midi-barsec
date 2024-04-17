@@ -60,7 +60,9 @@ async function playTrack(
       continue
     }
 
-    let oscillator = activeNotes.get(noteKey) || ctx.createOscillator()
+    let oscillator = activeNotes.get(noteKey)
+    oscillator?.stop()
+    oscillator = ctx.createOscillator()
     oscillator.connect(gainNode)
     oscillator.connect(analyser)
     oscillator.type = type
@@ -87,7 +89,7 @@ export async function playMidi(
     )
   }
 
-  let currentTime = ctx.currentTime + 1
+  let currentTime = ctx.currentTime + 0.75
 
   playTrack(
     ctx,

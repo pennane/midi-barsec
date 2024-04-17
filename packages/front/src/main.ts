@@ -45,10 +45,9 @@ async function selectFile(event: any) {
 
   try {
     const midi = new Midi(arrayBuffer)
-
     selectedMidi = midi
   } catch (e) {
-    throw e
+    alert(e)
   }
 }
 

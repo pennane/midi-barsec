@@ -9,6 +9,7 @@ const DEFAULT_MIDI_ARRAY_BUFFER: ArrayBuffer = defaultMidiFile
 const DEFAULT_MIDI = new Midi(DEFAULT_MIDI_ARRAY_BUFFER)
 
 let selectedMidi: Midi = DEFAULT_MIDI
+let selectedWaveform: OscillatorType = 'sawtooth'
 
 const audioCtx = new (window.AudioContext ||
   (window as any).webkitAudioContext)()
@@ -23,7 +24,7 @@ analyser.fftSize = 2048
 
 const play = ensureOnce(() => {
   document.getElementById('settings')!.classList.add('hidden')
-  playMidi(audioCtx, gainNode, analyser, selectedMidi)
+  playMidi(audioCtx, gainNode, analyser, selectedMidi, selectedWaveform)
 })
 
 async function selectFile(event: any) {
@@ -54,5 +55,12 @@ async function selectFile(event: any) {
 document.getElementById('display')!.addEventListener('touchend', play)
 document.getElementById('display')!.addEventListener('click', play)
 document.getElementById('input')!.addEventListener('change', selectFile)
+
+document
+  .getElementById('waveform')!
+  .addEventListener('change', function (this: HTMLInputElement) {
+    selectedWaveform = this.value as OscillatorType
+    console.log('Selected waveform:', selectedWaveform)
+  })
 
 visualize(document.getElementById('display')!, analyser)

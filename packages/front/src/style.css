@@ -1,3 +1,7 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
   display: flex;
   justify-content: center;
@@ -18,8 +22,6 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  width: 100%;
-
   display: flex;
   justify-content: center;
   align-items: center;
@@ -41,6 +43,7 @@ canvas {
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   width: 25vmin;
   height: 25vmin;
+  image-rendering: pixelated;
 }
 
 .hidden {

@@ -2,7 +2,6 @@ import {
   Chunk,
   ChunkType,
   Header,
-  MTrkEvent,
   Event,
   MidiEventType,
   EventType,

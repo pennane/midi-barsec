@@ -79,7 +79,8 @@ export async function playMidi(
   ctx: AudioContext,
   gainNode: GainNode,
   analyser: AnalyserNode,
-  midi: Midi
+  midi: Midi,
+  waveform: OscillatorType
 ) {
   const division = midi.header.division
 
@@ -98,6 +99,6 @@ export async function playMidi(
     midi.eventGenerator,
     currentTime,
     division,
-    'sawtooth'
+    waveform
   )
 }

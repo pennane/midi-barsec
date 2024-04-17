@@ -1,7 +1,7 @@
 const canvas = document.createElement('canvas')
 const canvasCtx = canvas.getContext('2d')!
 
-const SIZE = 150
+const SIZE = 200
 canvas.width = SIZE
 canvas.height = SIZE
 
@@ -23,12 +23,12 @@ function draw(analyser: AnalyserNode, dataArray: Uint8Array) {
   canvasCtx.fillStyle = 'rgb(0 0 0)'
   canvasCtx.fillRect(0, 0, SIZE, SIZE)
 
-  canvasCtx.lineWidth = 2
+  canvasCtx.lineWidth = 3
   canvasCtx.strokeStyle = 'rgb(0 0 255)'
 
   canvasCtx.beginPath()
 
-  const sliceWidth = (SIZE * 1.0) / bufferLength
+  const sliceWidth = SIZE / bufferLength
   let x = 0
 
   for (let i = 0; i < bufferLength; i++) {

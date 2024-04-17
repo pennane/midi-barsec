@@ -3,14 +3,19 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>play midi file</title>
+  <title>play midi files right here</title>
 </head>
 
 <body>
   <div id="settings">
     <input type="file" id="input" accept=".mid,.midi">
+    <select id="waveform">
+      <option value="sawtooth" selected>Sawtooth</option>
+      <option value="sine">Sine</option>
+      <option value="square">Square</option>
+      <option value="triangle">Triangle</option>
+    </select>
   </div>
   <div id="display"></div>
   <script type="module" src="/src/main.ts"></script>

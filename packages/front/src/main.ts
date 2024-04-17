@@ -60,7 +60,6 @@ document
   .getElementById('waveform')!
   .addEventListener('change', function (this: HTMLInputElement) {
     selectedWaveform = this.value as OscillatorType
-    console.log('Selected waveform:', selectedWaveform)
   })
 
 visualize(document.getElementById('display')!, analyser)

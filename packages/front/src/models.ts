@@ -1,6 +1,6 @@
-import { Buffer } from 'buffer'
-
 export type Byte = number
+
+export type EventGenerator = Generator<MTrkEvent, void, void>
 
 export enum ChunkType {
   MThd = 'MThd',
@@ -9,7 +9,7 @@ export enum ChunkType {
 
 export type Chunk = {
   type: ChunkType
-  buffer: Buffer
+  view: DataView
 }
 
 export enum Format {
@@ -53,7 +53,7 @@ export enum MidiEventType {
 
 export type SysexEvent = {
   type: EventType.Sysex
-  data: Buffer
+  data: ArrayBuffer
 }
 
 export enum MetaEventType {
@@ -66,7 +66,7 @@ export enum MetaEventType {
 export type MetaEvent = {
   type: EventType.Meta
   metaType: MetaEventType
-  buffer: Buffer
+  dataView: DataView
 }
 
 export type Event = MidiEvent | SysexEvent | MetaEvent
@@ -78,9 +78,4 @@ export type MTrkEvent = {
 
 export type Track = {
   events: MTrkEvent[]
-}
-
-export type Midi = {
-  header: Header
-  tracks: Track[]
 }

@@ -1,13 +1,12 @@
 import './style.css'
-import { Midi } from './models'
-import defaultMidi from './out.json'
+import defaultMidiFile from './megalovania.mid?arraybuffer'
 import { playMidi } from './player'
 import { ensureOnce } from './util'
 import { visualize } from './visualizer'
-import { MidiParser } from './parser/MidiParser'
-import { Buffer } from 'buffer'
+import { Midi } from './parser/MidiParser'
 
-const DEFAULT_MIDI = defaultMidi as Midi
+const DEFAULT_MIDI_ARRAY_BUFFER: ArrayBuffer = defaultMidiFile
+const DEFAULT_MIDI = new Midi(DEFAULT_MIDI_ARRAY_BUFFER)
 
 let selectedMidi: Midi = DEFAULT_MIDI
 
@@ -15,7 +14,7 @@ const audioCtx = new (window.AudioContext ||
   (window as any).webkitAudioContext)()
 
 const gainNode = audioCtx.createGain()
-gainNode.gain.value = 0.05
+gainNode.gain.value = 0.03
 gainNode.connect(audioCtx.destination)
 
 const analyser = audioCtx.createAnalyser()
@@ -45,10 +44,11 @@ async function selectFile(event: any) {
   }
 
   try {
-    const midi = new MidiParser(Buffer.from(arrayBuffer)).parse()
+    const midi = new Midi(arrayBuffer)
+
     selectedMidi = midi
   } catch (e) {
-    alert(e)
+    throw e
   }
 }
 

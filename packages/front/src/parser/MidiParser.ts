@@ -183,39 +183,37 @@ function* events(
 }
 
 function* mergedEvents(tracks: Chunk[]): EventGenerator {
-  const generators = tracks.map((track) => ({
-    gen: events(track.view),
-    next: null as { currentTime: number; event: Event } | null
-  }))
+  const generators = tracks.map(track => {
+    const generator = events(track.view);
+    return { generator, next: generator.next().value || null };
+  });
 
-  generators.forEach((track) => (track.next = track.gen.next().value || null))
+  let currentTime = 0;
 
-  let currentTime = 0
+  while (true) {
+    let earliestTime = Infinity;
+    let earliestIndex = -1;
 
-  while (generators.some((track) => track.next)) {
-    let earliest = { currentTime: Infinity, index: -1 }
+    for (let i = 0; i < generators.length; i++) {
+      const { next } = generators[i];
 
-    generators.forEach((track, index) => {
-      if (track.next && track.next.currentTime < earliest.currentTime) {
-        earliest = { currentTime: track.next.currentTime, index }
+      if (next && next.currentTime < earliestTime) {
+        earliestTime = next.currentTime;
+        earliestIndex = i;
       }
-    })
-
-    const currentTrack = generators[earliest.index]
-
-    if (!currentTrack.next) continue
-
-    const eventCurrentTime = currentTrack.next.currentTime
-    const deltaTime = eventCurrentTime - currentTime
-    const event = currentTrack.next.event
-
-    yield {
-      event,
-      deltaTime
     }
 
-    currentTrack.next = currentTrack.gen.next().value || null
-    currentTime = eventCurrentTime
+    if (earliestIndex === -1) break;
+
+    const currentTrack = generators[earliestIndex];
+
+    yield {
+      event: currentTrack.next.event,
+      deltaTime: earliestTime - currentTime,
+    };
+
+    currentTrack.next = currentTrack.generator.next().value || null;
+    currentTime = earliestTime;
   }
 }
 

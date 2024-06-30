@@ -96,7 +96,7 @@ export async function playMidi(
     ctx,
     gainNode,
     analyser,
-    midi.eventGenerator,
+    midi.generator(),
     currentTime,
     division,
     waveform

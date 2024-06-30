@@ -257,17 +257,19 @@ function* chunks(buffer: ArrayBuffer): Generator<Chunk> {
 
 export class Midi {
   public header: Header
-  public eventGenerator: EventGenerator
+  private tracks: Chunk[]
 
   constructor(buffer: ArrayBuffer) {
     const chunkGenerator = chunks(buffer)
 
     this.header = parseHeader(chunkGenerator.next().value)
 
-    const tracks = Array.from(chunkGenerator).filter(
+    this.tracks = Array.from(chunkGenerator).filter(
       (track) => track.type === ChunkType.MTrk
     )
+  }
 
-    this.eventGenerator = mergedEvents(tracks)
+  public generator(): EventGenerator {
+    return mergedEvents(this.tracks)
   }
 }

@@ -15,7 +15,7 @@ const audioCtx = new (window.AudioContext ||
   (window as any).webkitAudioContext)()
 
 const gainNode = audioCtx.createGain()
-gainNode.gain.value = 0.03
+gainNode.gain.value = 0.01
 gainNode.connect(audioCtx.destination)
 
 const analyser = audioCtx.createAnalyser()

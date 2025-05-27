@@ -3,71 +3,94 @@ import { MidiParser } from '../parser/midiParser'
 import { midiNoteToFrequency } from '../util/midi'
 
 const DEFAULT_TEMPO = 500_000 // Default tempo (500,000 microseconds per quarter note)
-const DEFAULT_DIVISION = 48 // Ticks per quarter note
 const MICROSEC_IN_SEC = 1_000_000 // Number of microseconds in a second
 
-async function playTrack(
+async function playTrackIncremental(
   ctx: AudioContext,
   gainNode: GainNode,
   analyser: AnalyserNode,
   reader: MidiReader,
-  startTime: number,
-  division: number = DEFAULT_DIVISION,
+  division: number,
   type: OscillatorType
 ) {
-  let currentTime = startTime
+  const SCHEDULE_AHEAD_TIME = 1.0 // seconds
+  const CHECK_INTERVAL = 100 // ms
+
   let tickDuration = DEFAULT_TEMPO / division / MICROSEC_IN_SEC
-
-  function calculateEventTime(deltaTime: number) {
-    return deltaTime * tickDuration
-  }
-
+  let scheduledTime = ctx.currentTime
   const activeNotes: Map<string, OscillatorNode> = new Map()
 
-  for (const { event, deltaTime } of reader) {
-    currentTime += calculateEventTime(deltaTime)
+  const iterator = reader[Symbol.iterator]()
+  let done = false
+  let nextEvent = iterator.next()
 
-    if (
-      event.type === EventType.Meta &&
-      event.metaType === MetaEventType.Tempo
-    ) {
-      const newTempo =
-        (event.data.getUint8(0) << 16) |
-        (event.data.getUint8(1) << 8) |
-        event.data.getUint8(2)
-      tickDuration = newTempo / division / MICROSEC_IN_SEC
-      continue
+  function scheduleEvents() {
+    const maxTime = ctx.currentTime + SCHEDULE_AHEAD_TIME
+
+    while (!done && scheduledTime < maxTime) {
+      const { value, done } = nextEvent
+      if (done) return
+
+      const { event, deltaTime } = value
+      const eventTime = deltaTime * tickDuration
+      scheduledTime += eventTime
+
+      if (
+        event.type === EventType.Meta &&
+        event.metaType === MetaEventType.Tempo
+      ) {
+        const newTempo =
+          (event.data.getUint8(0) << 16) |
+          (event.data.getUint8(1) << 8) |
+          event.data.getUint8(2)
+        tickDuration = newTempo / division / MICROSEC_IN_SEC
+        nextEvent = iterator.next()
+        continue
+      }
+
+      if (
+        event.type !== EventType.Midi ||
+        (event.eventType !== MidiEventType.NoteOn &&
+          event.eventType !== MidiEventType.NoteOff)
+      ) {
+        nextEvent = iterator.next()
+        continue
+      }
+
+      const noteKey = `${event.channel}-${event.data}`
+
+      if (event.eventType === MidiEventType.NoteOff || event.otherData === 0) {
+        const osc = activeNotes.get(noteKey)
+        if (osc) {
+          osc.stop(scheduledTime)
+          activeNotes.delete(noteKey)
+        }
+        nextEvent = iterator.next()
+        continue
+      }
+
+      const osc = ctx.createOscillator()
+      osc.connect(gainNode)
+      osc.connect(analyser)
+      osc.type = type
+      osc.frequency.setValueAtTime(
+        midiNoteToFrequency(event.data),
+        scheduledTime
+      )
+      osc.start(scheduledTime)
+      activeNotes.set(noteKey, osc)
+
+      nextEvent = iterator.next()
     }
-
-    if (
-      event.type !== EventType.Midi ||
-      (event.eventType !== MidiEventType.NoteOn &&
-        event.eventType !== MidiEventType.NoteOff)
-    ) {
-      continue
-    }
-
-    const noteKey = `${event.channel}-${event.data}`
-
-    if (event.eventType === MidiEventType.NoteOff || event.otherData === 0) {
-      activeNotes.get(noteKey)?.stop(currentTime)
-      activeNotes.delete(noteKey)
-      continue
-    }
-
-    let oscillator = activeNotes.get(noteKey)
-    oscillator?.stop()
-    oscillator = ctx.createOscillator()
-    oscillator.connect(gainNode)
-    oscillator.connect(analyser)
-    oscillator.type = type
-
-    const frequency = midiNoteToFrequency(event.data)
-    oscillator.frequency.setValueAtTime(frequency, currentTime)
-
-    oscillator.start(currentTime)
-    activeNotes.set(noteKey, oscillator)
   }
+
+  const interval = setInterval(() => {
+    if (done) {
+      clearInterval(interval)
+      return
+    }
+    scheduleEvents()
+  }, CHECK_INTERVAL)
 }
 
 export async function playMidi(
@@ -85,14 +108,11 @@ export async function playMidi(
     )
   }
 
-  let currentTime = ctx.currentTime + 0.75
-
-  playTrack(
+  await playTrackIncremental(
     ctx,
     gainNode,
     analyser,
     midi.reader,
-    currentTime,
     division,
     waveform
   )

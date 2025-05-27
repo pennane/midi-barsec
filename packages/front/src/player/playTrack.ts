@@ -26,12 +26,12 @@ function createPlaybackState(reader: MidiReader): PlaybackState {
   }
 }
 
-function pausePlayback(state: PlaybackState, context: PlaybackContext): void {
+function pausePlayback(state: PlaybackState, ctx: PlaybackContext): void {
   state.isPlaying = false
 
   for (const oscillator of state.activeNotes.values()) {
     try {
-      oscillator.stop(context.audioContext.currentTime)
+      oscillator.stop(ctx.audioContext.currentTime)
     } catch (e) {}
   }
   state.activeNotes.clear()
@@ -42,19 +42,16 @@ function pausePlayback(state: PlaybackState, context: PlaybackContext): void {
   }
 }
 
-function resumePlayback(state: PlaybackState, context: PlaybackContext): void {
+function resumePlayback(state: PlaybackState, ctx: PlaybackContext): void {
   if (state.isPlaying) return
 
   state.isPlaying = true
-  state.scheduledTime = context.audioContext.currentTime
+  state.scheduledTime = ctx.audioContext.currentTime
 
-  startAudioPlayer(context, state)
+  startAudioPlayer(ctx, state)
 }
 
-function processNextEvent(
-  context: PlaybackContext,
-  state: PlaybackState
-): boolean {
+function processNextEvent(ctx: PlaybackContext, state: PlaybackState): boolean {
   const next = state.eventIterator.next()
 
   if (next.done) {
@@ -65,15 +62,15 @@ function processNextEvent(
   const eventTime = deltaTime * state.tickDuration
   state.scheduledTime += eventTime
 
-  processEvent(event, context, state)
+  processEvent(event, ctx, state)
   return true
 }
 
-function scheduleEvents(context: PlaybackContext, state: PlaybackState): void {
-  const maxTime = context.audioContext.currentTime + SCHEDULE_AHEAD_TIME
+function scheduleEvents(ctx: PlaybackContext, state: PlaybackState): void {
+  const maxTime = ctx.audioContext.currentTime + SCHEDULE_AHEAD_TIME
 
   while (state.isPlaying && state.scheduledTime < maxTime) {
-    const hasMoreEvents = processNextEvent(context, state)
+    const hasMoreEvents = processNextEvent(ctx, state)
     if (!hasMoreEvents) {
       state.isPlaying = false
       break
@@ -81,27 +78,24 @@ function scheduleEvents(context: PlaybackContext, state: PlaybackState): void {
   }
 }
 
-function startAudioPlayer(
-  context: PlaybackContext,
-  state: PlaybackState
-): void {
+function startAudioPlayer(ctx: PlaybackContext, state: PlaybackState): void {
   if (!state.isPlaying) {
     return
   }
 
-  scheduleEvents(context, state)
+  scheduleEvents(ctx, state)
 
   state.animationFrameId = requestAnimationFrame(() => {
-    startAudioPlayer(context, state)
+    startAudioPlayer(ctx, state)
   })
 }
 
 function setWaveform(
   state: PlaybackState,
-  context: PlaybackContext,
+  ctx: PlaybackContext,
   newWaveform: OscillatorType
 ): void {
-  context.waveform = newWaveform
+  ctx.waveform = newWaveform
   for (const oscillator of state.activeNotes.values()) {
     try {
       oscillator.type = newWaveform
@@ -126,7 +120,7 @@ export function playMidi(
     )
   }
 
-  const context: PlaybackContext = {
+  const ctx: PlaybackContext = {
     audioContext,
     gainNode,
     analyserNode,
@@ -135,17 +129,17 @@ export function playMidi(
   }
 
   const state = createPlaybackState(midi.reader)
-  state.tickDuration = calculateTickDuration(DEFAULT_TEMPO, context.division)
-  state.scheduledTime = context.audioContext.currentTime
+  state.tickDuration = calculateTickDuration(DEFAULT_TEMPO, ctx.division)
+  state.scheduledTime = ctx.audioContext.currentTime
 
-  startAudioPlayer(context, state)
+  startAudioPlayer(ctx, state)
 
   return {
-    pause: () => pausePlayback(state, context),
-    resume: () => resumePlayback(state, context),
+    pause: () => pausePlayback(state, ctx),
+    resume: () => resumePlayback(state, ctx),
     isPlaying: () => state.isPlaying,
     isPaused: () => !state.isPlaying,
     setWaveform: (newWaveform: OscillatorType) =>
-      setWaveform(state, context, newWaveform)
+      setWaveform(state, ctx, newWaveform)
   }
 }

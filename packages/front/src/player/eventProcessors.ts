@@ -34,7 +34,7 @@ type PlaybackContext = {
 
 type EventProcessor = (
   event: MidiTrackEvent,
-  context: PlaybackContext,
+  ctx: PlaybackContext,
   state: PlaybackState
 ) => void
 
@@ -49,26 +49,26 @@ type ProcessorPredicate =
 
 function processTempoChange(
   event: MidiTrackEvent,
-  context: PlaybackContext,
+  ctx: PlaybackContext,
   state: PlaybackState
 ): void {
   if (isTempoEvent(event)) {
     const newTempo = readUint24BE(event.data, 0)
-    state.tickDuration = calculateTickDuration(newTempo, context.division)
+    state.tickDuration = calculateTickDuration(newTempo, ctx.division)
   }
 }
 
 function processNoteOn(
   event: MTrkEvent['event'],
-  context: PlaybackContext,
+  ctx: PlaybackContext,
   state: PlaybackState
 ): void {
   if (isNoteOnEvent(event) && event.otherData !== 0) {
     const noteKey = `${event.channel}-${event.data}`
-    const oscillator = context.audioContext.createOscillator()
-    oscillator.connect(context.gainNode)
-    oscillator.connect(context.analyserNode)
-    oscillator.type = context.waveform
+    const oscillator = ctx.audioContext.createOscillator()
+    oscillator.connect(ctx.gainNode)
+    oscillator.connect(ctx.analyserNode)
+    oscillator.type = ctx.waveform
     oscillator.frequency.setValueAtTime(
       midiNoteToFrequency(event.data),
       state.scheduledTime
@@ -80,7 +80,7 @@ function processNoteOn(
 
 function processNoteOff(
   event: MTrkEvent['event'],
-  _context: PlaybackContext,
+  _ctx: PlaybackContext,
   state: PlaybackState
 ): void {
   if (isMidiEvent(event)) {
@@ -135,12 +135,12 @@ const selectEventProcessor = (
 
 export function processEvent(
   event: MTrkEvent['event'],
-  context: PlaybackContext,
+  ctx: PlaybackContext,
   state: PlaybackState
 ): void {
   const processor = selectEventProcessor(event)
   if (processor) {
-    processor(event, context, state)
+    processor(event, ctx, state)
   }
 }
 

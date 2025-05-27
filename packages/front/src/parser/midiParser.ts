@@ -1,5 +1,5 @@
 import {
-  Header,
+  MidiFileHeader,
   MidiChunk,
   MidiChunkType,
   MidiReader,
@@ -38,7 +38,7 @@ function* mergeTracksToSingleReader(tracks: MidiChunk[]): MidiReader {
   }
 }
 
-function readHeader(chunk: MidiChunk): Header {
+function readHeader(chunk: MidiChunk): MidiFileHeader {
   if (chunk.type !== MidiChunkType.MThd) {
     throw new Error('Invalid chunk type for header')
   }
@@ -97,7 +97,7 @@ function* readEvents(
 }
 
 export class MidiParser {
-  public readonly header: Header
+  public readonly header: MidiFileHeader
   private tracks: MidiChunk[]
   private _duration: number | null = null
 

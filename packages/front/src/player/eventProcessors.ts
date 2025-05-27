@@ -1,4 +1,9 @@
-import { MetaEvent, MidiEvent, MidiTrackEvent, MTrkEvent } from '../models'
+import {
+  MetaEvent,
+  MidiChannelMessage,
+  MidiTrackEvent,
+  MTrkEvent
+} from '../models'
 import {
   midiNoteToFrequency,
   calculateTickDuration,
@@ -49,18 +54,20 @@ function processTempoChange(
 }
 
 function processNoteOn(
-  event: MidiEvent,
+  event: MidiChannelMessage,
   ctx: PlaybackContext,
   state: PlaybackState
 ): void {
-  if (isNoteOnEvent(event) && event.otherData !== 0) {
-    const noteKey = `${event.channel}-${event.data}`
+  if (isNoteOnEvent(event) && event.data2 !== 0) {
+    const noteKey = `${event.channel}-${event.data1}`
 
     const existingOscillator = state.activeNotes.get(noteKey)
     if (existingOscillator) {
       try {
         existingOscillator.stop(state.scheduledTime)
-      } catch {}
+      } catch {
+        // Oscillator might already be stopped, ignore the error
+      }
     }
 
     const oscillator = ctx.audioContext.createOscillator()
@@ -68,7 +75,7 @@ function processNoteOn(
     oscillator.connect(ctx.analyserNode)
     oscillator.type = ctx.waveform
     oscillator.frequency.setValueAtTime(
-      midiNoteToFrequency(event.data),
+      midiNoteToFrequency(event.data1),
       state.scheduledTime
     )
     oscillator.start(state.scheduledTime)
@@ -77,11 +84,11 @@ function processNoteOn(
 }
 
 function processNoteOff(
-  event: MidiEvent,
+  event: MidiChannelMessage,
   _ctx: PlaybackContext,
   state: PlaybackState
 ): void {
-  const noteKey = `${event.channel}-${event.data}`
+  const noteKey = `${event.channel}-${event.data1}`
   const oscillator = state.activeNotes.get(noteKey)
   if (oscillator) {
     oscillator.stop(state.scheduledTime)

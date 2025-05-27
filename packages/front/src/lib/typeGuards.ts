@@ -1,14 +1,16 @@
 import {
   EventType,
   MetaEventType,
-  MidiEventType,
+  MidiChannelVoiceMessageType,
   MidiTrackEvent,
-  MidiEvent,
+  MidiChannelMessage,
   MetaEvent,
-  SysexEvent
+  SystemExclusiveMessage
 } from '../models'
 
-export function isMidiEvent(event: MidiTrackEvent): event is MidiEvent {
+export function isMidiEvent(
+  event: MidiTrackEvent
+): event is MidiChannelMessage {
   return event.type === EventType.Midi
 }
 
@@ -16,36 +18,53 @@ export function isMetaEvent(event: MidiTrackEvent): event is MetaEvent {
   return event.type === EventType.Meta
 }
 
-export function isSysexEvent(event: MidiTrackEvent): event is SysexEvent {
+export function isSysexEvent(
+  event: MidiTrackEvent
+): event is SystemExclusiveMessage {
   return event.type === EventType.Sysex
 }
 
-export function isNoteOnEvent(event: MidiTrackEvent): event is MidiEvent {
-  return isMidiEvent(event) && event.eventType === MidiEventType.NoteOn
+export function isNoteOnEvent(
+  event: MidiTrackEvent
+): event is MidiChannelMessage {
+  return (
+    isMidiEvent(event) &&
+    event.messageType === MidiChannelVoiceMessageType.NoteOn
+  )
 }
 
-export function isNoteOffEvent(event: MidiTrackEvent): event is MidiEvent {
-  return isMidiEvent(event) && event.eventType === MidiEventType.NoteOff
+export function isNoteOffEvent(
+  event: MidiTrackEvent
+): event is MidiChannelMessage {
+  return (
+    isMidiEvent(event) &&
+    event.messageType === MidiChannelVoiceMessageType.NoteOff
+  )
 }
 
 export function isNoteOnWithZeroVelocity(
   event: MidiTrackEvent
-): event is MidiEvent {
-  return isNoteOnEvent(event) && event.otherData === 0
+): event is MidiChannelMessage {
+  return isNoteOnEvent(event) && event.data2 === 0
 }
 
-export function isEffectiveNoteOff(event: MidiTrackEvent): event is MidiEvent {
+export function isEffectiveNoteOff(
+  event: MidiTrackEvent
+): event is MidiChannelMessage {
   return isNoteOffEvent(event) || isNoteOnWithZeroVelocity(event)
 }
 
 export function isProgramChangeEvent(
   event: MidiTrackEvent
-): event is MidiEvent {
-  return isMidiEvent(event) && event.eventType === MidiEventType.ProgramChange
+): event is MidiChannelMessage {
+  return (
+    isMidiEvent(event) &&
+    event.messageType === MidiChannelVoiceMessageType.ProgramChange
+  )
 }
 
 export function isTempoEvent(event: MidiTrackEvent): event is MetaEvent {
-  return isMetaEvent(event) && event.metaType === MetaEventType.Tempo
+  return isMetaEvent(event) && event.metaType === MetaEventType.SetTempo
 }
 
 export function isEndOfTrackEvent(event: MidiTrackEvent): event is MetaEvent {

@@ -1,10 +1,10 @@
 import {
   EventType,
-  MetaEvent,
-  MidiEvent,
-  MidiEventType,
+  MidiChannelVoiceMessageType,
   MidiTrackEvent,
-  SysexEvent
+  MidiChannelMessage,
+  MetaEvent,
+  SystemExclusiveMessage
 } from '../models'
 import { readVariableLengthQuantity } from '../lib'
 
@@ -30,7 +30,10 @@ const createResult = <T extends MidiTrackEvent>(
   byteLength: number
 ): Result<T> => ({ event, byteLength })
 
-function readSysexEvent(view: DataView, pointer: number): Result<SysexEvent> {
+function readSysexEvent(
+  view: DataView,
+  pointer: number
+): Result<SystemExclusiveMessage> {
   const { value: length, length: lenLength } = readVariableLengthQuantity(
     view,
     pointer
@@ -77,25 +80,25 @@ function readMidiEvent(
   view: DataView,
   pointer: number,
   statusByte: number
-): Result<MidiEvent> {
-  const eventType = (statusByte >> 4) & 0x0f
+): Result<MidiChannelMessage> {
+  const messageType = (statusByte >> 4) & 0x0f
   const channel = statusByte & 0x0f
-  const data = view.getUint8(pointer)
+  const data1 = view.getUint8(pointer)
 
   const hasTwoBytes =
-    eventType !== MidiEventType.ProgramChange &&
-    eventType !== MidiEventType.ChannelPressure
+    messageType !== MidiChannelVoiceMessageType.ProgramChange &&
+    messageType !== MidiChannelVoiceMessageType.ChannelPressure
 
-  const otherData = hasTwoBytes ? view.getUint8(pointer + 1) : undefined
+  const data2 = hasTwoBytes ? view.getUint8(pointer + 1) : undefined
   const byteLength = hasTwoBytes ? 2 : 1
 
   return createResult(
     {
       type: EventType.Midi,
-      eventType,
+      messageType,
       channel,
-      data,
-      otherData
+      data1,
+      data2
     },
     byteLength
   )

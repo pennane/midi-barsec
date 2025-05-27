@@ -2,7 +2,7 @@ import { getState } from './appState'
 
 let progressFill: HTMLElement
 let currentTimeDisplay: HTMLElement
-let totalTimeDisplay: HTMLElement
+let totalDurationDisplay: HTMLElement
 let progressBar: HTMLElement
 let updateInterval: number | null = null
 
@@ -22,13 +22,13 @@ function updateDisplay(): void {
 
   progressFill.style.width = `${position * 100}%`
   currentTimeDisplay.textContent = formatTime(currentTime)
-  totalTimeDisplay.textContent = formatTime(totalDuration)
+  totalDurationDisplay.textContent = formatTime(totalDuration)
 }
 
 export function initProgressBar(): void {
   progressFill = document.getElementById('progress-fill')!
   currentTimeDisplay = document.getElementById('current-time')!
-  totalTimeDisplay = document.getElementById('total-time')!
+  totalDurationDisplay = document.getElementById('total-time')!
   progressBar = document.getElementById('progress-bar')!
 
   progressBar.addEventListener('click', (event) => {
@@ -65,9 +65,9 @@ export function stopProgressUpdates(): void {
 export function resetProgressBar(): void {
   progressFill.style.width = '0%'
   currentTimeDisplay.textContent = '0:00'
-  totalTimeDisplay.textContent = '0:00'
+  totalDurationDisplay.textContent = '0:00'
 }
 
 export function setTotalDuration(duration: number): void {
-  totalTimeDisplay.textContent = formatTime(duration)
+  totalDurationDisplay.textContent = formatTime(duration)
 }

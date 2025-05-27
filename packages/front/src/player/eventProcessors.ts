@@ -1,7 +1,8 @@
 import {
   calculateTickDuration,
-  isEffectiveNoteOff,
+  isChannelVolumeEvent,
   isEffectiveTextEvent,
+  isNoteOffEvent,
   isNoteOnEvent,
   isPercussionEvent,
   isTempoEvent,
@@ -19,7 +20,13 @@ import {
 type PlaybackState = {
   tickDuration: number
   scheduledTime: number
-  activeNotes: Map<string, OscillatorNode>
+  channels: Map<
+    number,
+    {
+      gain: GainNode
+      notes: Map<number, { gain: GainNode; oscillator: OscillatorNode }>
+    }
+  >
   isPlaying: boolean
   animationFrameId?: number
   eventIterator: Iterator<MTrkEvent, void, void>
@@ -61,27 +68,39 @@ function processNoteOn(
   ctx: PlaybackContext,
   state: PlaybackState
 ): void {
-  const noteKey = `${event.channel}-${event.data1}`
+  let channel = state.channels.get(event.channel)
+  if (!channel) {
+    channel = { gain: ctx.audioContext.createGain(), notes: new Map() }
+    state.channels.set(event.channel, channel)
+  }
 
-  const existingOscillator = state.activeNotes.get(noteKey)
+  const existingOscillator = channel.notes.get(event.data1)
   if (existingOscillator) {
     try {
-      existingOscillator.stop(state.scheduledTime)
+      existingOscillator.oscillator.stop(state.scheduledTime)
     } catch {
       // Oscillator might already be stopped, ignore the error
     }
   }
 
   const oscillator = ctx.audioContext.createOscillator()
-  oscillator.connect(ctx.gainNode)
-  oscillator.connect(ctx.analyserNode)
+  const gain = ctx.audioContext.createGain()
+
+  const velocity = (event.data2 ?? 0) / 127
+  gain.gain.setValueAtTime(velocity, state.scheduledTime)
+
   oscillator.type = ctx.waveform
   oscillator.frequency.setValueAtTime(
     midiNoteToFrequency(event.data1),
     state.scheduledTime
   )
+
+  oscillator.connect(gain)
+  gain.connect(ctx.gainNode)
+  gain.connect(ctx.analyserNode)
+
   oscillator.start(state.scheduledTime)
-  state.activeNotes.set(noteKey, oscillator)
+  channel.notes.set(event.data1, { oscillator, gain })
 }
 
 function processNoteOff(
@@ -89,12 +108,24 @@ function processNoteOff(
   _ctx: PlaybackContext,
   state: PlaybackState
 ): void {
-  const noteKey = `${event.channel}-${event.data1}`
-  const oscillator = state.activeNotes.get(noteKey)
-  if (oscillator) {
-    oscillator.stop(state.scheduledTime)
-    state.activeNotes.delete(noteKey)
-  }
+  const channel = state.channels.get(event.channel)
+  if (!channel) return
+  const oscillator = channel.notes.get(event.data1)?.oscillator
+  if (!oscillator) return
+  oscillator.stop(state.scheduledTime)
+  channel.notes.delete(event.data1)
+}
+
+function processChannelVolume(
+  event: MidiChannelMessage,
+  _ctx: PlaybackContext,
+  state: PlaybackState
+): void {
+  const channel = state.channels.get(event.channel)
+  if (!channel || event.data2 === undefined) return
+
+  const volume = event.data2 / 127
+  channel.gain.gain.setValueAtTime(volume, state.scheduledTime)
 }
 
 function processTextEvent(
@@ -116,13 +147,14 @@ const eventProcessors = [
     processor: processTempoChange
   },
   {
-    predicate: isEffectiveNoteOff,
+    predicate: isNoteOffEvent,
     processor: processNoteOff
   },
   {
     predicate: isNoteOnEvent,
     processor: processNoteOn
   },
+  { predicate: isChannelVolumeEvent, processor: processChannelVolume },
   {
     predicate: isEffectiveTextEvent,
     processor: processTextEvent

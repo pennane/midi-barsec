@@ -72,6 +72,12 @@ export function isControllerChangeEvent(
   )
 }
 
+export function isChannelVolumeEvent(
+  event: MidiTrackEvent
+): event is MidiChannelMessage {
+  return isControllerChangeEvent(event) && event.data1 === 7
+}
+
 export function isPercussionEvent(
   event: MidiTrackEvent
 ): event is MidiChannelMessage {

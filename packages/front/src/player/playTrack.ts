@@ -1,11 +1,11 @@
-import { MidiReader } from '../models'
-import { MidiParser } from '../parser/midiParser'
-import { processEvent, PlaybackState, PlaybackContext } from './eventProcessors'
 import {
   DEFAULT_TEMPO,
   SCHEDULE_AHEAD_TIME,
   calculateTickDuration
 } from '../lib'
+import { MidiReader } from '../models'
+import { MidiParser } from '../parser/midiParser'
+import { PlaybackContext, PlaybackState, processEvent } from './eventProcessors'
 
 export type PlaybackControl = {
   pause: () => void
@@ -26,7 +26,7 @@ function createPlaybackState(
   return {
     tickDuration: calculateTickDuration(DEFAULT_TEMPO, 1),
     scheduledTime: 0,
-    activeNotes: new Map(),
+    channels: new Map(),
     isPlaying: true,
     eventIterator,
     currentTimeSeconds: 0,
@@ -38,12 +38,14 @@ function createPlaybackState(
 function pausePlayback(state: PlaybackState, ctx: PlaybackContext): void {
   state.isPlaying = false
 
-  for (const oscillator of state.activeNotes.values()) {
-    try {
-      oscillator.stop(ctx.audioContext.currentTime)
-    } catch (e) {}
+  for (const channel of state.channels.values()) {
+    for (const note of channel.notes.values()) {
+      try {
+        note.oscillator.stop(ctx.audioContext.currentTime)
+      } catch (e) {}
+    }
   }
-  state.activeNotes.clear()
+  state.channels.clear()
 
   if (state.animationFrameId) {
     cancelAnimationFrame(state.animationFrameId)
@@ -119,13 +121,14 @@ function setWaveform(
   newWaveform: OscillatorType
 ): void {
   ctx.waveform = newWaveform
-  for (const oscillator of state.activeNotes.values()) {
-    try {
-      oscillator.type = newWaveform
-    } catch (e) {
-      console.warn('Could not update oscillator waveform:', e)
+  for (const channel of state.channels.values())
+    for (const note of channel.notes.values()) {
+      try {
+        note.oscillator.type = newWaveform
+      } catch (e) {
+        console.warn('Could not update oscillator waveform:', e)
+      }
     }
-  }
 }
 
 export function playMidi(
@@ -163,12 +166,14 @@ export function playMidi(
     const targetTime = position * totalDuration
     const { reader, actualPosition } = midi.createSeekReader(targetTime)
 
-    for (const oscillator of state.activeNotes.values()) {
-      try {
-        oscillator.stop(ctx.audioContext.currentTime)
-      } catch {}
+    for (const channel of state.channels.values()) {
+      for (const note of channel.notes.values()) {
+        try {
+          note.oscillator.stop(ctx.audioContext.currentTime)
+        } catch {}
+      }
     }
-    state.activeNotes.clear()
+    state.channels.clear()
 
     state.eventIterator = reader[Symbol.iterator]()
     state.currentTimeSeconds = actualPosition

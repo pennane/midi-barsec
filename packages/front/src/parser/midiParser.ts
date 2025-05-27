@@ -1,12 +1,12 @@
+import { calculateMidiDuration, createSeekableReader } from '../lib/midiUtils'
 import {
-  MidiFileHeader,
   MidiChunk,
   MidiChunkType,
+  MidiFileHeader,
   MidiReader,
   MidiTrackEvent
 } from '../models'
 import { readEvent } from './eventReader'
-import { calculateMidiDuration, createSeekableReader } from '../lib/midiUtils'
 
 /**
  * k-way merge

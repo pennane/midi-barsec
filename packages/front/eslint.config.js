@@ -33,7 +33,8 @@ export default [
       'no-debugger': 'error',
       'no-unused-vars': 'off',
       'prefer-const': 'warn',
-      'no-var': 'error'
+      'no-var': 'error',
+      'no-empty': 'off'
     }
   },
   {

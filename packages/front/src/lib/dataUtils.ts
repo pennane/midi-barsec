@@ -1,6 +1,6 @@
 /**
- * Reads a variable-length quantity from a DataView.
- * This is a core MIDI parsing utility used throughout the MIDI specification.
+ * Reads a variable-length quantity from a DataView
+ * core MIDI parsing utility used throughout the MIDI specification
  *
  * @param view The DataView to read from
  * @param offset The byte offset to start reading from
@@ -24,8 +24,8 @@ export function readVariableLengthQuantity(
 }
 
 /**
- * Reads a 24-bit big-endian integer from a DataView.
- * Commonly used for MIDI tempo values.
+ * Reads a 24-bit big-endian integer from a DataView
+ * used for MIDI tempo values
  *
  * @param view The DataView to read from
  * @param offset The byte offset to start reading from

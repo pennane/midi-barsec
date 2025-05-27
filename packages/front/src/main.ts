@@ -13,6 +13,7 @@ let selectedMidi: MidiParser = DEFAULT_MIDI
 let selectedWaveform: OscillatorType = 'sawtooth'
 
 const audioCtx = new (window.AudioContext ||
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window as any).webkitAudioContext)()
 
 const gainNode = audioCtx.createGain()
@@ -28,8 +29,10 @@ const play = ensureOnce(() => {
   playMidi(audioCtx, gainNode, analyser, selectedMidi, selectedWaveform)
 })
 
-async function selectFile(event: any) {
-  const fileList = ((event.target as any)?.files || null) as FileList | null
+async function selectFile(event: Event) {
+  const fileList = ((event.target as HTMLInputElement)?.files ||
+    null) as FileList | null
+
   if (!fileList) {
     alert('abort da mission')
     return

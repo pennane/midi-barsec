@@ -153,7 +153,7 @@ export function playMidi(
     for (const oscillator of state.activeNotes.values()) {
       try {
         oscillator.stop(ctx.audioContext.currentTime)
-      } catch (e) {}
+      } catch {}
     }
     state.activeNotes.clear()
 

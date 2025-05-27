@@ -1,18 +1,11 @@
-import {
-  MetaEventType,
-  MidiEventType,
-  MidiTrackEvent,
-  MTrkEvent
-} from '../models'
+import { MetaEvent, MidiEvent, MidiTrackEvent, MTrkEvent } from '../models'
 import {
   midiNoteToFrequency,
   calculateTickDuration,
   readUint24BE,
   isTempoEvent,
-  isMidiEvent,
-  isMetaEvent,
   isNoteOnEvent,
-  isNoteOnWithZeroVelocity
+  isEffectiveNoteOff
 } from '../lib'
 
 type PlaybackState = {
@@ -35,34 +28,28 @@ type PlaybackContext = {
   waveform: OscillatorType
 }
 
-type EventProcessor = (
-  event: MidiTrackEvent,
+type EventProcessor<T extends MidiTrackEvent> = (
+  event: T,
   ctx: PlaybackContext,
   state: PlaybackState
 ) => void
 
-type ProcessorPredicate =
-  | { type: 'meta'; metaType: MetaEventType; processor: EventProcessor }
-  | { type: 'midi'; eventType: MidiEventType; processor: EventProcessor }
-  | {
-      type: 'other'
-      predicate: (event: MidiTrackEvent) => boolean
-      processor: EventProcessor
-    }
+type ProcessorPredicate<T extends MidiTrackEvent> = {
+  predicate: (event: MidiTrackEvent) => event is T
+  processor: EventProcessor<T>
+}
 
 function processTempoChange(
-  event: MidiTrackEvent,
+  event: MetaEvent,
   ctx: PlaybackContext,
   state: PlaybackState
 ): void {
-  if (isTempoEvent(event)) {
-    const newTempo = readUint24BE(event.data, 0)
-    state.tickDuration = calculateTickDuration(newTempo, ctx.division)
-  }
+  const newTempo = readUint24BE(event.data, 0)
+  state.tickDuration = calculateTickDuration(newTempo, ctx.division)
 }
 
 function processNoteOn(
-  event: MTrkEvent['event'],
+  event: MidiEvent,
   ctx: PlaybackContext,
   state: PlaybackState
 ): void {
@@ -82,62 +69,45 @@ function processNoteOn(
 }
 
 function processNoteOff(
-  event: MTrkEvent['event'],
+  event: MidiEvent,
   _ctx: PlaybackContext,
   state: PlaybackState
 ): void {
-  if (isMidiEvent(event)) {
-    const noteKey = `${event.channel}-${event.data}`
-    const oscillator = state.activeNotes.get(noteKey)
-    if (oscillator) {
-      oscillator.stop(state.scheduledTime)
-      state.activeNotes.delete(noteKey)
-    }
+  const noteKey = `${event.channel}-${event.data}`
+  const oscillator = state.activeNotes.get(noteKey)
+  if (oscillator) {
+    oscillator.stop(state.scheduledTime)
+    state.activeNotes.delete(noteKey)
   }
 }
 
-const eventProcessors: Array<ProcessorPredicate> = [
+const eventProcessors = [
   {
-    type: 'meta',
-    metaType: MetaEventType.Tempo,
+    predicate: isTempoEvent,
     processor: processTempoChange
   },
   {
-    type: 'midi',
-    eventType: MidiEventType.NoteOn,
+    predicate: isNoteOnEvent,
     processor: processNoteOn
   },
   {
-    type: 'midi',
-    eventType: MidiEventType.NoteOff,
-    processor: processNoteOff
-  },
-  {
-    type: 'other',
-    predicate: isNoteOnWithZeroVelocity,
+    predicate: isEffectiveNoteOff,
     processor: processNoteOff
   }
-]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+] satisfies ProcessorPredicate<any>[]
 
 const selectEventProcessor = (
-  event: MTrkEvent['event']
-): EventProcessor | undefined => {
-  const processorPredicate = eventProcessors.find((p) => {
-    switch (p.type) {
-      case 'meta':
-        return isMetaEvent(event) && event.metaType === p.metaType
-      case 'midi':
-        return isMidiEvent(event) && event.eventType === p.eventType
-      case 'other':
-        return p.predicate(event)
-    }
-  })
-
-  return processorPredicate?.processor
+  event: MidiTrackEvent
+): EventProcessor<MidiTrackEvent> | undefined => {
+  const processorPredicate = eventProcessors.find((p) => p.predicate(event))
+  return processorPredicate?.processor as
+    | EventProcessor<MidiTrackEvent>
+    | undefined
 }
 
 export function processEvent(
-  event: MTrkEvent['event'],
+  event: MidiTrackEvent,
   ctx: PlaybackContext,
   state: PlaybackState
 ): void {

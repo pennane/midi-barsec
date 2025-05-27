@@ -1,6 +1,7 @@
 import {
   calculateTickDuration,
   isEffectiveNoteOff,
+  isEffectiveTextEvent,
   isNoteOnEvent,
   isPercussionEvent,
   isTempoEvent,
@@ -95,6 +96,16 @@ function processNoteOff(
     state.activeNotes.delete(noteKey)
   }
 }
+
+function processTextEvent(
+  event: MetaEvent,
+  _ctx: PlaybackContext,
+  _state: PlaybackState
+): void {
+  const text = new TextDecoder().decode(event.data)
+  console.log('Text Event:', text, event.metaType)
+}
+
 /**
  * REMINDER ARTTU: ORDER MATTERS HERE :D
  */
@@ -111,6 +122,10 @@ const eventProcessors = [
   {
     predicate: isNoteOnEvent,
     processor: processNoteOn
+  },
+  {
+    predicate: isEffectiveTextEvent,
+    processor: processTextEvent
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ] satisfies ProcessorPredicate<any>[]

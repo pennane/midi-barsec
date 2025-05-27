@@ -63,6 +63,15 @@ export function isProgramChangeEvent(
   )
 }
 
+export function isControllerChangeEvent(
+  event: MidiTrackEvent
+): event is MidiChannelMessage {
+  return (
+    isMidiEvent(event) &&
+    event.messageType === MidiChannelVoiceMessageType.ControlChange
+  )
+}
+
 export function isPercussionEvent(
   event: MidiTrackEvent
 ): event is MidiChannelMessage {
@@ -77,6 +86,17 @@ export function isEndOfTrackEvent(event: MidiTrackEvent): event is MetaEvent {
   return isMetaEvent(event) && event.metaType === MetaEventType.EndOfTrack
 }
 
-export function isTextEvent(event: MidiTrackEvent): event is MetaEvent {
-  return isMetaEvent(event) && event.metaType === MetaEventType.TextEvent
+export function isEffectiveTextEvent(
+  event: MidiTrackEvent
+): event is MetaEvent {
+  return (
+    isMetaEvent(event) &&
+    (event.metaType === MetaEventType.TextEvent ||
+      event.metaType === MetaEventType.CopyrightNotice ||
+      event.metaType === MetaEventType.SequenceTrackName ||
+      event.metaType === MetaEventType.InstrumentName ||
+      event.metaType === MetaEventType.Lyric ||
+      event.metaType === MetaEventType.Marker ||
+      event.metaType === MetaEventType.CuePoint)
+  )
 }

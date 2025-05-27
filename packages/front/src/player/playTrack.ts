@@ -13,16 +13,25 @@ export type PlaybackControl = {
   isPlaying: () => boolean
   isPaused: () => boolean
   setWaveform: (waveform: OscillatorType) => void
+  getCurrentPosition: () => number // 0-1 ratio
+  getTotalDuration: () => number // seconds
+  seekTo: (position: number) => void // 0-1 ratio
 }
 
-function createPlaybackState(reader: MidiReader): PlaybackState {
+function createPlaybackState(
+  reader: MidiReader,
+  totalDuration: number
+): PlaybackState {
   const eventIterator = reader[Symbol.iterator]()
   return {
     tickDuration: calculateTickDuration(DEFAULT_TEMPO, 1),
     scheduledTime: 0,
     activeNotes: new Map(),
     isPlaying: true,
-    eventIterator
+    eventIterator,
+    currentTimeSeconds: 0,
+    totalDurationSeconds: totalDuration,
+    startTime: 0
   }
 }
 
@@ -61,6 +70,7 @@ function processNextEvent(ctx: PlaybackContext, state: PlaybackState): boolean {
   const { event, deltaTime } = next.value
   const eventTime = deltaTime * state.tickDuration
   state.scheduledTime += eventTime
+  state.currentTimeSeconds += eventTime
 
   processEvent(event, ctx, state)
   return true
@@ -128,11 +138,34 @@ export function playMidi(
     waveform
   }
 
-  const state = createPlaybackState(midi.reader)
+  const totalDuration = midi.duration()
+  const state = createPlaybackState(midi.reader(), totalDuration)
   state.tickDuration = calculateTickDuration(DEFAULT_TEMPO, ctx.division)
   state.scheduledTime = ctx.audioContext.currentTime
+  state.startTime = ctx.audioContext.currentTime
 
   startAudioPlayer(ctx, state)
+
+  function seekTo(position: number): void {
+    const targetTime = position * totalDuration
+    const { reader, actualPosition } = midi.createSeekReader(targetTime)
+
+    for (const oscillator of state.activeNotes.values()) {
+      try {
+        oscillator.stop(ctx.audioContext.currentTime)
+      } catch (e) {}
+    }
+    state.activeNotes.clear()
+
+    state.eventIterator = reader[Symbol.iterator]()
+    state.currentTimeSeconds = actualPosition
+    state.scheduledTime = ctx.audioContext.currentTime
+    state.startTime = ctx.audioContext.currentTime - actualPosition
+
+    if (state.isPlaying) {
+      startAudioPlayer(ctx, state)
+    }
+  }
 
   return {
     pause: () => pausePlayback(state, ctx),
@@ -140,6 +173,13 @@ export function playMidi(
     isPlaying: () => state.isPlaying,
     isPaused: () => !state.isPlaying,
     setWaveform: (newWaveform: OscillatorType) =>
-      setWaveform(state, ctx, newWaveform)
+      setWaveform(state, ctx, newWaveform),
+    getCurrentPosition: () => {
+      if (state.totalDurationSeconds === 0) return 0
+      const elapsed = ctx.audioContext.currentTime - state.startTime
+      return Math.min(elapsed / state.totalDurationSeconds, 1)
+    },
+    getTotalDuration: () => state.totalDurationSeconds,
+    seekTo
   }
 }

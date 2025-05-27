@@ -22,6 +22,9 @@ type PlaybackState = {
   isPlaying: boolean
   animationFrameId?: number
   eventIterator: Iterator<MTrkEvent, void, void>
+  currentTimeSeconds: number
+  totalDurationSeconds: number
+  startTime: number
 }
 
 type PlaybackContext = {

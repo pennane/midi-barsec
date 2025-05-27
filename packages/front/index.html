@@ -1,24 +1,28 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>play midi files right here</title>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>play midi files right here</title>
-</head>
-
-<body>
-  <div id="settings">
-    <input type="file" id="input" accept=".mid,.midi">
-    <select id="waveform">
-      <option value="sawtooth" selected>Sawtooth</option>
-      <option value="sine">Sine</option>
-      <option value="square">Square</option>
-      <option value="triangle">Triangle</option>
-    </select>
-  </div>
-  <div id="display"></div>
-  <script type="module" src="/src/main.ts"></script>
-</body>
-
+  <body>
+    <div id="settings">
+      <input type="file" id="input" accept=".mid,.midi" />
+      <select id="waveform"></select>
+    </div>
+    <div id="controls">
+      <div id="progress-container">
+        <div id="progress-bar">
+          <div id="progress-fill"></div>
+        </div>
+        <div id="time-display">
+          <span id="current-time">0:00</span>
+          <span id="total-time">0:00</span>
+        </div>
+      </div>
+    </div>
+    <div id="display"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
 </html>

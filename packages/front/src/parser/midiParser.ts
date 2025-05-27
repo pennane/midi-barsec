@@ -6,6 +6,7 @@ import {
   MidiTrackEvent
 } from '../models'
 import { readEvent } from './eventReader'
+import { calculateMidiDuration, createSeekableReader } from '../lib/midiUtils'
 
 /**
  * k-way merge
@@ -97,17 +98,51 @@ function* readEvents(
 
 export class MidiParser {
   public readonly header: Header
-  public readonly reader: MidiReader
+  private tracks: MidiChunk[]
+  private _duration: number | null = null
 
   constructor(buffer: ArrayBuffer) {
     const chunkReader = readChunks(buffer)
     this.header = readHeader(chunkReader.next().value)
-    const tracks = []
+    this.tracks = []
     for (const chunk of chunkReader) {
       if (chunk.type === MidiChunkType.MTrk) {
-        tracks.push(chunk)
+        this.tracks.push(chunk)
       }
     }
-    this.reader = mergeTracksToSingleReader(tracks)
+  }
+
+  public reader(): MidiReader {
+    return mergeTracksToSingleReader(this.tracks)
+  }
+
+  public duration(): number {
+    if (this._duration) return this._duration
+
+    if (typeof this.header.division !== 'number') {
+      throw new Error('Unsupported division type for duration calculation')
+    }
+
+    this._duration = calculateMidiDuration(this.reader(), this.header.division)
+
+    return this._duration
+  }
+
+  /**
+   * Creates a new reader that starts from a specific time position.
+   */
+  public createSeekReader(targetTimeSeconds: number): {
+    reader: MidiReader
+    actualPosition: number
+  } {
+    if (typeof this.header.division !== 'number') {
+      throw new Error('Unsupported division type for seeking')
+    }
+
+    return createSeekableReader(
+      this.reader(),
+      this.header.division,
+      targetTimeSeconds
+    )
   }
 }

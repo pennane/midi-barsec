@@ -6,7 +6,7 @@ import {
   MidiTrackEvent,
   SysexEvent
 } from '../models'
-import { readVariableLengthQuantity } from './dataView'
+import { readVariableLengthQuantity } from '../lib'
 
 type Result<T extends MidiTrackEvent> = {
   event: T

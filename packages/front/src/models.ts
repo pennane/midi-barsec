@@ -1,5 +1,5 @@
 /** 0-255 */
-export type Byte = number
+type Byte = number
 
 export type MidiReader = Generator<MTrkEvent, void, void>
 
@@ -13,7 +13,7 @@ export type MidiChunk = {
   view: DataView
 }
 
-export enum FormatType {
+enum FormatType {
   Format0 = 0,
   Format1 = 1,
   Format2 = 2
@@ -73,8 +73,4 @@ export type MidiTrackEvent = MidiEvent | SysexEvent | MetaEvent
 export type MTrkEvent = {
   deltaTime: number
   event: MidiTrackEvent
-}
-
-export type Track = {
-  events: MTrkEvent[]
 }

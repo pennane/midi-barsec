@@ -1,105 +1,75 @@
-import { EventType, MetaEventType, MidiEventType, MidiReader } from '../models'
+import { MidiReader } from '../models'
 import { MidiParser } from '../parser/midiParser'
-import { midiNoteToFrequency } from '../util/midi'
+import { processEvent, PlaybackState, PlaybackContext } from './eventProcessors'
+import {
+  DEFAULT_TEMPO,
+  SCHEDULE_AHEAD_TIME,
+  calculateTickDuration
+} from '../lib'
 
-const DEFAULT_TEMPO = 500_000 // Default tempo (500,000 microseconds per quarter note)
-const MICROSEC_IN_SEC = 1_000_000 // Number of microseconds in a second
+function createPlaybackState(reader: MidiReader): PlaybackState {
+  const eventIterator = reader[Symbol.iterator]()
+  return {
+    tickDuration: calculateTickDuration(DEFAULT_TEMPO, 1),
+    scheduledTime: 0,
+    activeNotes: new Map(),
+    isPlaying: true,
+    eventIterator
+  }
+}
 
-async function playTrackIncremental(
-  ctx: AudioContext,
-  gainNode: GainNode,
-  analyser: AnalyserNode,
-  reader: MidiReader,
-  division: number,
-  type: OscillatorType
-) {
-  const SCHEDULE_AHEAD_TIME = 1.0 // seconds
-  const CHECK_INTERVAL = 100 // ms
+function processNextEvent(
+  context: PlaybackContext,
+  state: PlaybackState
+): boolean {
+  const next = state.eventIterator.next()
 
-  let tickDuration = DEFAULT_TEMPO / division / MICROSEC_IN_SEC
-  let scheduledTime = ctx.currentTime
-  const activeNotes: Map<string, OscillatorNode> = new Map()
-
-  const iterator = reader[Symbol.iterator]()
-  let done = false
-  let nextEvent = iterator.next()
-
-  function scheduleEvents() {
-    const maxTime = ctx.currentTime + SCHEDULE_AHEAD_TIME
-
-    while (!done && scheduledTime < maxTime) {
-      const { value, done } = nextEvent
-      if (done) return
-
-      const { event, deltaTime } = value
-      const eventTime = deltaTime * tickDuration
-      scheduledTime += eventTime
-
-      if (
-        event.type === EventType.Meta &&
-        event.metaType === MetaEventType.Tempo
-      ) {
-        const newTempo =
-          (event.data.getUint8(0) << 16) |
-          (event.data.getUint8(1) << 8) |
-          event.data.getUint8(2)
-        tickDuration = newTempo / division / MICROSEC_IN_SEC
-        nextEvent = iterator.next()
-        continue
-      }
-
-      if (
-        event.type !== EventType.Midi ||
-        (event.eventType !== MidiEventType.NoteOn &&
-          event.eventType !== MidiEventType.NoteOff)
-      ) {
-        nextEvent = iterator.next()
-        continue
-      }
-
-      const noteKey = `${event.channel}-${event.data}`
-
-      if (event.eventType === MidiEventType.NoteOff || event.otherData === 0) {
-        const osc = activeNotes.get(noteKey)
-        if (osc) {
-          osc.stop(scheduledTime)
-          activeNotes.delete(noteKey)
-        }
-        nextEvent = iterator.next()
-        continue
-      }
-
-      const osc = ctx.createOscillator()
-      osc.connect(gainNode)
-      osc.connect(analyser)
-      osc.type = type
-      osc.frequency.setValueAtTime(
-        midiNoteToFrequency(event.data),
-        scheduledTime
-      )
-      osc.start(scheduledTime)
-      activeNotes.set(noteKey, osc)
-
-      nextEvent = iterator.next()
-    }
+  if (next.done) {
+    return false
   }
 
-  const interval = setInterval(() => {
-    if (done) {
-      clearInterval(interval)
-      return
+  const { event, deltaTime } = next.value
+  const eventTime = deltaTime * state.tickDuration
+  state.scheduledTime += eventTime
+
+  processEvent(event, context, state)
+  return true
+}
+
+function scheduleEvents(context: PlaybackContext, state: PlaybackState): void {
+  const maxTime = context.audioContext.currentTime + SCHEDULE_AHEAD_TIME
+
+  while (state.isPlaying && state.scheduledTime < maxTime) {
+    const hasMoreEvents = processNextEvent(context, state)
+    if (!hasMoreEvents) {
+      state.isPlaying = false
+      break
     }
-    scheduleEvents()
-  }, CHECK_INTERVAL)
+  }
+}
+
+function startAudioPlayer(
+  context: PlaybackContext,
+  state: PlaybackState
+): void {
+  if (!state.isPlaying) {
+    return
+  }
+
+  scheduleEvents(context, state)
+
+  state.animationFrameId = requestAnimationFrame(() => {
+    startAudioPlayer(context, state)
+  })
 }
 
 export async function playMidi(
-  ctx: AudioContext,
+  audioContext: AudioContext,
   gainNode: GainNode,
-  analyser: AnalyserNode,
+  analyserNode: AnalyserNode,
   midi: MidiParser,
   waveform: OscillatorType
-) {
+): Promise<void> {
   const division = midi.header.division
 
   if (typeof division !== 'number') {
@@ -108,12 +78,17 @@ export async function playMidi(
     )
   }
 
-  await playTrackIncremental(
-    ctx,
+  const context: PlaybackContext = {
+    audioContext,
     gainNode,
-    analyser,
-    midi.reader,
+    analyserNode,
     division,
     waveform
-  )
+  }
+
+  const state = createPlaybackState(midi.reader)
+  state.tickDuration = calculateTickDuration(DEFAULT_TEMPO, context.division)
+  state.scheduledTime = context.audioContext.currentTime
+
+  startAudioPlayer(context, state)
 }

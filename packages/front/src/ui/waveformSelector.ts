@@ -1,4 +1,4 @@
-import { setSelectedWaveform } from './appState'
+import { setSelectedWaveform } from '../appState'
 
 enum OscillatorTypes {
   SAWTOOTH = 'sawtooth',

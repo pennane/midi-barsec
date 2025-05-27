@@ -1,5 +1,5 @@
-import { MidiParser } from '../parser/midiParser'
-import { PlaybackControl } from '../player/playTrack'
+import type { MidiParser } from './parser/midiParser'
+import type { PlaybackControl } from './player/playTrack'
 
 type AppState = {
   selectedMidi: MidiParser

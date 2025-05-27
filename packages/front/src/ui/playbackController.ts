@@ -1,5 +1,5 @@
 import { playMidi } from '../player/playTrack'
-import { getState, setCurrentPlayback } from './appState'
+import { getState, setCurrentPlayback } from '../appState'
 import {
   startProgressUpdates,
   stopProgressUpdates,

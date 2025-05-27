@@ -1,12 +1,12 @@
+import { readVariableLengthQuantity } from '../lib'
 import {
   EventType,
+  MetaEvent,
+  MidiChannelMessage,
   MidiChannelVoiceMessageType,
   MidiTrackEvent,
-  MidiChannelMessage,
-  MetaEvent,
   SystemExclusiveMessage
 } from '../models'
-import { readVariableLengthQuantity } from '../lib'
 
 type Result<T extends MidiTrackEvent> = {
   event: T

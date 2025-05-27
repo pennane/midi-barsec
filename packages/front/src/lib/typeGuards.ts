@@ -1,10 +1,10 @@
 import {
   EventType,
+  MetaEvent,
   MetaEventType,
+  MidiChannelMessage,
   MidiChannelVoiceMessageType,
   MidiTrackEvent,
-  MidiChannelMessage,
-  MetaEvent,
   SystemExclusiveMessage
 } from '../models'
 
@@ -61,6 +61,12 @@ export function isProgramChangeEvent(
     isMidiEvent(event) &&
     event.messageType === MidiChannelVoiceMessageType.ProgramChange
   )
+}
+
+export function isPercussionEvent(
+  event: MidiTrackEvent
+): event is MidiChannelMessage {
+  return isMidiEvent(event) && event.channel === 9
 }
 
 export function isTempoEvent(event: MidiTrackEvent): event is MetaEvent {

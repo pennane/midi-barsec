@@ -1,17 +1,19 @@
 import {
+  calculateTickDuration,
+  isEffectiveNoteOff,
+  isNoteOnEvent,
+  isPercussionEvent,
+  isTempoEvent,
+  midiNoteToFrequency,
+  readUint24BE
+} from '../lib'
+import { noop } from '../lib/fp'
+import {
   MetaEvent,
   MidiChannelMessage,
   MidiTrackEvent,
   MTrkEvent
 } from '../models'
-import {
-  midiNoteToFrequency,
-  calculateTickDuration,
-  readUint24BE,
-  isTempoEvent,
-  isNoteOnEvent,
-  isEffectiveNoteOff
-} from '../lib'
 
 type PlaybackState = {
   tickDuration: number
@@ -58,29 +60,27 @@ function processNoteOn(
   ctx: PlaybackContext,
   state: PlaybackState
 ): void {
-  if (isNoteOnEvent(event) && event.data2 !== 0) {
-    const noteKey = `${event.channel}-${event.data1}`
+  const noteKey = `${event.channel}-${event.data1}`
 
-    const existingOscillator = state.activeNotes.get(noteKey)
-    if (existingOscillator) {
-      try {
-        existingOscillator.stop(state.scheduledTime)
-      } catch {
-        // Oscillator might already be stopped, ignore the error
-      }
+  const existingOscillator = state.activeNotes.get(noteKey)
+  if (existingOscillator) {
+    try {
+      existingOscillator.stop(state.scheduledTime)
+    } catch {
+      // Oscillator might already be stopped, ignore the error
     }
-
-    const oscillator = ctx.audioContext.createOscillator()
-    oscillator.connect(ctx.gainNode)
-    oscillator.connect(ctx.analyserNode)
-    oscillator.type = ctx.waveform
-    oscillator.frequency.setValueAtTime(
-      midiNoteToFrequency(event.data1),
-      state.scheduledTime
-    )
-    oscillator.start(state.scheduledTime)
-    state.activeNotes.set(noteKey, oscillator)
   }
+
+  const oscillator = ctx.audioContext.createOscillator()
+  oscillator.connect(ctx.gainNode)
+  oscillator.connect(ctx.analyserNode)
+  oscillator.type = ctx.waveform
+  oscillator.frequency.setValueAtTime(
+    midiNoteToFrequency(event.data1),
+    state.scheduledTime
+  )
+  oscillator.start(state.scheduledTime)
+  state.activeNotes.set(noteKey, oscillator)
 }
 
 function processNoteOff(
@@ -99,6 +99,7 @@ function processNoteOff(
  * REMINDER ARTTU: ORDER MATTERS HERE :D
  */
 const eventProcessors = [
+  { predicate: isPercussionEvent, processor: noop },
   {
     predicate: isTempoEvent,
     processor: processTempoChange
@@ -134,4 +135,4 @@ export function processEvent(
   }
 }
 
-export type { PlaybackState, PlaybackContext }
+export type { PlaybackContext, PlaybackState }

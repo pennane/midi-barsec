@@ -15,7 +15,7 @@ export function visualize(target: HTMLElement, analyser: AnalyserNode) {
   draw(analyser, dataArray)
 }
 
-function draw(analyser: AnalyserNode, dataArray: Uint8Array) {
+function draw(analyser: AnalyserNode, dataArray: Uint8Array<ArrayBuffer>) {
   const bufferLength = analyser.frequencyBinCount
 
   analyser.getByteTimeDomainData(dataArray)

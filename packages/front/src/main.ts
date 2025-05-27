@@ -1,14 +1,15 @@
 import './style.css'
 import defaultMidiFile from './megalovania.mid?arraybuffer'
-import { playMidi } from './player'
-import { ensureOnce } from './util'
-import { visualize } from './visualizer'
-import { Midi } from './parser/MidiParser'
+
+import { MidiParser } from './parser/midiParser'
+import { playMidi } from './player/playTrack'
+import { ensureOnce } from './util/fp'
+import { visualize } from './visualizer/visualizer'
 
 const DEFAULT_MIDI_ARRAY_BUFFER: ArrayBuffer = defaultMidiFile
-const DEFAULT_MIDI = new Midi(DEFAULT_MIDI_ARRAY_BUFFER)
+const DEFAULT_MIDI = new MidiParser(DEFAULT_MIDI_ARRAY_BUFFER)
 
-let selectedMidi: Midi = DEFAULT_MIDI
+let selectedMidi: MidiParser = DEFAULT_MIDI
 let selectedWaveform: OscillatorType = 'sawtooth'
 
 const audioCtx = new (window.AudioContext ||
@@ -45,7 +46,7 @@ async function selectFile(event: any) {
   }
 
   try {
-    const midi = new Midi(arrayBuffer)
+    const midi = new MidiParser(arrayBuffer)
     selectedMidi = midi
   } catch (e) {
     alert(e)

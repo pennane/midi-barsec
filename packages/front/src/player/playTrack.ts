@@ -1,11 +1,6 @@
-import {
-  EventType,
-  MidiEventType,
-  MetaEventType,
-  EventGenerator
-} from '../models'
-import { Midi } from '../parser/MidiParser'
-import { midiNoteToFrequency } from '../util'
+import { EventType, MetaEventType, MidiEventType, MidiReader } from '../models'
+import { MidiParser } from '../parser/midiParser'
+import { midiNoteToFrequency } from '../util/midi'
 
 const DEFAULT_TEMPO = 500_000 // Default tempo (500,000 microseconds per quarter note)
 const DEFAULT_DIVISION = 48 // Ticks per quarter note
@@ -15,7 +10,7 @@ async function playTrack(
   ctx: AudioContext,
   gainNode: GainNode,
   analyser: AnalyserNode,
-  eventGenerator: EventGenerator,
+  reader: MidiReader,
   startTime: number,
   division: number = DEFAULT_DIVISION,
   type: OscillatorType
@@ -29,7 +24,7 @@ async function playTrack(
 
   const activeNotes: Map<string, OscillatorNode> = new Map()
 
-  for (const { event, deltaTime } of eventGenerator) {
+  for (const { event, deltaTime } of reader) {
     currentTime += calculateEventTime(deltaTime)
 
     if (
@@ -37,9 +32,9 @@ async function playTrack(
       event.metaType === MetaEventType.Tempo
     ) {
       const newTempo =
-        (event.dataView.getUint8(0) << 16) |
-        (event.dataView.getUint8(1) << 8) |
-        event.dataView.getUint8(2)
+        (event.data.getUint8(0) << 16) |
+        (event.data.getUint8(1) << 8) |
+        event.data.getUint8(2)
       tickDuration = newTempo / division / MICROSEC_IN_SEC
       continue
     }
@@ -79,7 +74,7 @@ export async function playMidi(
   ctx: AudioContext,
   gainNode: GainNode,
   analyser: AnalyserNode,
-  midi: Midi,
+  midi: MidiParser,
   waveform: OscillatorType
 ) {
   const division = midi.header.division
@@ -96,7 +91,7 @@ export async function playMidi(
     ctx,
     gainNode,
     analyser,
-    midi.generator(),
+    midi.reader,
     currentTime,
     division,
     waveform

@@ -19,7 +19,8 @@ export default [
         alert: 'readonly',
         requestAnimationFrame: 'readonly',
         setInterval: 'readonly',
-        clearInterval: 'readonly'
+        clearInterval: 'readonly',
+        console: 'readonly'
       }
     },
     plugins: {

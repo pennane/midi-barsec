@@ -44,6 +44,7 @@ canvas {
   width: 25vmin;
   height: 25vmin;
   image-rendering: pixelated;
+  cursor: pointer;
 }
 
 .hidden {

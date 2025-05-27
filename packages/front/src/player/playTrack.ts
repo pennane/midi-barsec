@@ -9,7 +9,7 @@ import {
 
 export type PlaybackControl = {
   pause: () => void
-  resume: () => void
+  resume: () => Promise<void>
   isPlaying: () => boolean
   isPaused: () => boolean
   setWaveform: (waveform: OscillatorType) => void
@@ -51,8 +51,21 @@ function pausePlayback(state: PlaybackState, ctx: PlaybackContext): void {
   }
 }
 
-function resumePlayback(state: PlaybackState, ctx: PlaybackContext): void {
+async function resumePlayback(
+  state: PlaybackState,
+  ctx: PlaybackContext
+): Promise<void> {
   if (state.isPlaying) return
+
+  // Ensure AudioContext is running before resuming playback
+  if (ctx.audioContext.state === 'suspended') {
+    try {
+      await ctx.audioContext.resume()
+    } catch (error) {
+      console.error('Failed to resume AudioContext:', error)
+      return
+    }
+  }
 
   state.isPlaying = true
   state.scheduledTime = ctx.audioContext.currentTime

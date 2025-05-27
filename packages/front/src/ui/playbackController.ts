@@ -13,7 +13,7 @@ export function initPlaybackController(): void {
   document.getElementById('display')!.addEventListener('click', togglePlayback)
 }
 
-function togglePlayback() {
+async function togglePlayback() {
   const state = getState()
 
   if (state.currentPlayback?.isPlaying()) {
@@ -21,9 +21,18 @@ function togglePlayback() {
     stopProgressUpdates()
     return
   } else if (state.currentPlayback?.isPaused()) {
-    state.currentPlayback.resume()
+    await state.currentPlayback.resume()
     startProgressUpdates()
     return
+  }
+
+  if (state.audioContext.state === 'suspended') {
+    try {
+      await state.audioContext.resume()
+    } catch (error) {
+      console.error('Failed to resume AudioContext:', error)
+      return
+    }
   }
 
   const playback = playMidi(

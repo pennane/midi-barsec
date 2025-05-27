@@ -13,7 +13,7 @@ export function initPlaybackController(): void {
   document.getElementById('display')!.addEventListener('click', togglePlayback)
 }
 
-async function togglePlayback(): Promise<void> {
+function togglePlayback() {
   const state = getState()
 
   if (state.currentPlayback?.isPlaying()) {

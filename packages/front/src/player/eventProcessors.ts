@@ -55,6 +55,14 @@ function processNoteOn(
 ): void {
   if (isNoteOnEvent(event) && event.otherData !== 0) {
     const noteKey = `${event.channel}-${event.data}`
+
+    const existingOscillator = state.activeNotes.get(noteKey)
+    if (existingOscillator) {
+      try {
+        existingOscillator.stop(state.scheduledTime)
+      } catch {}
+    }
+
     const oscillator = ctx.audioContext.createOscillator()
     oscillator.connect(ctx.gainNode)
     oscillator.connect(ctx.analyserNode)
@@ -80,19 +88,21 @@ function processNoteOff(
     state.activeNotes.delete(noteKey)
   }
 }
-
+/**
+ * REMINDER ARTTU: ORDER MATTERS HERE :D
+ */
 const eventProcessors = [
   {
     predicate: isTempoEvent,
     processor: processTempoChange
   },
   {
-    predicate: isNoteOnEvent,
-    processor: processNoteOn
-  },
-  {
     predicate: isEffectiveNoteOff,
     processor: processNoteOff
+  },
+  {
+    predicate: isNoteOnEvent,
+    processor: processNoteOn
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ] satisfies ProcessorPredicate<any>[]

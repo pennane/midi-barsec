@@ -2,7 +2,7 @@ import './style.css'
 import defaultMidiFile from './megalovania.mid?arraybuffer'
 
 import { MidiParser } from './parser/midiParser'
-import { visualize } from './visualizer/visualizer'
+import { visualize } from './ui/visualizer'
 import { initAppState } from './ui/appState'
 import { initProgressBar, setTotalDuration } from './ui/progressBar'
 import { initWaveformSelector } from './ui/waveformSelector'

@@ -1,5 +1,5 @@
-import { playMidi } from '../player/playTrack'
 import { getState, setCurrentPlayback } from '../appState'
+import { playMidi } from '../player/playTrack'
 import {
   startProgressUpdates,
   stopProgressUpdates,
@@ -7,9 +7,6 @@ import {
 } from './progressBar'
 
 export function initPlaybackController(): void {
-  document
-    .getElementById('display')!
-    .addEventListener('touchend', togglePlayback)
   document.getElementById('display')!.addEventListener('click', togglePlayback)
 }
 

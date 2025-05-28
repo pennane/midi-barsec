@@ -25,9 +25,15 @@ body {
   left: 0;
   right: 0;
   display: flex;
-  justify-content: center;
+  justify-content: end;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
+}
+#settings > div {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 #settings:hover {

@@ -25,27 +25,23 @@ export function isSysexEvent(
   return event.type === EventType.Sysex
 }
 
-export function isNoteOnEvent(
-  event: MidiTrackEvent
-): event is MidiChannelMessage {
+function isNoteOnEvent(event: MidiTrackEvent): event is MidiChannelMessage {
   return (
     isMidiEvent(event) &&
     event.messageType === MidiChannelVoiceMessageType.NoteOn
   )
 }
 
-export function isNoteOffEvent(
-  event: MidiTrackEvent
-): event is MidiChannelMessage {
+function isNoteOffEvent(event: MidiTrackEvent): event is MidiChannelMessage {
   return (
     isMidiEvent(event) &&
     event.messageType === MidiChannelVoiceMessageType.NoteOff
   )
 }
 
-export function isNoteOnWithZeroVelocity(
+function isNoteOnWithZeroVelocity(
   event: MidiTrackEvent
-): event is MidiChannelMessage {
+): event is MidiChannelMessage & { data2: 0 } {
   return isNoteOnEvent(event) && event.data2 === 0
 }
 
@@ -61,15 +57,6 @@ export function isEffectiveNoteOn(
   return isNoteOnEvent(event) && !isNoteOnWithZeroVelocity(event)
 }
 
-export function isProgramChangeEvent(
-  event: MidiTrackEvent
-): event is MidiChannelMessage {
-  return (
-    isMidiEvent(event) &&
-    event.messageType === MidiChannelVoiceMessageType.ProgramChange
-  )
-}
-
 export function isControllerChangeEvent(
   event: MidiTrackEvent
 ): event is MidiChannelControllerChangeMessage {
@@ -77,12 +64,6 @@ export function isControllerChangeEvent(
     isMidiEvent(event) &&
     event.messageType === MidiChannelVoiceMessageType.ControlChange
   )
-}
-
-export function isChannelVolumeEvent(
-  event: MidiTrackEvent
-): event is MidiChannelMessage {
-  return isControllerChangeEvent(event) && event.data1 === 7
 }
 
 export function isPercussionEvent(
@@ -93,8 +74,4 @@ export function isPercussionEvent(
 
 export function isTempoEvent(event: MidiTrackEvent): event is MetaEvent {
   return isMetaEvent(event) && event.metaType === MetaEventType.SetTempo
-}
-
-export function isEndOfTrackEvent(event: MidiTrackEvent): event is MetaEvent {
-  return isMetaEvent(event) && event.metaType === MetaEventType.EndOfTrack
 }

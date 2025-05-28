@@ -5,11 +5,6 @@ import {
   ProcessorPredicate
 } from '../models'
 
-export const predicateProcessor =
-  <IN>(rules: ProcessorPredicate<IN, any>[]) =>
-  (event: IN, ctx: PlaybackContext, state: PlaybackState) =>
-    rules.find((p) => p.predicate(event))?.processor(event, ctx, state)
-
 export function getOrCreateChannel(
   state: PlaybackState,
   ctx: PlaybackContext,

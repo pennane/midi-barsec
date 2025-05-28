@@ -20,4 +20,4 @@ export const metaProcessors = {
       }
     }, delayMs)
   }
-} as const satisfies { [key in MetaEventType]?: EventProcessor<MetaEvent> }
+} as { [key in MetaEventType]?: EventProcessor<MetaEvent> }

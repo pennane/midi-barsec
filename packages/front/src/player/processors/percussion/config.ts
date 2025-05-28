@@ -1,0 +1,225 @@
+import { GeneralMidiPercussion } from '../../../models'
+import { PercussionConfig } from './models'
+
+export const PERCUSSION_CONFIGS = {
+  [GeneralMidiPercussion.AcousticBassDrum]: {
+    type: 'oscillator',
+    frequency: 60,
+    duration: 0.5,
+    volume: 1.5,
+    filterType: 'lowpass',
+    filterFrequency: 200,
+    envelope: { attack: 0.01, decay: 0.1, sustain: 0.3, release: 0.4 }
+  },
+  [GeneralMidiPercussion.BassDrum1]: {
+    type: 'oscillator',
+    frequency: 50,
+    duration: 0.4,
+    volume: 1.5,
+    filterType: 'lowpass',
+    filterFrequency: 180,
+    envelope: { attack: 0.01, decay: 0.08, sustain: 0.2, release: 0.3 }
+  },
+  [GeneralMidiPercussion.AcousticSnare]: {
+    type: 'hybrid',
+    frequency: 200,
+    duration: 0.2,
+    volume: 1.2,
+    filterType: 'bandpass',
+    filterFrequency: 2000,
+    filterQ: 1,
+    envelope: { attack: 0.01, decay: 0.05, sustain: 0.1, release: 0.14 }
+  },
+  [GeneralMidiPercussion.ElectricSnare]: {
+    type: 'hybrid',
+    frequency: 250,
+    duration: 0.15,
+    volume: 1.0,
+    filterType: 'bandpass',
+    filterFrequency: 2500,
+    filterQ: 1.5,
+    envelope: { attack: 0.005, decay: 0.04, sustain: 0.05, release: 0.1 }
+  },
+  [GeneralMidiPercussion.ClosedHiHat]: {
+    type: 'noise',
+    duration: 0.1,
+    volume: 0.8,
+    filterType: 'highpass',
+    filterFrequency: 8000,
+    filterQ: 2,
+    envelope: { attack: 0.001, decay: 0.02, sustain: 0.01, release: 0.07 }
+  },
+  [GeneralMidiPercussion.PedalHiHat]: {
+    type: 'noise',
+    duration: 0.08,
+    volume: 0.7,
+    filterType: 'highpass',
+    filterFrequency: 9000,
+    filterQ: 2.5,
+    envelope: { attack: 0.001, decay: 0.015, sustain: 0.005, release: 0.06 }
+  },
+  [GeneralMidiPercussion.OpenHiHat]: {
+    type: 'noise',
+    duration: 0.3,
+    volume: 0.9,
+    filterType: 'highpass',
+    filterFrequency: 7000,
+    filterQ: 1.5,
+    envelope: { attack: 0.001, decay: 0.05, sustain: 0.2, release: 0.25 }
+  },
+  [GeneralMidiPercussion.CrashCymbal1]: {
+    type: 'noise',
+    duration: 2.0,
+    volume: 1.0,
+    filterType: 'bandpass',
+    filterFrequency: 5000,
+    filterQ: 0.5,
+    envelope: { attack: 0.01, decay: 0.3, sustain: 0.4, release: 1.3 }
+  },
+  [GeneralMidiPercussion.CrashCymbal2]: {
+    type: 'noise',
+    duration: 1.8,
+    volume: 0.9,
+    filterType: 'bandpass',
+    filterFrequency: 4500,
+    filterQ: 0.6,
+    envelope: { attack: 0.01, decay: 0.25, sustain: 0.35, release: 1.2 }
+  },
+  [GeneralMidiPercussion.RideCymbal1]: {
+    type: 'noise',
+    duration: 1.0,
+    volume: 0.8,
+    filterType: 'bandpass',
+    filterFrequency: 6000,
+    filterQ: 1,
+    envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 0.6 }
+  },
+  [GeneralMidiPercussion.RideCymbal2]: {
+    type: 'noise',
+    duration: 0.8,
+    volume: 0.75,
+    filterType: 'bandpass',
+    filterFrequency: 5500,
+    filterQ: 1.2,
+    envelope: { attack: 0.005, decay: 0.08, sustain: 0.25, release: 0.5 }
+  },
+  [GeneralMidiPercussion.LowFloorTom]: {
+    type: 'oscillator',
+    frequency: 80,
+    duration: 0.4,
+    volume: 1.0,
+    filterType: 'lowpass',
+    filterFrequency: 500,
+    envelope: { attack: 0.01, decay: 0.1, sustain: 0.2, release: 0.3 }
+  },
+  [GeneralMidiPercussion.LowTom]: {
+    type: 'oscillator',
+    frequency: 100,
+    duration: 0.35,
+    volume: 1.0,
+    filterType: 'lowpass',
+    filterFrequency: 600,
+    envelope: { attack: 0.01, decay: 0.08, sustain: 0.15, release: 0.26 }
+  },
+  [GeneralMidiPercussion.LowMidTom]: {
+    type: 'oscillator',
+    frequency: 120,
+    duration: 0.3,
+    volume: 1.0,
+    filterType: 'lowpass',
+    filterFrequency: 700,
+    envelope: { attack: 0.01, decay: 0.07, sustain: 0.12, release: 0.22 }
+  },
+  [GeneralMidiPercussion.HiMidTom]: {
+    type: 'oscillator',
+    frequency: 150,
+    duration: 0.25,
+    volume: 1.0,
+    filterType: 'lowpass',
+    filterFrequency: 800,
+    envelope: { attack: 0.01, decay: 0.06, sustain: 0.1, release: 0.18 }
+  },
+  [GeneralMidiPercussion.HighFloorTom]: {
+    type: 'oscillator',
+    frequency: 180,
+    duration: 0.2,
+    volume: 1.0,
+    filterType: 'lowpass',
+    filterFrequency: 900,
+    envelope: { attack: 0.01, decay: 0.05, sustain: 0.08, release: 0.14 }
+  },
+  [GeneralMidiPercussion.HighTom]: {
+    type: 'oscillator',
+    frequency: 200,
+    duration: 0.18,
+    volume: 1.0,
+    filterType: 'lowpass',
+    filterFrequency: 1000,
+    envelope: { attack: 0.01, decay: 0.04, sustain: 0.06, release: 0.12 }
+  },
+  [GeneralMidiPercussion.SideStick]: {
+    type: 'oscillator',
+    frequency: 1000,
+    duration: 0.05,
+    volume: 0.6,
+    filterType: 'highpass',
+    filterFrequency: 800,
+    envelope: { attack: 0.001, decay: 0.01, sustain: 0.02, release: 0.04 }
+  },
+  [GeneralMidiPercussion.HandClap]: {
+    type: 'noise',
+    duration: 0.1,
+    volume: 0.8,
+    filterType: 'bandpass',
+    filterFrequency: 1500,
+    filterQ: 2,
+    envelope: { attack: 0.01, decay: 0.03, sustain: 0.02, release: 0.05 }
+  },
+  [GeneralMidiPercussion.ChineseCymbal]: {
+    type: 'noise',
+    duration: 1.5,
+    volume: 0.9,
+    filterType: 'bandpass',
+    filterFrequency: 4000,
+    filterQ: 0.8,
+    envelope: { attack: 0.02, decay: 0.2, sustain: 0.3, release: 1.0 }
+  },
+  [GeneralMidiPercussion.SplashCymbal]: {
+    type: 'noise',
+    duration: 0.8,
+    volume: 0.8,
+    filterType: 'bandpass',
+    filterFrequency: 6500,
+    filterQ: 1.5,
+    envelope: { attack: 0.005, decay: 0.1, sustain: 0.2, release: 0.5 }
+  },
+  [GeneralMidiPercussion.RideBell]: {
+    type: 'oscillator',
+    frequency: 2000,
+    duration: 0.3,
+    volume: 0.7,
+    filterType: 'bandpass',
+    filterFrequency: 2000,
+    filterQ: 3,
+    envelope: { attack: 0.005, decay: 0.05, sustain: 0.1, release: 0.2 }
+  },
+  [GeneralMidiPercussion.Cowbell]: {
+    type: 'oscillator',
+    frequency: 800,
+    duration: 0.2,
+    volume: 0.6,
+    filterType: 'bandpass',
+    filterFrequency: 800,
+    filterQ: 5,
+    envelope: { attack: 0.01, decay: 0.05, sustain: 0.05, release: 0.1 }
+  },
+  [GeneralMidiPercussion.Tambourine]: {
+    type: 'noise',
+    duration: 0.3,
+    volume: 0.5,
+    filterType: 'highpass',
+    filterFrequency: 5000,
+    filterQ: 1,
+    envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.2 }
+  }
+} as { [key in GeneralMidiPercussion]?: PercussionConfig }

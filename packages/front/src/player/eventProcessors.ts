@@ -7,20 +7,31 @@ import {
   isPercussionEvent,
   isSysexEvent
 } from '../lib'
-import { MetaEvent, MidiChannelMessage, MidiTrackEvent } from '../models'
+import { MidiChannelMessage, MidiTrackEvent } from '../models'
 import { EventProcessor } from './models'
 import {
   controllerProcessors,
   voiceMessageProcessors
 } from './processors/midiProcessors'
+import { percussionProcessors } from './processors/percussion/percussionProcessors'
 import { metaProcessors } from './processors/metaProcessors'
 
 const processMidi: EventProcessor<MidiChannelMessage> = (event, ctx, state) => {
-  if (isPercussionEvent(event)) return // Percussion sounds terrible, handle later if some clever way appears
+  if (isPercussionEvent(event)) {
+    if (isEffectiveNoteOn(event)) {
+      return percussionProcessors.noteOn(event, ctx, state)
+    }
+    if (isEffectiveNoteOff(event)) {
+      return percussionProcessors.noteOff(event, ctx, state)
+    }
+    return
+  }
 
   if (isControllerChangeEvent(event)) {
     return controllerProcessors[event.data1]?.(event, ctx, state)
   }
+
+  // return // for debugging
 
   if (isEffectiveNoteOn(event)) {
     return voiceMessageProcessors.noteOn(event, ctx, state)
@@ -31,19 +42,18 @@ const processMidi: EventProcessor<MidiChannelMessage> = (event, ctx, state) => {
   }
 }
 
-const processMeta: EventProcessor<MetaEvent> = (event, ctx, state) =>
-  metaProcessors[event.metaType as keyof typeof metaProcessors]?.(
-    event,
-    ctx,
-    state
-  )
-
 export const processEvent: EventProcessor<MidiTrackEvent> = (
   event,
   ctx,
   state
 ) => {
-  if (isSysexEvent(event)) return
-  if (isMidiEvent(event)) return processMidi(event, ctx, state)
-  if (isMetaEvent(event)) return processMeta(event, ctx, state)
+  if (isSysexEvent(event)) {
+    return
+  }
+  if (isMidiEvent(event)) {
+    return processMidi(event, ctx, state)
+  }
+  if (isMetaEvent(event)) {
+    return metaProcessors[event.metaType]?.(event, ctx, state)
+  }
 }

@@ -237,11 +237,20 @@ const processControllerChange: EventProcessor<MidiChannelMessage> = (
 
 function processLyric(
   event: MetaEvent,
-  _ctx: PlaybackContext,
-  _state: PlaybackState
+  ctx: PlaybackContext,
+  state: PlaybackState
 ): void {
   const text = new TextDecoder().decode(event.data)
-  announce(text)
+
+  const currentTime = ctx.audioContext.currentTime
+  const delaySeconds = Math.max(0, state.scheduledTime - currentTime)
+  const delayMs = delaySeconds * 1000
+
+  setTimeout(() => {
+    if (state.isPlaying) {
+      announce(text)
+    }
+  }, delayMs)
 }
 
 const processMeta: EventProcessor<MetaEvent> = (event, ctx, state) => {

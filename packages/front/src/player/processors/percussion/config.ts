@@ -175,15 +175,6 @@ export const PERCUSSION_CONFIGS = {
     filterQ: 2,
     envelope: { attack: 0.01, decay: 0.03, sustain: 0.02, release: 0.05 }
   },
-  [GeneralMidiPercussion.ChineseCymbal]: {
-    type: 'noise',
-    duration: 1.5,
-    volume: 0.4,
-    filterType: 'bandpass',
-    filterFrequency: 4000,
-    filterQ: 0.8,
-    envelope: { attack: 0.02, decay: 0.2, sustain: 0.3, release: 1.0 }
-  },
   [GeneralMidiPercussion.SplashCymbal]: {
     type: 'noise',
     duration: 0.8,

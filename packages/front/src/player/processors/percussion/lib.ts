@@ -1,25 +1,9 @@
-import { GeneralMidiPercussion } from '../../../models'
-import { PERCUSSION_CONFIGS } from './config'
 import { PercussionConfig } from './models'
 
-export const getPercussionConfig = (
-  noteNumber: GeneralMidiPercussion
-): PercussionConfig => {
-  const config = PERCUSSION_CONFIGS[noteNumber]
-  if (config) return config
-
-  const frequency = 200 + (noteNumber - 35) * 15
-  return {
-    type: 'oscillator',
-    frequency,
-    duration: 0.1,
-    volume: 0.8,
-    envelope: { attack: 0.01, decay: 0.03, sustain: 0.05, release: 0.06 }
-  }
-}
-
-const calculateVolume = (configVolume: number, velocity: number): number =>
-  (velocity / 127) * configVolume
+export const calculateVolume = (
+  configVolume: number,
+  velocity: number
+): number => (velocity / 127) * configVolume
 
 const getDefaultEnvelope = () => ({
   attack: 0.01,
@@ -38,7 +22,7 @@ const createNoiseBuffer = (
   const data = buffer.getChannelData(0)
 
   for (let i = 0; i < bufferLength; i++) {
-    data[i] = Math.random() * 2 - 1
+    data[i] = (Math.random() * 2 - 1) * 0.5
   }
 
   return buffer
@@ -161,7 +145,7 @@ const applyEnvelope = (
 export const createPercussionSound = (
   config: PercussionConfig,
   audioContext: AudioContext,
-  velocity: number,
+  volume: number,
   scheduledTime: number
 ): {
   source: OscillatorNode | AudioBufferSourceNode
@@ -170,7 +154,6 @@ export const createPercussionSound = (
 } => {
   const gain = audioContext.createGain()
   const envelope = config.envelope || getDefaultEnvelope()
-  const volume = calculateVolume(config.volume, velocity)
 
   let source: OscillatorNode | AudioBufferSourceNode
   let filter: BiquadFilterNode | undefined

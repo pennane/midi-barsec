@@ -1,10 +1,11 @@
 import { GeneralMidiPercussion, MidiChannelMessage } from '../../../models'
 import { EventProcessor } from '../../models'
 import { getOrCreateChannel } from '../lib'
+import { PERCUSSION_CONFIGS } from './config'
 
 import {
+  calculateVolume,
   createPercussionSound,
-  getPercussionConfig,
   scheduleNoteCleanup,
   startPercussionSource,
   stopExistingNote,
@@ -13,11 +14,14 @@ import {
 
 // thanks chatgpt
 export const percussionProcessors = {
-  noteOn: (event: MidiChannelMessage, ctx, state) => {
+  noteOn: (event, ctx, state) => {
     const channel = getOrCreateChannel(state, ctx, event.channel, true)
     const velocity = event.data2 ?? 127
+
     const noteNumber = event.data1 as GeneralMidiPercussion
-    const config = getPercussionConfig(noteNumber)
+    const config = PERCUSSION_CONFIGS[noteNumber]
+    if (!config || !ctx.percussion) return
+    const volume = calculateVolume(config.volume, velocity)
 
     const existingNote = channel.notes.get(noteNumber)
     if (existingNote) {
@@ -28,7 +32,7 @@ export const percussionProcessors = {
     const { source, gain } = createPercussionSound(
       config,
       ctx.audioContext,
-      velocity,
+      volume,
       state.scheduledTime
     )
 
@@ -47,12 +51,11 @@ export const percussionProcessors = {
 
   noteOff: (event: MidiChannelMessage, ctx, state) => {
     const channel = getOrCreateChannel(state, ctx, event.channel, true)
-    const noteNumber = event.data1
+    const noteNumber = event.data1 as GeneralMidiPercussion
     const note = channel.notes.get(noteNumber)
+    const config = PERCUSSION_CONFIGS[noteNumber]
 
-    if (!note) return
-
-    const config = getPercussionConfig(noteNumber as GeneralMidiPercussion)
+    if (!note || !config) return
 
     if (config.duration > 0.5) {
       stopLongPercussionNote(note, state.scheduledTime)

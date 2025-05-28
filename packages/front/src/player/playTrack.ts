@@ -6,7 +6,7 @@ import {
 import { MidiReader } from '../models'
 import { MidiParser } from '../parser/midiParser'
 import { processEvent } from './eventProcessors'
-import { PlaybackState, PlaybackContext } from './models'
+import { PlaybackContext, PlaybackState } from './models'
 
 export type PlaybackControl = {
   pause: () => void
@@ -14,6 +14,7 @@ export type PlaybackControl = {
   isPlaying: () => boolean
   isPaused: () => boolean
   setWaveform: (waveform: OscillatorType) => void
+  setPercussion: (enabled: boolean) => void
   getCurrentPosition: () => number // 0-1 ratio
   getTotalDuration: () => number // seconds
   seekTo: (position: number) => void // 0-1 ratio
@@ -152,7 +153,8 @@ export function playMidi(
     gainNode,
     analyserNode,
     division,
-    waveform
+    waveform,
+    percussion: false
   }
 
   const totalDuration = midi.duration()
@@ -199,6 +201,7 @@ export function playMidi(
       return Math.min(elapsed / state.totalDurationSeconds, 1)
     },
     getTotalDuration: () => state.totalDurationSeconds,
-    seekTo
+    seekTo,
+    setPercussion: (enabled) => (ctx.percussion = enabled)
   }
 }

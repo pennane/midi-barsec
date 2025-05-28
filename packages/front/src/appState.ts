@@ -52,3 +52,7 @@ export function setSelectedWaveform(waveform: OscillatorType): void {
 export function setCurrentPlayback(playback: PlaybackControl | null): void {
   state.currentPlayback = playback
 }
+
+export function setPercussion(enabled: boolean): void {
+  getState().currentPlayback?.setPercussion(enabled)
+}

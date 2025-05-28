@@ -31,6 +31,7 @@ export type PlaybackContext = {
   analyserNode: AnalyserNode
   division: number
   waveform: OscillatorType
+  percussion: boolean
 }
 
 export type EventProcessor<T> = (

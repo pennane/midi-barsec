@@ -1,3 +1,5 @@
+import { setPercussion } from '../appState'
+
 let volumeGainNode: GainNode
 
 export function initVolumeControl(gainNode: GainNode): void {
@@ -26,6 +28,12 @@ export function initVolumeControl(gainNode: GainNode): void {
       volumeGainNode.context.currentTime
     )
     updateVolumeDisplay(target.value, volumeDisplay)
+  })
+
+  const percussion = document.getElementById('percussion-checkbox')!
+
+  percussion.addEventListener('click', () => {
+    setPercussion((percussion as any).checked)
   })
 }
 

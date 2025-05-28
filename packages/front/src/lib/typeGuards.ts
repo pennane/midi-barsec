@@ -55,6 +55,12 @@ export function isEffectiveNoteOff(
   return isNoteOffEvent(event) || isNoteOnWithZeroVelocity(event)
 }
 
+export function isEffectiveNoteOn(
+  event: MidiTrackEvent
+): event is MidiChannelMessage {
+  return isNoteOnEvent(event) && !isNoteOnWithZeroVelocity(event)
+}
+
 export function isProgramChangeEvent(
   event: MidiTrackEvent
 ): event is MidiChannelMessage {
@@ -81,7 +87,7 @@ export function isChannelVolumeEvent(
 
 export function isPercussionEvent(
   event: MidiTrackEvent
-): event is MidiChannelMessage {
+): event is MidiChannelMessage & { channel: 9 } {
   return isMidiEvent(event) && event.channel === 9
 }
 

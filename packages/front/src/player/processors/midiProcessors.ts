@@ -2,14 +2,13 @@ import { midiNoteToFrequency } from '../../lib'
 import {
   MidiChannelControllerChangeMessage,
   MidiChannelMessage,
-  MidiChannelVoiceMessageType,
   MidiControllerChange
 } from '../../models'
 import { getOrCreateChannel } from './lib'
 import { EventProcessor } from '../models'
 
 export const voiceMessageProcessors = {
-  [MidiChannelVoiceMessageType.NoteOn]: (event, ctx, state) => {
+  noteOn: (event, ctx, state) => {
     const channel = getOrCreateChannel(state, ctx, event.channel)
     const velocity = (event.data2 ?? 0) / 127
     const existingNote = channel.notes.get(event.data1)
@@ -48,7 +47,7 @@ export const voiceMessageProcessors = {
       sustained: false
     })
   },
-  [MidiChannelVoiceMessageType.NoteOff]: (event, ctx, state) => {
+  noteOff: (event, ctx, state) => {
     const channel = getOrCreateChannel(state, ctx, event.channel)
     const note = channel.notes.get(event.data1)
     if (!note) return
@@ -60,9 +59,7 @@ export const voiceMessageProcessors = {
       channel.notes.delete(event.data1)
     }
   }
-} as const satisfies {
-  [key in MidiChannelVoiceMessageType]?: EventProcessor<MidiChannelMessage>
-}
+} as const satisfies Record<string, EventProcessor<MidiChannelMessage>>
 
 export const controllerProcessors = {
   [MidiControllerChange.ChannelVolumeMSB]: (event, ctx, state) => {
@@ -101,6 +98,6 @@ export const controllerProcessors = {
     channel.panner.pan.setValueAtTime(0, state.scheduledTime)
     channel.gain.gain.setValueAtTime(1, state.scheduledTime)
   }
-} as const satisfies {
+} as {
   [key in MidiControllerChange]?: EventProcessor<MidiChannelControllerChangeMessage>
 }

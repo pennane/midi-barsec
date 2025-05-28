@@ -30,6 +30,8 @@ body {
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
+  padding: 1rem;
+  padding-top: 0;
 }
 
 #settings * {

@@ -1,4 +1,4 @@
-import { PlaybackState, PlaybackContext, Channel } from '../models'
+import { Channel, PlaybackContext, PlaybackState } from '../models'
 
 export function getOrCreateChannel(
   state: PlaybackState,
@@ -20,7 +20,8 @@ export function getOrCreateChannel(
     gain,
     panner,
     notes: new Map(),
-    sustain: false
+    sustain: false,
+    pitchBend: 0
   }
   state.channels.set(channelIndex, channel)
 

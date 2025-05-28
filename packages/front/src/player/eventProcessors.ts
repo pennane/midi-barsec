@@ -5,6 +5,7 @@ import {
   isMetaEvent,
   isMidiEvent,
   isPercussionEvent,
+  isPitchBendEvent,
   isSysexEvent
 } from '../lib'
 import { MidiChannelMessage, MidiTrackEvent } from '../models'
@@ -22,6 +23,10 @@ const processMidi: EventProcessor<MidiChannelMessage> = (event, ctx, state) => {
   }
 
   const percussion = isPercussionEvent(event)
+
+  if (isPitchBendEvent(event)) {
+    return voiceMessageProcessors.pitchBend(event, ctx, state)
+  }
 
   if (isEffectiveNoteOn(event)) {
     return percussion

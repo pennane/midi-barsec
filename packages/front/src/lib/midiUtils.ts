@@ -1,12 +1,12 @@
-import {
-  MIDI_NOTE_A4,
-  MIDI_NOTE_A4_FREQUENCY,
-  MICROSECONDS_IN_SECOND,
-  DEFAULT_TEMPO
-} from './constants'
 import { MidiReader, MTrkEvent } from '../models'
-import { isTempoEvent } from './typeGuards'
+import {
+  DEFAULT_TEMPO,
+  MICROSECONDS_IN_SECOND,
+  MIDI_NOTE_A4,
+  MIDI_NOTE_A4_FREQUENCY
+} from './constants'
 import { readUint24BE } from './dataUtils'
+import { isTempoEvent } from './typeGuards'
 
 /**
  * Converts a MIDI note number to its corresponding frequency in Hz.
@@ -113,4 +113,10 @@ export function createSeekableReader(
     reader: createReaderFromPosition(),
     actualPosition: currentTime
   }
+}
+
+export function pitchBendToMultiplier(pitchBend: number, range = 2) {
+  const bend = (pitchBend - 8192) / 8192 // -1 to +1
+  const semitoneOffset = bend * range
+  return Math.pow(2, semitoneOffset / 12)
 }

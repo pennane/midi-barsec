@@ -1,11 +1,11 @@
-import { midiNoteToFrequency } from '../../lib'
+import { midiNoteToFrequency, pitchBendToMultiplier } from '../../lib'
 import {
   MidiChannelControllerChangeMessage,
   MidiChannelMessage,
   MidiControllerChange
 } from '../../models'
-import { getOrCreateChannel } from './lib'
 import { EventProcessor } from '../models'
+import { getOrCreateChannel } from './lib'
 
 export const voiceMessageProcessors = {
   noteOn: (event, ctx, state) => {
@@ -33,7 +33,8 @@ export const voiceMessageProcessors = {
     gain.gain.setValueAtTime(velocity, state.scheduledTime)
     oscillator.type = ctx.waveform
     oscillator.frequency.setValueAtTime(
-      midiNoteToFrequency(event.data1),
+      midiNoteToFrequency(event.data1) *
+        pitchBendToMultiplier(channel.pitchBend),
       state.scheduledTime
     )
 
@@ -57,6 +58,23 @@ export const voiceMessageProcessors = {
     } else {
       note.oscillator.stop(state.scheduledTime)
       channel.notes.delete(event.data1)
+    }
+  },
+  pitchBend: (event, ctx, state) => {
+    const channel = getOrCreateChannel(state, ctx, event.channel)
+    const lsb = event.data1 ?? 0
+    const msb = event.data2 ?? 0
+    const value = (msb << 7) | lsb // 14-bit value
+    channel.pitchBend = value
+
+    const bendMultiplier = pitchBendToMultiplier(value)
+
+    for (const [noteNumber, note] of channel.notes) {
+      const baseFreq = midiNoteToFrequency(noteNumber)
+      note.oscillator.frequency.setValueAtTime(
+        baseFreq * bendMultiplier,
+        state.scheduledTime
+      )
     }
   }
 } as const satisfies Record<string, EventProcessor<MidiChannelMessage>>

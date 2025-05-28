@@ -11,6 +11,7 @@ export type Channel = {
   panner: StereoPannerNode
   notes: Map<number, Note>
   sustain: boolean
+  pitchBend: number
 }
 
 export type PlaybackState = {

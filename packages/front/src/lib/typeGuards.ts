@@ -25,6 +25,17 @@ export function isSysexEvent(
   return event.type === EventType.Sysex
 }
 
+export function isPitchBendEvent(
+  event: MidiTrackEvent
+): event is MidiChannelMessage & {
+  messageType: MidiChannelVoiceMessageType.PitchBendChange
+} {
+  return (
+    isMidiEvent(event) &&
+    event.messageType === MidiChannelVoiceMessageType.PitchBendChange
+  )
+}
+
 function isNoteOnEvent(event: MidiTrackEvent): event is MidiChannelMessage {
   return (
     isMidiEvent(event) &&

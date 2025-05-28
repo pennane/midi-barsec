@@ -15,13 +15,11 @@ export function initVolumeControl(gainNode: GainNode): void {
     return
   }
 
-  // Set initial display
   updateVolumeDisplay(volumeSlider.value, volumeDisplay)
 
-  // Handle volume changes
   volumeSlider.addEventListener('input', (event) => {
     const target = event.target as HTMLInputElement
-    const volume = parseInt(target.value) / 100 // Convert 0-100 to 0-1
+    const volume = parseInt(target.value) / 100
 
     volumeGainNode.gain.setValueAtTime(
       volume,

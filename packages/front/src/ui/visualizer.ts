@@ -24,7 +24,7 @@ function draw(analyser: AnalyserNode, dataArray: Uint8Array<ArrayBuffer>) {
   canvasCtx.fillRect(0, 0, SIZE, SIZE)
 
   canvasCtx.lineWidth = 3
-  canvasCtx.strokeStyle = 'rgb(0 0 255)'
+  canvasCtx.strokeStyle = '#006aff'
 
   canvasCtx.beginPath()
 

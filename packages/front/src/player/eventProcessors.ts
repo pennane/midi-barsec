@@ -230,7 +230,7 @@ const controllerChangeProcessor: EventProcessor<MidiChannelMessage> = (
     case 121:
       return processResetControllers(event, ctx, state)
     default:
-      noop
+      return noop()
   }
 }
 

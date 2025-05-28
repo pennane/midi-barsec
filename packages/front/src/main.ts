@@ -1,4 +1,4 @@
-import defaultMidiFile from './axelf.mid?arraybuffer'
+import defaultMidiFile from './prodigy.mid?arraybuffer'
 import './style.css'
 
 import { initAppState } from './appState'

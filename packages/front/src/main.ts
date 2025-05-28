@@ -7,8 +7,8 @@ import { initFileSelector } from './ui/fileSelector'
 import { initPlaybackController } from './ui/playbackController'
 import { initProgressBar, setTotalDuration } from './ui/progressBar'
 import { visualize } from './ui/visualizer'
-import { initWaveformSelector } from './ui/waveformSelector'
 import { initVolumeControl } from './ui/volumeControl'
+import { initWaveformSelector } from './ui/waveformSelector'
 
 const audioCtx = new (window.AudioContext ||
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

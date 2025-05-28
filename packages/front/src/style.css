@@ -102,12 +102,11 @@ body {
 
 canvas {
   border-radius: 0.25rem;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   width: 25vmin;
   height: 25vmin;
   image-rendering: pixelated;
   cursor: pointer;
-  filter: drop-shadow(2px 4px 100px rgb(255 255 255 / 0.15));
+  filter: drop-shadow(2px 4px 100px rgb(255 255 255 / 0.6));
 }
 
 #controls {

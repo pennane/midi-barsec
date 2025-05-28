@@ -17,15 +17,10 @@ export function visualize(target: HTMLElement, analyser: AnalyserNode) {
 
 function draw(analyser: AnalyserNode, dataArray: Uint8Array<ArrayBuffer>) {
   const bufferLength = analyser.frequencyBinCount
-
   analyser.getByteTimeDomainData(dataArray)
-
-  canvasCtx.fillStyle = 'rgb(0 0 0)'
-  canvasCtx.fillRect(0, 0, SIZE, SIZE)
-
+  canvasCtx.clearRect(0, 0, SIZE, SIZE)
   canvasCtx.lineWidth = 3
   canvasCtx.strokeStyle = '#006aff'
-
   canvasCtx.beginPath()
 
   const sliceWidth = SIZE / bufferLength

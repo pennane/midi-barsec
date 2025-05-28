@@ -1,3 +1,4 @@
+import { getState } from '../appState'
 import {
   DEFAULT_TEMPO,
   SCHEDULE_AHEAD_TIME,
@@ -154,7 +155,7 @@ export function playMidi(
     analyserNode,
     division,
     waveform,
-    percussion: false
+    percussion: getState().percussion
   }
 
   const totalDuration = midi.duration()

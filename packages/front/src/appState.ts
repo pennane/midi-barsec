@@ -8,6 +8,7 @@ type AppState = {
   audioContext: AudioContext
   gainNode: GainNode
   analyserNode: AnalyserNode
+  percussion: boolean
 }
 
 let state: AppState
@@ -24,7 +25,8 @@ export function initAppState(
     currentPlayback: null,
     audioContext,
     gainNode,
-    analyserNode
+    analyserNode,
+    percussion: false
   }
 }
 
@@ -54,5 +56,10 @@ export function setCurrentPlayback(playback: PlaybackControl | null): void {
 }
 
 export function setPercussion(enabled: boolean): void {
-  getState().currentPlayback?.setPercussion(enabled)
+  const state = getState()
+  state.currentPlayback?.setPercussion(enabled)
+  state.percussion = enabled
+}
+export function getPercussion(): boolean {
+  return getState().percussion
 }

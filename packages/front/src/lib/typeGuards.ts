@@ -91,18 +91,3 @@ export function isTempoEvent(event: MidiTrackEvent): event is MetaEvent {
 export function isEndOfTrackEvent(event: MidiTrackEvent): event is MetaEvent {
   return isMetaEvent(event) && event.metaType === MetaEventType.EndOfTrack
 }
-
-export function isEffectiveTextEvent(
-  event: MidiTrackEvent
-): event is MetaEvent {
-  return (
-    isMetaEvent(event) &&
-    (event.metaType === MetaEventType.TextEvent ||
-      event.metaType === MetaEventType.CopyrightNotice ||
-      event.metaType === MetaEventType.SequenceTrackName ||
-      event.metaType === MetaEventType.InstrumentName ||
-      event.metaType === MetaEventType.Lyric ||
-      event.metaType === MetaEventType.Marker ||
-      event.metaType === MetaEventType.CuePoint)
-  )
-}

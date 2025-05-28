@@ -2,20 +2,21 @@ import {
   calculateTickDuration,
   isControllerChangeEvent,
   isEffectiveNoteOff,
-  isEffectiveTextEvent,
+  isMetaEvent,
   isNoteOnEvent,
   isPercussionEvent,
-  isTempoEvent,
   midiNoteToFrequency,
   readUint24BE
 } from '../lib'
 import { noop } from '../lib/fp'
 import {
   MetaEvent,
+  MetaEventType,
   MidiChannelMessage,
   MidiTrackEvent,
   MTrkEvent
 } from '../models'
+import { announce } from '../ui/textAnnouncer'
 
 type Note = {
   gain: GainNode
@@ -215,7 +216,7 @@ function processChannelVolume(
   channel.gain.gain.setValueAtTime(volume, state.scheduledTime)
 }
 
-const controllerChangeProcessor: EventProcessor<MidiChannelMessage> = (
+const processControllerChange: EventProcessor<MidiChannelMessage> = (
   event,
   ctx,
   state
@@ -234,13 +235,24 @@ const controllerChangeProcessor: EventProcessor<MidiChannelMessage> = (
   }
 }
 
-function processTextEvent(
+function processLyric(
   event: MetaEvent,
   _ctx: PlaybackContext,
   _state: PlaybackState
 ): void {
   const text = new TextDecoder().decode(event.data)
-  console.log('Text Event:', text, event.metaType)
+  announce(text)
+}
+
+const processMeta: EventProcessor<MetaEvent> = (event, ctx, state) => {
+  switch (event.metaType) {
+    case MetaEventType.SetTempo:
+      return processTempoChange(event, ctx, state)
+    case MetaEventType.Lyric:
+      return processLyric(event, ctx, state)
+    default:
+      return noop()
+  }
 }
 
 /**
@@ -249,10 +261,6 @@ function processTextEvent(
 const eventProcessors = [
   { predicate: isPercussionEvent, processor: noop },
   {
-    predicate: isTempoEvent,
-    processor: processTempoChange
-  },
-  {
     predicate: isEffectiveNoteOff,
     processor: processNoteOff
   },
@@ -260,10 +268,10 @@ const eventProcessors = [
     predicate: isNoteOnEvent,
     processor: processNoteOn
   },
-  { predicate: isControllerChangeEvent, processor: controllerChangeProcessor },
+  { predicate: isControllerChangeEvent, processor: processControllerChange },
   {
-    predicate: isEffectiveTextEvent,
-    processor: processTextEvent
+    predicate: isMetaEvent,
+    processor: processMeta
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ] satisfies ProcessorPredicate<any>[]

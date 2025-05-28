@@ -42,13 +42,13 @@ function pausePlayback(state: PlaybackState, ctx: PlaybackContext): void {
     for (const note of channel.notes.values()) {
       try {
         note.oscillator.stop(ctx.audioContext.currentTime)
-      } catch (e) {}
+      } catch {}
     }
   }
   state.channels.clear()
 
   if (state.animationFrameId) {
-    cancelAnimationFrame(state.animationFrameId)
+    window.cancelAnimationFrame(state.animationFrameId)
     state.animationFrameId = undefined
   }
 }

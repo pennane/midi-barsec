@@ -1,20 +1,20 @@
-import './style.css'
 import defaultMidiFile from './megalovania.mid?arraybuffer'
+import './style.css'
 
-import { MidiParser } from './parser/midiParser'
-import { visualize } from './ui/visualizer'
 import { initAppState } from './appState'
-import { initProgressBar, setTotalDuration } from './ui/progressBar'
-import { initWaveformSelector } from './ui/waveformSelector'
+import { MidiParser } from './parser/midiParser'
 import { initFileSelector } from './ui/fileSelector'
 import { initPlaybackController } from './ui/playbackController'
+import { initProgressBar, setTotalDuration } from './ui/progressBar'
+import { visualize } from './ui/visualizer'
+import { initWaveformSelector } from './ui/waveformSelector'
 
 const audioCtx = new (window.AudioContext ||
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window as any).webkitAudioContext)()
 
 const gainNode = audioCtx.createGain()
-gainNode.gain.value = 0.01
+gainNode.gain.value = 0.03
 gainNode.connect(audioCtx.destination)
 
 const analyser = audioCtx.createAnalyser()

@@ -26,7 +26,7 @@ export function initAppState(
     audioContext,
     gainNode,
     analyserNode,
-    percussion: false
+    percussion: true
   }
 }
 

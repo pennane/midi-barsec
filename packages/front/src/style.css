@@ -19,6 +19,7 @@ body {
   color: white;
 }
 #settings {
+  z-index: 10;
   margin: 0.75rem;
   opacity: 0.25;
   position: absolute;
@@ -100,16 +101,22 @@ body {
   font-family: monospace;
 }
 
+#display {
+  position: relative;
+}
+
 canvas {
   border-radius: 0.25rem;
   width: 25vmin;
   height: 25vmin;
   image-rendering: pixelated;
   cursor: pointer;
-  filter: drop-shadow(2px 4px 100px rgb(255 255 255 / 0.6));
+  filter: drop-shadow(2px 4px 100px rgb(255 255 255 / 0.2));
+  /* border: 0.1px solid rgb(255, 255, 255, 0.04); */
 }
 
 #controls {
+  z-index: 10;
   position: absolute;
   bottom: 2rem;
   left: 2rem;

@@ -1,12 +1,12 @@
-import defaultMidiFile from './megalovania.mid?arraybuffer'
 import './style.css'
+import defaultMidiFile from './takefive.mid?arraybuffer'
 
 import { initAppState } from './appState'
 import { MidiParser } from './parser/midiParser'
 import { initFileSelector } from './ui/fileSelector'
 import { initPlaybackController } from './ui/playbackController'
 import { initProgressBar, setTotalDuration } from './ui/progressBar'
-import { visualize } from './ui/visualizer'
+import { initializeVisualizer } from './ui/visualizer/visualizer'
 import { initVolumeControl } from './ui/volumeControl'
 import { initWaveformSelector } from './ui/waveformSelector'
 
@@ -34,4 +34,5 @@ initVolumeControl(volumeGainNode)
 initFileSelector()
 initPlaybackController()
 setTotalDuration(DEFAULT_MIDI.duration())
-visualize(document.getElementById('display')!, analyser)
+
+initializeVisualizer(document.getElementById('display')!, analyser)

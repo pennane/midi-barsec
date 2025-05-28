@@ -5,7 +5,8 @@ import {
 } from '../lib'
 import { MidiReader } from '../models'
 import { MidiParser } from '../parser/midiParser'
-import { PlaybackContext, PlaybackState, processEvent } from './eventProcessors'
+import { processEvent } from './eventProcessors'
+import { PlaybackState, PlaybackContext } from './models'
 
 export type PlaybackControl = {
   pause: () => void

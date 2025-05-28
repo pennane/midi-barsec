@@ -2,6 +2,7 @@ import {
   EventType,
   MetaEvent,
   MetaEventType,
+  MidiChannelControllerChangeMessage,
   MidiChannelMessage,
   MidiChannelVoiceMessageType,
   MidiTrackEvent,
@@ -65,7 +66,7 @@ export function isProgramChangeEvent(
 
 export function isControllerChangeEvent(
   event: MidiTrackEvent
-): event is MidiChannelMessage {
+): event is MidiChannelControllerChangeMessage {
   return (
     isMidiEvent(event) &&
     event.messageType === MidiChannelVoiceMessageType.ControlChange

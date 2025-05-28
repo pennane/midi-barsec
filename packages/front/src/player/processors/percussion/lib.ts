@@ -19,7 +19,7 @@ export const getPercussionConfig = (
 }
 
 const calculateVolume = (configVolume: number, velocity: number): number =>
-  (configVolume * velocity) / 127
+  (velocity / 127) * configVolume
 
 const getDefaultEnvelope = () => ({
   attack: 0.01,

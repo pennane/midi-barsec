@@ -51,6 +51,10 @@ export function setSelectedWaveform(waveform: OscillatorType): void {
   }
 }
 
+export function getSelectedWaveform() {
+  return state.selectedWaveform
+}
+
 export function setCurrentPlayback(playback: PlaybackControl | null): void {
   state.currentPlayback = playback
 }

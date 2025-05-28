@@ -21,16 +21,16 @@ const processMidi: EventProcessor<MidiChannelMessage> = (event, ctx, state) => {
     return controllerProcessors[event.data1]?.(event, ctx, state)
   }
 
-  // return // for debugging
+  const percussion = isPercussionEvent(event)
 
   if (isEffectiveNoteOn(event)) {
-    return isPercussionEvent(event)
+    return percussion
       ? percussionProcessors.noteOn(event, ctx, state)
       : voiceMessageProcessors.noteOn(event, ctx, state)
   }
 
   if (isEffectiveNoteOff(event)) {
-    return isPercussionEvent(event)
+    return percussion
       ? percussionProcessors.noteOff(event, ctx, state)
       : voiceMessageProcessors.noteOff(event, ctx, state)
   }

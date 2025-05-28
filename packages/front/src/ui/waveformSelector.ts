@@ -1,4 +1,4 @@
-import { setSelectedWaveform } from '../appState'
+import { getSelectedWaveform, setSelectedWaveform } from '../appState'
 
 enum OscillatorTypes {
   SAWTOOTH = 'sawtooth',
@@ -8,8 +8,8 @@ enum OscillatorTypes {
 }
 
 const OSCILLATOR_DISPLAY_NAMES: Record<OscillatorTypes, string> = {
-  [OscillatorTypes.SAWTOOTH]: 'Sawtooth',
   [OscillatorTypes.SINE]: 'Sine',
+  [OscillatorTypes.SAWTOOTH]: 'Sawtooth',
   [OscillatorTypes.SQUARE]: 'Square',
   [OscillatorTypes.TRIANGLE]: 'Triangle'
 }
@@ -22,7 +22,7 @@ export function initWaveformSelector(): void {
     const option = document.createElement('option')
     option.value = type
     option.textContent = OSCILLATOR_DISPLAY_NAMES[type]
-    option.selected = type === OscillatorTypes.SAWTOOTH
+    option.selected = type === getSelectedWaveform()
     selectElement.appendChild(option)
   })
 

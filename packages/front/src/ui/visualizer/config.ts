@@ -130,7 +130,7 @@ const PsychedelicRadialVisualizer = {
   }
 } satisfies Visualizer & { angle: number }
 
-const AudioChaosVisualizer = {
+const ParticleVisualizer = {
   ctx: null as unknown as CanvasRenderingContext2D,
   size: 0,
   particles: [] as {
@@ -166,7 +166,7 @@ const AudioChaosVisualizer = {
 
     for (let i = 0; i < loudness / 2; i++) {
       const angle = Math.random() * Math.PI * 2
-      const speed = Math.random() * 4 + 1
+      const speed = Math.random() ** 2 * 4 + 1 // Skewed toward lower speeds
       this.particles.push({
         x: center,
         y: center,
@@ -176,13 +176,9 @@ const AudioChaosVisualizer = {
       })
     }
 
-    ctx.beginPath()
-    ctx.lineWidth = 2
-    ctx.strokeStyle = `hsl(${
-      Math.sin(performance.now() / 500) * 180 + 180
-    }, 100%, 60%)`
-
     this.noise += 0.05 + loudness / 200
+
+    const maxDistance = size / 2
 
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const p = this.particles[i]
@@ -190,14 +186,19 @@ const AudioChaosVisualizer = {
       p.y += p.vy
       p.life -= 1
 
-      if (p.life <= 0 || p.x < 0 || p.y < 0 || p.x > size || p.y > size) {
+      const dx = p.x - center
+      const dy = p.y - center
+      const dist = Math.sqrt(dx * dx + dy * dy)
+      const alpha = Math.max(0, 1 - dist / maxDistance)
+
+      if (p.life <= 0 || alpha <= 0) {
         this.particles.splice(i, 1)
         continue
       }
 
-      ctx.fillStyle = `hsl(${
+      ctx.fillStyle = `hsla(${
         (p.life * 3 + performance.now() / 10) % 360
-      }, 100%, 70%)`
+      }, 100%, 70%, ${alpha.toFixed(2)})`
       ctx.beginPath()
       ctx.arc(p.x, p.y, 2, 0, Math.PI * 2)
       ctx.fill()
@@ -265,11 +266,11 @@ export const SpinningTriangleVisualizer = {
 } satisfies Visualizer & { angle: number }
 
 export const visualizers = {
-  basic: BasicVisualizer,
-  smooth: SmoothVisualizer,
-  radial: PsychedelicRadialVisualizer,
-  particles: AudioChaosVisualizer,
-  triangle: SpinningTriangleVisualizer
+  Basic: BasicVisualizer,
+  Smooth: SmoothVisualizer,
+  Radial: PsychedelicRadialVisualizer,
+  Particle: ParticleVisualizer,
+  Triangle: SpinningTriangleVisualizer
 }
 
 export const defaultVisualizer = BasicVisualizer

@@ -1,5 +1,5 @@
+import defaultMidiFile from './prodigy.mid?arraybuffer'
 import './style.css'
-import defaultMidiFile from './takefive.mid?arraybuffer'
 
 import { initAppState } from './appState'
 import { MidiParser } from './parser/midiParser'

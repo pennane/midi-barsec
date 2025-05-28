@@ -8,6 +8,12 @@ import {
 
 export function initPlaybackController(): void {
   document.getElementById('display')!.addEventListener('click', togglePlayback)
+  document.addEventListener('keydown', (event) => {
+    if (event.code === 'Space' && !event.repeat) {
+      event.preventDefault()
+      togglePlayback()
+    }
+  })
 }
 
 async function togglePlayback() {

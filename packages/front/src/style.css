@@ -30,6 +30,11 @@ body {
   gap: 1rem;
   flex-wrap: wrap;
 }
+
+#settings * {
+  font-size: 0.8rem !important;
+}
+
 #settings > div {
   display: flex;
   align-items: center;

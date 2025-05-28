@@ -1,8 +1,8 @@
 import {
   calculateTickDuration,
-  isChannelVolumeEvent,
+  isControllerChangeEvent,
+  isEffectiveNoteOff,
   isEffectiveTextEvent,
-  isNoteOffEvent,
   isNoteOnEvent,
   isPercussionEvent,
   isTempoEvent,
@@ -17,16 +17,23 @@ import {
   MTrkEvent
 } from '../models'
 
+type Note = {
+  gain: GainNode
+  oscillator: OscillatorNode
+  sustained: boolean
+}
+
+type Channel = {
+  gain: GainNode
+  panner: StereoPannerNode
+  notes: Map<number, Note>
+  sustain: boolean
+}
+
 type PlaybackState = {
   tickDuration: number
   scheduledTime: number
-  channels: Map<
-    number,
-    {
-      gain: GainNode
-      notes: Map<number, { gain: GainNode; oscillator: OscillatorNode }>
-    }
-  >
+  channels: Map<number, Channel>
   isPlaying: boolean
   animationFrameId?: number
   eventIterator: Iterator<MTrkEvent, void, void>
@@ -54,6 +61,31 @@ type ProcessorPredicate<T extends MidiTrackEvent> = {
   processor: EventProcessor<T>
 }
 
+function getOrCreateChannel(
+  state: PlaybackState,
+  ctx: PlaybackContext,
+  channelIndex: number
+): Channel {
+  let channel = state.channels.get(channelIndex)
+  if (channel) return channel
+
+  const gain = ctx.audioContext.createGain()
+  const panner = ctx.audioContext.createStereoPanner()
+  panner.connect(gain)
+  gain.connect(ctx.gainNode)
+  gain.connect(ctx.analyserNode)
+
+  channel = {
+    gain,
+    panner,
+    notes: new Map(),
+    sustain: false
+  }
+  state.channels.set(channelIndex, channel)
+
+  return channel
+}
+
 function processTempoChange(
   event: MetaEvent,
   ctx: PlaybackContext,
@@ -68,27 +100,27 @@ function processNoteOn(
   ctx: PlaybackContext,
   state: PlaybackState
 ): void {
-  let channel = state.channels.get(event.channel)
-  if (!channel) {
-    channel = { gain: ctx.audioContext.createGain(), notes: new Map() }
-    state.channels.set(event.channel, channel)
+  const channel = getOrCreateChannel(state, ctx, event.channel)
+  const velocity = (event.data2 ?? 0) / 127
+  const existingNote = channel.notes.get(event.data1)
+  if (existingNote?.sustained) {
+    existingNote.gain.gain.setValueAtTime(velocity, state.scheduledTime)
+    return
   }
 
-  const existingOscillator = channel.notes.get(event.data1)
-  if (existingOscillator) {
+  if (existingNote) {
     try {
-      existingOscillator.oscillator.stop(state.scheduledTime)
-    } catch {
-      // Oscillator might already be stopped, ignore the error
-    }
+      existingNote.oscillator.stop(state.scheduledTime)
+    } catch {}
+    existingNote.oscillator.disconnect()
+    existingNote.gain.disconnect()
+    channel.notes.delete(event.data1)
   }
 
   const oscillator = ctx.audioContext.createOscillator()
   const gain = ctx.audioContext.createGain()
 
-  const velocity = (event.data2 ?? 0) / 127
   gain.gain.setValueAtTime(velocity, state.scheduledTime)
-
   oscillator.type = ctx.waveform
   oscillator.frequency.setValueAtTime(
     midiNoteToFrequency(event.data1),
@@ -96,36 +128,110 @@ function processNoteOn(
   )
 
   oscillator.connect(gain)
-  gain.connect(ctx.gainNode)
-  gain.connect(ctx.analyserNode)
+  gain.connect(channel.panner)
 
   oscillator.start(state.scheduledTime)
-  channel.notes.set(event.data1, { oscillator, gain })
+
+  channel.notes.set(event.data1, {
+    oscillator,
+    gain,
+    sustained: false
+  })
 }
 
 function processNoteOff(
+  event: MidiChannelMessage,
+  ctx: PlaybackContext,
+  state: PlaybackState
+): void {
+  const channel = getOrCreateChannel(state, ctx, event.channel)
+  const note = channel.notes.get(event.data1)
+  if (!note) return
+  if (channel.sustain) {
+    note.sustained = true
+  } else {
+    note.oscillator.stop(state.scheduledTime)
+    channel.notes.delete(event.data1)
+  }
+}
+
+function processSustainPedal(
+  event: MidiChannelMessage,
+  ctx: PlaybackContext,
+  state: PlaybackState
+): void {
+  if (event.data2 === undefined) return
+  const isDown = event.data2 >= 64
+  const channel = getOrCreateChannel(state, ctx, event.channel)
+
+  channel.sustain = isDown
+  if (isDown) {
+    return
+  }
+
+  for (const [key, note] of channel.notes.entries()) {
+    if (note.sustained) {
+      note.oscillator.stop(state.scheduledTime)
+      channel.notes.delete(key)
+    }
+  }
+}
+
+function processPan(
+  event: MidiChannelMessage,
+  ctx: PlaybackContext,
+  state: PlaybackState
+): void {
+  const channel = getOrCreateChannel(state, ctx, event.channel)
+
+  if (!channel || event.data2 === undefined) return
+
+  const pan = (event.data2 - 64) / 64 // Convert 0–127 to -1.0–1.0
+  channel.panner.pan.setValueAtTime(pan, state.scheduledTime)
+}
+
+function processResetControllers(
   event: MidiChannelMessage,
   _ctx: PlaybackContext,
   state: PlaybackState
 ): void {
   const channel = state.channels.get(event.channel)
   if (!channel) return
-  const oscillator = channel.notes.get(event.data1)?.oscillator
-  if (!oscillator) return
-  oscillator.stop(state.scheduledTime)
-  channel.notes.delete(event.data1)
+
+  channel.sustain = false
+  channel.panner.pan.setValueAtTime(0, state.scheduledTime)
+  channel.gain.gain.setValueAtTime(1, state.scheduledTime)
 }
 
 function processChannelVolume(
   event: MidiChannelMessage,
-  _ctx: PlaybackContext,
+  ctx: PlaybackContext,
   state: PlaybackState
 ): void {
-  const channel = state.channels.get(event.channel)
-  if (!channel || event.data2 === undefined) return
+  if (event.data2 === undefined) return
+  const channel = getOrCreateChannel(state, ctx, event.channel)
 
   const volume = event.data2 / 127
   channel.gain.gain.setValueAtTime(volume, state.scheduledTime)
+}
+
+const controllerChangeProcessor: EventProcessor<MidiChannelMessage> = (
+  event,
+  ctx,
+  state
+) => {
+  switch (event.data1) {
+    case 7:
+      return processChannelVolume(event, ctx, state)
+    case 10:
+      return processPan(event, ctx, state)
+    case 64:
+      return processSustainPedal(event, ctx, state)
+    case 121:
+      return processResetControllers(event, ctx, state)
+    default:
+      noop
+  }
 }
 
 function processTextEvent(
@@ -147,14 +253,14 @@ const eventProcessors = [
     processor: processTempoChange
   },
   {
-    predicate: isNoteOffEvent,
+    predicate: isEffectiveNoteOff,
     processor: processNoteOff
   },
   {
     predicate: isNoteOnEvent,
     processor: processNoteOn
   },
-  { predicate: isChannelVolumeEvent, processor: processChannelVolume },
+  { predicate: isControllerChangeEvent, processor: controllerChangeProcessor },
   {
     predicate: isEffectiveTextEvent,
     processor: processTextEvent

@@ -22,7 +22,7 @@ export function initVolumeControl(gainNode: GainNode): void {
     const volume = parseInt(target.value) / 100
 
     volumeGainNode.gain.setValueAtTime(
-      volume,
+      volume * 3,
       volumeGainNode.context.currentTime
     )
     updateVolumeDisplay(target.value, volumeDisplay)

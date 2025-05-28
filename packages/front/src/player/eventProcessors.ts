@@ -16,13 +16,16 @@ import {
 import { metaProcessors } from './processors/metaProcessors'
 
 const processMidi: EventProcessor<MidiChannelMessage> = (event, ctx, state) => {
-  if (isPercussionEvent(event)) return
+  if (isPercussionEvent(event)) return // Percussion sounds terrible, handle later if some clever way appears
+
   if (isControllerChangeEvent(event)) {
     return controllerProcessors[event.data1]?.(event, ctx, state)
   }
+
   if (isEffectiveNoteOn(event)) {
     return voiceMessageProcessors.noteOn(event, ctx, state)
   }
+
   if (isEffectiveNoteOff(event)) {
     return voiceMessageProcessors.noteOff(event, ctx, state)
   }

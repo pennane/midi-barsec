@@ -238,11 +238,7 @@ export type MetaEvent = {
   data: DataView
 }
 
-/** Union type for all MIDI Track Events */
-export type MidiTrackEvent =
-  | MidiChannelMessage
-  | SystemExclusiveMessage
-  | MetaEvent
+export type MidiTrackEvent = MidiChannelMessage | MetaEvent
 
 /** MTrk Event (MIDI File Specification) - combines delta-time with event */
 export type MTrkEvent = {

@@ -5,8 +5,7 @@ import {
   isMetaEvent,
   isMidiEvent,
   isPercussionEvent,
-  isPitchBendEvent,
-  isSysexEvent
+  isPitchBendEvent
 } from '../lib'
 import { MidiChannelMessage, MidiTrackEvent } from '../models'
 import { EventProcessor } from './models'
@@ -46,10 +45,7 @@ export const processEvent: EventProcessor<MidiTrackEvent> = (
   ctx,
   state
 ) => {
-  if (isSysexEvent(event)) {
-    return
-  }
-  if (isMidiEvent(event)) {
+    if (isMidiEvent(event)) {
     return processMidi(event, ctx, state)
   }
   if (isMetaEvent(event)) {

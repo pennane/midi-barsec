@@ -5,8 +5,7 @@ import {
   MidiChannelControllerChangeMessage,
   MidiChannelMessage,
   MidiChannelVoiceMessageType,
-  MidiTrackEvent,
-  SystemExclusiveMessage
+  MidiTrackEvent
 } from '../models'
 
 export function isMidiEvent(
@@ -18,13 +17,6 @@ export function isMidiEvent(
 export function isMetaEvent(event: MidiTrackEvent): event is MetaEvent {
   return event.type === EventType.Meta
 }
-
-export function isSysexEvent(
-  event: MidiTrackEvent
-): event is SystemExclusiveMessage {
-  return event.type === EventType.Sysex
-}
-
 export function isPitchBendEvent(
   event: MidiTrackEvent
 ): event is MidiChannelMessage & {
@@ -33,6 +25,17 @@ export function isPitchBendEvent(
   return (
     isMidiEvent(event) &&
     event.messageType === MidiChannelVoiceMessageType.PitchBendChange
+  )
+}
+
+export function isChannelPressureEvent(
+  event: MidiTrackEvent
+): event is MidiChannelMessage & {
+  messageType: MidiChannelVoiceMessageType.ChannelPressure
+} {
+  return (
+    isMidiEvent(event) &&
+    event.messageType === MidiChannelVoiceMessageType.ChannelPressure
   )
 }
 

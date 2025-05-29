@@ -8,7 +8,7 @@ import {
   SystemExclusiveMessage
 } from '../models'
 
-type Result<T extends MidiTrackEvent> = {
+type Result<T> = {
   event: T
   byteLength: number
 }
@@ -19,13 +19,13 @@ type EventReader = (
   view: DataView,
   ptr: number,
   statusByte: number
-) => Result<MidiTrackEvent>
+) => Result<MidiTrackEvent | SystemExclusiveMessage>
 
 type ReaderPredicate =
   | { type: 'exact'; status: number; reader: EventReader }
   | { type: 'range'; range: StatusRange; reader: EventReader }
 
-const createResult = <T extends MidiTrackEvent>(
+const createResult = <T extends MidiTrackEvent | SystemExclusiveMessage>(
   event: T,
   byteLength: number
 ): Result<T> => ({ event, byteLength })
@@ -106,8 +106,7 @@ function readMidiEvent(
 
 const eventReaders: Array<ReaderPredicate> = [
   { type: 'exact', status: 0xff, reader: readMetaEvent },
-  { type: 'exact', status: 0xf0, reader: readSysexEvent },
-  { type: 'exact', status: 0xf7, reader: readSysexEvent },
+  { type: 'range', range: { from: 0xf0, to: 0xfe }, reader: readSysexEvent },
   {
     type: 'range',
     range: { from: 0x80, to: 0xef },

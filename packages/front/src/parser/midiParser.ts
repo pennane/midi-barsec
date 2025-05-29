@@ -1,5 +1,6 @@
 import { calculateMidiDuration, createSeekableReader } from '../lib/midiUtils'
 import {
+  EventType,
   MidiChunk,
   MidiChunkType,
   MidiFileHeader,
@@ -106,8 +107,11 @@ function* readEvents(
       offset,
       lastStatusByte
     )
-    currentTime += deltaTime
     offset += byteLength
+
+    if (event.type === EventType.Sysex) continue
+
+    currentTime += deltaTime
     lastStatusByte = statusByte
     yield { currentTime, event }
   }

@@ -1,5 +1,5 @@
-import { MidiParser } from '../parser/midiParser'
 import { setSelectedMidi } from '../appState'
+import { MidiParser } from '../parser/midiParser'
 import {
   resetProgressBar,
   setTotalDuration,

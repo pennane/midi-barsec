@@ -63,16 +63,33 @@ function* readChunks(buffer: ArrayBuffer): Generator<MidiChunk> {
   const view = new DataView(buffer)
   let pointer = 0
 
-  while (pointer < view.byteLength) {
-    const type = String.fromCharCode(...new Uint8Array(buffer, pointer, 4))
+  while (pointer + 8 <= view.byteLength) {
+    const typeBytes = new Uint8Array(buffer, pointer, 4)
+    const type = String.fromCharCode(...typeBytes)
     pointer += 4
+
     const length = view.getUint32(pointer, false)
     pointer += 4
+
+    if (pointer + length > view.byteLength) {
+      console.warn(
+        `Chunk '${type}' claims length ${length}, but only ${
+          view.byteLength - pointer
+        } bytes remain`
+      )
+      break
+    }
+
     yield {
       type: type as MidiChunkType,
-      view: new DataView(view.buffer, pointer, length)
+      view: new DataView(buffer, pointer, length)
     }
+
     pointer += length
+  }
+
+  if (pointer < view.byteLength) {
+    console.warn(`Unparsed trailing bytes: ${view.byteLength - pointer}`)
   }
 }
 

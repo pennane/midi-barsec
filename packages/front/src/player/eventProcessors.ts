@@ -1,4 +1,5 @@
 import {
+  isChannelPressureEvent,
   isControllerChangeEvent,
   isEffectiveNoteOff,
   isEffectiveNoteOn,
@@ -21,22 +22,32 @@ const processMidi: EventProcessor<MidiChannelMessage> = (event, ctx, state) => {
     return controllerProcessors[event.data1]?.(event, ctx, state)
   }
 
-  const percussion = isPercussionEvent(event)
+  if (isPercussionEvent(event)) {
+    if (isEffectiveNoteOn(event)) {
+      return percussionProcessors.noteOn(event, ctx, state)
+    }
+
+    if (isEffectiveNoteOff(event)) {
+      return percussionProcessors.noteOff(event, ctx, state)
+    }
+
+    return
+  }
+
+  if (isEffectiveNoteOn(event)) {
+    return voiceMessageProcessors.noteOn(event, ctx, state)
+  }
+
+  if (isEffectiveNoteOff(event)) {
+    return voiceMessageProcessors.noteOff(event, ctx, state)
+  }
 
   if (isPitchBendEvent(event)) {
     return voiceMessageProcessors.pitchBend(event, ctx, state)
   }
 
-  if (isEffectiveNoteOn(event)) {
-    return percussion
-      ? percussionProcessors.noteOn(event, ctx, state)
-      : voiceMessageProcessors.noteOn(event, ctx, state)
-  }
-
-  if (isEffectiveNoteOff(event)) {
-    return percussion
-      ? percussionProcessors.noteOff(event, ctx, state)
-      : voiceMessageProcessors.noteOff(event, ctx, state)
+  if (isChannelPressureEvent(event)) {
+    return voiceMessageProcessors.channelPressure(event, ctx, state)
   }
 }
 
@@ -45,7 +56,7 @@ export const processEvent: EventProcessor<MidiTrackEvent> = (
   ctx,
   state
 ) => {
-    if (isMidiEvent(event)) {
+  if (isMidiEvent(event)) {
     return processMidi(event, ctx, state)
   }
   if (isMetaEvent(event)) {

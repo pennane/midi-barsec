@@ -76,6 +76,18 @@ export const voiceMessageProcessors = {
         state.scheduledTime
       )
     }
+  },
+  channelPressure: (event, ctx, state) => {
+    const channel = getOrCreateChannel(state, ctx, event.channel)
+    const pressure = (event.data1 ?? 0) / 127
+    channel.pressure = pressure
+
+    for (const note of channel.notes.values()) {
+      note.gain.gain.linearRampToValueAtTime(
+        note.gain.gain.value + pressure * 0.1,
+        state.scheduledTime + 0.01
+      )
+    }
   }
 } as const satisfies Record<string, EventProcessor<MidiChannelMessage>>
 
@@ -115,6 +127,23 @@ export const controllerProcessors = {
     channel.sustain = false
     channel.panner.pan.setValueAtTime(0, state.scheduledTime)
     channel.gain.gain.setValueAtTime(1, state.scheduledTime)
+  },
+  [MidiControllerChange.AllNotesOff]: (event, ctx, state) => {
+    const channel = getOrCreateChannel(state, ctx, event.channel)
+    for (const [key, note] of channel.notes.entries()) {
+      note.oscillator.stop(state.scheduledTime)
+      channel.notes.delete(key)
+    }
+  },
+  [MidiControllerChange.ExpressionControllerMSB]: (event, ctx, state) => {
+    const value = event.data2 ?? 0
+    const channel = getOrCreateChannel(state, ctx, event.channel)
+    channel.expression = value / 127
+
+    channel.gain.gain.setValueAtTime(
+      channel.expression * (channel.volume ?? 1),
+      state.scheduledTime
+    )
   }
 } as {
   [key in MidiControllerChange]?: EventProcessor<MidiChannelControllerChangeMessage>

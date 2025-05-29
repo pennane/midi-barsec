@@ -21,7 +21,12 @@ export function getOrCreateChannel(
     panner,
     notes: new Map(),
     sustain: false,
-    pitchBend: 0
+    pitchBend: 0,
+    program: 0,
+    modulation: 0,
+    expression: 1,
+    pressure: 0,
+    volume: 1
   }
   state.channels.set(channelIndex, channel)
 

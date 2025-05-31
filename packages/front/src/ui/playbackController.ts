@@ -1,4 +1,4 @@
-import { MidiPlayer } from '../player/midiPlayer'
+import { MidiPlayer } from '../player/models'
 
 async function toggle(player: MidiPlayer): Promise<void> {
   if (player.isPlaying()) {

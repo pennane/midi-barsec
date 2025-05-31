@@ -1,5 +1,5 @@
 import { MidiParser } from '../parser/midiParser'
-import { MidiPlayer } from '../player/midiPlayer'
+import { MidiPlayer } from '../player/models'
 
 let midiPlayer: MidiPlayer
 export function initFileSelector(player: MidiPlayer): void {

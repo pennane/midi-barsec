@@ -1,4 +1,4 @@
-import { MidiPlayer, MidiPlayerEventMap } from '../player/midiPlayer'
+import { MidiPlayer, MidiPlayerEventMap } from '../player/models'
 
 let progressFill: HTMLElement
 let currentTimeDisplay: HTMLElement

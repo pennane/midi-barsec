@@ -29,18 +29,15 @@ export type PlaybackContext = {
   audioContext: AudioContext
   gainNode: GainNode
   analyserNode: AnalyserNode
-  division: number
   waveform: OscillatorType
-  percussion: boolean
-  tickDuration: number
-  scheduledTime: number
   channels: Map<number, Channel>
-  isPlaying: boolean
-  animationFrameId?: number
   eventIterator: Iterator<MTrkEvent, void, void>
-  currentTimeSeconds: number
-  totalDurationSeconds: number
+  division: number
+  tickDuration: number
+  includePercussion: boolean
+  scheduledTime: number
   startTime: number
+  animationFrameId?: number
 }
 
 export type EventProcessor<T> = (ctx: PlaybackContext, event: T) => void

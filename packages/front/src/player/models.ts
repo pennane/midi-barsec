@@ -3,14 +3,30 @@ import { MTrkEvent } from '../spec'
 export type Note = {
   gain: GainNode
   oscillator: OscillatorNode
+  noteNumber: number
   baseGain: number
   baseFrequency: number
   sustained: boolean
 }
 
+export type Instrument = {
+  playNote(
+    ctx: PlaybackContext,
+    channel: Channel,
+    opts: { noteNumber: number; velocity: number }
+  ): Note
+  stopNote(
+    ctx: PlaybackContext,
+    channel: Channel,
+    note: Note,
+    opts: { reapplied: boolean }
+  ): void
+}
+
 export type Channel = {
   gain: GainNode
   panner: StereoPannerNode
+  instrument: Instrument
   notes: Map<number, Note>
   sustain: boolean
   /** 0.0–1.0 */

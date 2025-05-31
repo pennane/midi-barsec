@@ -1,3 +1,4 @@
+import { createDefaultInstrument } from '../instruments'
 import { Channel, PlaybackContext } from '../models'
 
 export function getOrCreateChannel(
@@ -18,6 +19,7 @@ export function getOrCreateChannel(
   channel = {
     gain,
     panner,
+    instrument: createDefaultInstrument(),
     notes: new Map(),
     sustain: false,
     pitchBend: 0,

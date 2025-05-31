@@ -1,4 +1,4 @@
-import { midiNoteToFrequency, pitchBendToMultiplier } from '../../lib'
+import { pitchBendToMultiplier } from '../../lib'
 import {
   MidiChannelControllerChangeMessage,
   MidiChannelMessage,
@@ -12,57 +12,36 @@ export const voiceMessageProcessors = {
   noteOn: (ctx, event) => {
     const channel = getOrCreateChannel(ctx, event.channel)
     const velocity = (event.data2 ?? 0) / 127
-    const baseGain = velocity
-    const baseFrequency = midiNoteToFrequency(event.data1)
-
-    const existingNote = channel.notes.get(event.data1)
-
-    if (existingNote?.sustained) {
-      existingNote.gain.gain.setValueAtTime(velocity, ctx.scheduledTime)
-      return
-    }
+    const noteNumber = event.data1
+    const existingNote = channel.notes.get(noteNumber)
 
     if (existingNote) {
       try {
-        existingNote.oscillator.stop(ctx.scheduledTime)
+        channel.instrument.stopNote(ctx, channel, existingNote, {
+          reapplied: existingNote.sustained
+        })
       } catch {}
-      existingNote.oscillator.disconnect()
-      existingNote.gain.disconnect()
-      channel.notes.delete(event.data1)
+      channel.notes.delete(noteNumber)
     }
 
-    const gain = ctx.audioContext.createGain()
-    gain.gain.setValueAtTime(baseGain, ctx.scheduledTime)
-
-    const oscillator = ctx.audioContext.createOscillator()
-    oscillator.type = ctx.waveform
-    oscillator.frequency.setValueAtTime(
-      baseFrequency * pitchBendToMultiplier(channel.pitchBend),
-      ctx.scheduledTime
-    )
-
-    oscillator.connect(gain)
-    gain.connect(channel.panner)
-    oscillator.start(ctx.scheduledTime)
-
-    channel.notes.set(event.data1, {
-      oscillator,
-      gain,
-      baseFrequency,
-      baseGain,
-      sustained: channel.sustain
+    const newNote = channel.instrument.playNote(ctx, channel, {
+      noteNumber,
+      velocity
     })
+
+    channel.notes.set(noteNumber, newNote)
   },
   noteOff: (ctx, event) => {
     const channel = getOrCreateChannel(ctx, event.channel)
-    const note = channel.notes.get(event.data1)
+    const noteNumber = event.data1
+    const note = channel.notes.get(noteNumber)
     if (!note) return
 
     if (channel.sustain) {
       note.sustained = true
     } else {
-      note.oscillator.stop(ctx.scheduledTime)
-      channel.notes.delete(event.data1)
+      channel.instrument.stopNote(ctx, channel, note, { reapplied: false })
+      channel.notes.delete(noteNumber)
     }
   },
   pitchBend: (ctx, event) => {

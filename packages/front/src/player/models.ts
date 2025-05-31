@@ -25,7 +25,13 @@ export type Channel = {
   pressure: number
 }
 
-export type PlaybackState = {
+export type PlaybackContext = {
+  audioContext: AudioContext
+  gainNode: GainNode
+  analyserNode: AnalyserNode
+  division: number
+  waveform: OscillatorType
+  percussion: boolean
   tickDuration: number
   scheduledTime: number
   channels: Map<number, Channel>
@@ -37,20 +43,7 @@ export type PlaybackState = {
   startTime: number
 }
 
-export type PlaybackContext = {
-  audioContext: AudioContext
-  gainNode: GainNode
-  analyserNode: AnalyserNode
-  division: number
-  waveform: OscillatorType
-  percussion: boolean
-}
-
-export type EventProcessor<T> = (
-  event: T,
-  ctx: PlaybackContext,
-  state: PlaybackState
-) => void
+export type EventProcessor<T> = (ctx: PlaybackContext, event: T) => void
 
 export type ProcessorPredicate<IN, OUT extends IN> = {
   predicate: (event: IN) => event is OUT

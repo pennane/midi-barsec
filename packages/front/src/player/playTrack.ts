@@ -4,10 +4,9 @@ import {
   SCHEDULE_AHEAD_TIME,
   calculateTickDuration
 } from '../lib'
-import { MidiReader } from '../models'
 import { MidiParser } from '../parser/midiParser'
 import { processEvent } from './eventProcessors'
-import { PlaybackContext, PlaybackState } from './models'
+import { PlaybackContext } from './models'
 
 export type PlaybackControl = {
   pause: () => void
@@ -21,46 +20,26 @@ export type PlaybackControl = {
   seekTo: (position: number) => void // 0-1 ratio
 }
 
-function createPlaybackState(
-  reader: MidiReader,
-  totalDuration: number
-): PlaybackState {
-  const eventIterator = reader[Symbol.iterator]()
-  return {
-    tickDuration: calculateTickDuration(DEFAULT_TEMPO, 1),
-    scheduledTime: 0,
-    channels: new Map(),
-    isPlaying: true,
-    eventIterator,
-    currentTimeSeconds: 0,
-    totalDurationSeconds: totalDuration,
-    startTime: 0
-  }
-}
+function pausePlayback(ctx: PlaybackContext): void {
+  ctx.isPlaying = false
 
-function pausePlayback(state: PlaybackState, ctx: PlaybackContext): void {
-  state.isPlaying = false
-
-  for (const channel of state.channels.values()) {
+  for (const channel of ctx.channels.values()) {
     for (const note of channel.notes.values()) {
       try {
         note.oscillator.stop(ctx.audioContext.currentTime)
       } catch {}
     }
   }
-  state.channels.clear()
+  ctx.channels.clear()
 
-  if (state.animationFrameId) {
-    window.cancelAnimationFrame(state.animationFrameId)
-    state.animationFrameId = undefined
+  if (ctx.animationFrameId) {
+    window.cancelAnimationFrame(ctx.animationFrameId)
+    ctx.animationFrameId = undefined
   }
 }
 
-async function resumePlayback(
-  state: PlaybackState,
-  ctx: PlaybackContext
-): Promise<void> {
-  if (state.isPlaying) return
+async function resumePlayback(ctx: PlaybackContext): Promise<void> {
+  if (ctx.isPlaying) return
 
   // Ensure AudioContext is running before resuming playback
   if (ctx.audioContext.state === 'suspended') {
@@ -72,59 +51,55 @@ async function resumePlayback(
     }
   }
 
-  state.isPlaying = true
-  state.scheduledTime = ctx.audioContext.currentTime
+  ctx.isPlaying = true
+  ctx.scheduledTime = ctx.audioContext.currentTime
 
-  startAudioPlayer(ctx, state)
+  startAudioPlayer(ctx)
 }
 
-function processNextEvent(ctx: PlaybackContext, state: PlaybackState): boolean {
-  const next = state.eventIterator.next()
+function processNextEvent(ctx: PlaybackContext): boolean {
+  const next = ctx.eventIterator.next()
 
   if (next.done) {
     return false
   }
 
   const { event, deltaTime } = next.value
-  const eventTime = deltaTime * state.tickDuration
-  state.scheduledTime += eventTime
-  state.currentTimeSeconds += eventTime
+  const eventTime = deltaTime * ctx.tickDuration
+  ctx.scheduledTime += eventTime
+  ctx.currentTimeSeconds += eventTime
 
-  processEvent(event, ctx, state)
+  processEvent(ctx, event)
   return true
 }
 
-function scheduleEvents(ctx: PlaybackContext, state: PlaybackState): void {
+function scheduleEvents(ctx: PlaybackContext): void {
   const maxTime = ctx.audioContext.currentTime + SCHEDULE_AHEAD_TIME
 
-  while (state.isPlaying && state.scheduledTime < maxTime) {
-    const hasMoreEvents = processNextEvent(ctx, state)
+  while (ctx.isPlaying && ctx.scheduledTime < maxTime) {
+    const hasMoreEvents = processNextEvent(ctx)
     if (!hasMoreEvents) {
-      state.isPlaying = false
+      ctx.isPlaying = false
       break
     }
   }
 }
 
-function startAudioPlayer(ctx: PlaybackContext, state: PlaybackState): void {
-  if (!state.isPlaying) {
+function startAudioPlayer(ctx: PlaybackContext): void {
+  if (!ctx.isPlaying) {
     return
   }
 
-  scheduleEvents(ctx, state)
+  scheduleEvents(ctx)
 
-  state.animationFrameId = requestAnimationFrame(() => {
-    startAudioPlayer(ctx, state)
+  ctx.animationFrameId = requestAnimationFrame(() => {
+    startAudioPlayer(ctx)
   })
 }
 
-function setWaveform(
-  state: PlaybackState,
-  ctx: PlaybackContext,
-  newWaveform: OscillatorType
-): void {
+function setWaveform(ctx: PlaybackContext, newWaveform: OscillatorType): void {
   ctx.waveform = newWaveform
-  for (const channel of state.channels.values())
+  for (const channel of ctx.channels.values())
     for (const note of channel.notes.values()) {
       try {
         note.oscillator.type = newWaveform
@@ -149,59 +124,63 @@ export function playMidi(
     )
   }
 
+  const totalDuration = midi.duration()
+  const eventIterator = midi.reader()[Symbol.iterator]()
+
   const ctx: PlaybackContext = {
     audioContext,
     gainNode,
     analyserNode,
     division,
     waveform,
-    percussion: getState().percussion
+    percussion: getState().percussion,
+    tickDuration: calculateTickDuration(DEFAULT_TEMPO, division),
+    scheduledTime: audioContext.currentTime,
+    channels: new Map(),
+    isPlaying: true,
+    eventIterator,
+    currentTimeSeconds: 0,
+    totalDurationSeconds: totalDuration,
+    startTime: 0
   }
 
-  const totalDuration = midi.duration()
-  const state = createPlaybackState(midi.reader(), totalDuration)
-  state.tickDuration = calculateTickDuration(DEFAULT_TEMPO, ctx.division)
-  state.scheduledTime = ctx.audioContext.currentTime
-  state.startTime = ctx.audioContext.currentTime
-
-  startAudioPlayer(ctx, state)
+  startAudioPlayer(ctx)
 
   function seekTo(position: number): void {
     const targetTime = position * totalDuration
     const { reader, actualPosition } = midi.createSeekReader(targetTime)
 
-    for (const channel of state.channels.values()) {
+    for (const channel of ctx.channels.values()) {
       for (const note of channel.notes.values()) {
         try {
           note.oscillator.stop(ctx.audioContext.currentTime)
         } catch {}
       }
     }
-    state.channels.clear()
+    ctx.channels.clear()
 
-    state.eventIterator = reader[Symbol.iterator]()
-    state.currentTimeSeconds = actualPosition
-    state.scheduledTime = ctx.audioContext.currentTime
-    state.startTime = ctx.audioContext.currentTime - actualPosition
+    ctx.eventIterator = reader[Symbol.iterator]()
+    ctx.currentTimeSeconds = actualPosition
+    ctx.scheduledTime = ctx.audioContext.currentTime
+    ctx.startTime = ctx.audioContext.currentTime - actualPosition
 
-    if (state.isPlaying) {
-      startAudioPlayer(ctx, state)
+    if (ctx.isPlaying) {
+      startAudioPlayer(ctx)
     }
   }
 
   return {
-    pause: () => pausePlayback(state, ctx),
-    resume: () => resumePlayback(state, ctx),
-    isPlaying: () => state.isPlaying,
-    isPaused: () => !state.isPlaying,
-    setWaveform: (newWaveform: OscillatorType) =>
-      setWaveform(state, ctx, newWaveform),
+    pause: () => pausePlayback(ctx),
+    resume: () => resumePlayback(ctx),
+    isPlaying: () => ctx.isPlaying,
+    isPaused: () => !ctx.isPlaying,
+    setWaveform: (newWaveform: OscillatorType) => setWaveform(ctx, newWaveform),
     getCurrentPosition: () => {
-      if (state.totalDurationSeconds === 0) return 0
-      const elapsed = ctx.audioContext.currentTime - state.startTime
-      return Math.min(elapsed / state.totalDurationSeconds, 1)
+      if (ctx.totalDurationSeconds === 0) return 0
+      const elapsed = ctx.audioContext.currentTime - ctx.startTime
+      return Math.min(elapsed / ctx.totalDurationSeconds, 1)
     },
-    getTotalDuration: () => state.totalDurationSeconds,
+    getTotalDuration: () => ctx.totalDurationSeconds,
     seekTo,
     setPercussion: (enabled) => (ctx.percussion = enabled)
   }

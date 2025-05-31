@@ -1,12 +1,11 @@
-import { Channel, PlaybackContext, PlaybackState } from '../models'
+import { Channel, PlaybackContext } from '../models'
 
 export function getOrCreateChannel(
-  state: PlaybackState,
   ctx: PlaybackContext,
   channelIndex: number,
   percussion?: boolean
 ): Channel {
-  let channel = state.channels.get(channelIndex)
+  let channel = ctx.channels.get(channelIndex)
   if (channel) return channel
 
   const gain = ctx.audioContext.createGain()
@@ -27,7 +26,7 @@ export function getOrCreateChannel(
     volume: 1,
     pressure: 0
   }
-  state.channels.set(channelIndex, channel)
+  ctx.channels.set(channelIndex, channel)
 
   return channel
 }

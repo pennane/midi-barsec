@@ -15,8 +15,8 @@ import {
 
 // thanks chatgpt
 export const percussionProcessors = {
-  noteOn: (event, ctx, state) => {
-    const channel = getOrCreateChannel(state, ctx, event.channel, true)
+  noteOn: (ctx, event) => {
+    const channel = getOrCreateChannel(ctx, event.channel, true)
     const velocity = event.data2 ?? 127
 
     const noteNumber = event.data1 as Percussion
@@ -26,7 +26,7 @@ export const percussionProcessors = {
 
     const existingNote = channel.notes.get(noteNumber)
     if (existingNote) {
-      stopExistingNote(existingNote, state.scheduledTime)
+      stopExistingNote(existingNote, ctx.scheduledTime)
       channel.notes.delete(noteNumber)
     }
 
@@ -34,11 +34,11 @@ export const percussionProcessors = {
       config,
       ctx.audioContext,
       volume,
-      state.scheduledTime
+      ctx.scheduledTime
     )
 
     gain.connect(channel.panner)
-    startPercussionSource(source, config, state.scheduledTime)
+    startPercussionSource(source, config, ctx.scheduledTime)
 
     const note = {
       oscillator: source as OscillatorNode,
@@ -50,8 +50,8 @@ export const percussionProcessors = {
     scheduleNoteCleanup(channel, noteNumber, note, config.duration)
   },
 
-  noteOff: (event: MidiChannelMessage, ctx, state) => {
-    const channel = getOrCreateChannel(state, ctx, event.channel, true)
+  noteOff: (ctx, event) => {
+    const channel = getOrCreateChannel(ctx, event.channel, true)
     const noteNumber = event.data1 as Percussion
     const note = channel.notes.get(noteNumber)
     const config = PERCUSSION_CONFIGS[noteNumber]
@@ -59,7 +59,7 @@ export const percussionProcessors = {
     if (!note || !config) return
 
     if (config.duration > 0.5) {
-      stopLongPercussionNote(note, state.scheduledTime)
+      stopLongPercussionNote(note, ctx.scheduledTime)
       channel.notes.delete(noteNumber)
     }
   }

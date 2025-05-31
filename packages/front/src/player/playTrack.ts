@@ -1,4 +1,3 @@
-import { getState } from '../appState'
 import {
   DEFAULT_TEMPO,
   SCHEDULE_AHEAD_TIME,
@@ -11,8 +10,6 @@ import { PlaybackContext } from './models'
 export type PlaybackControl = {
   pause: () => void
   resume: () => Promise<void>
-  setWaveform: (waveform: OscillatorType) => void
-  setPercussion: (enabled: boolean) => void
   getCurrentPosition: () => number // 0-1 ratio
   getTotalDuration: () => number // seconds
   isPlaying(): boolean
@@ -90,24 +87,11 @@ function startAudioPlayer(ctx: PlaybackContext): void {
   })
 }
 
-function setWaveform(ctx: PlaybackContext, newWaveform: OscillatorType): void {
-  ctx.waveform = newWaveform
-  for (const channel of ctx.channels.values())
-    for (const note of channel.notes.values()) {
-      try {
-        note.oscillator.type = newWaveform
-      } catch (e) {
-        console.warn('Could not update oscillator waveform:', e)
-      }
-    }
-}
-
 export function playMidi(
   audioContext: AudioContext,
   gainNode: GainNode,
   analyserNode: AnalyserNode,
-  midi: MidiParser,
-  waveform: OscillatorType
+  midi: MidiParser
 ): PlaybackControl {
   const division = midi.header.division
 
@@ -125,8 +109,6 @@ export function playMidi(
     gainNode,
     analyserNode,
     division,
-    waveform,
-    includePercussion: getState().percussion,
     tickDuration: calculateTickDuration(DEFAULT_TEMPO, division),
     scheduledTime: audioContext.currentTime,
     channels: new Map(),
@@ -169,14 +151,12 @@ export function playMidi(
       isPlaying = true
       await resumePlayback(ctx)
     },
-    setWaveform: (newWaveform: OscillatorType) => setWaveform(ctx, newWaveform),
     getCurrentPosition: () => {
       if (totalDuration === 0) return 0
       const elapsed = ctx.audioContext.currentTime - ctx.startTime
       return Math.min(elapsed / totalDuration, 1)
     },
     getTotalDuration: () => totalDuration,
-    seekTo,
-    setPercussion: (enabled) => (ctx.includePercussion = enabled)
+    seekTo
   }
 }

@@ -45,20 +45,13 @@ export type PlaybackContext = {
   audioContext: AudioContext
   gainNode: GainNode
   analyserNode: AnalyserNode
-  waveform: OscillatorType
   channels: Map<number, Channel>
   eventIterator: Iterator<MTrkEvent, void, void>
   division: number
   tickDuration: number
-  includePercussion: boolean
   scheduledTime: number
   startTime: number
   animationFrameId?: number
 }
 
 export type EventProcessor<T> = (ctx: PlaybackContext, event: T) => void
-
-export type ProcessorPredicate<IN, OUT extends IN> = {
-  predicate: (event: IN) => event is OUT
-  processor: EventProcessor<OUT>
-}

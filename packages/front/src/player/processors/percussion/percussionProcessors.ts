@@ -1,5 +1,5 @@
 import { GeneralMidiPercussion, MidiChannelMessage } from '../../../models'
-import { EventProcessor } from '../../models'
+import { EventProcessor, Note } from '../../models'
 import { getOrCreateChannel } from '../lib'
 import { PERCUSSION_CONFIGS } from './config'
 
@@ -43,7 +43,7 @@ export const percussionProcessors = {
       oscillator: source as OscillatorNode,
       gain,
       sustained: false
-    }
+    } as Note
     channel.notes.set(noteNumber, note)
 
     scheduleNoteCleanup(channel, noteNumber, note, config.duration)

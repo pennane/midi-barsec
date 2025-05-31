@@ -61,13 +61,19 @@ function isNoteOnWithZeroVelocity(
 
 export function isEffectiveNoteOff(
   event: MidiTrackEvent
-): event is MidiChannelMessage {
+): event is MidiChannelMessage &
+  (
+    | { messageType: MidiChannelVoiceMessageType.NoteOff }
+    | { messageType: MidiChannelVoiceMessageType.NoteOn; data2: 0 }
+  ) {
   return isNoteOffEvent(event) || isNoteOnWithZeroVelocity(event)
 }
 
 export function isEffectiveNoteOn(
   event: MidiTrackEvent
-): event is MidiChannelMessage {
+): event is MidiChannelMessage & {
+  messageType: MidiChannelVoiceMessageType.NoteOn
+} {
   return isNoteOnEvent(event) && !isNoteOnWithZeroVelocity(event)
 }
 

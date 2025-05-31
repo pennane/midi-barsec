@@ -8,7 +8,13 @@ import {
   isPercussionEvent,
   isPitchBendEvent
 } from '../lib'
-import { MidiChannelMessage, MidiTrackEvent } from '../models'
+import {
+  MetaEventType,
+  MidiChannelMessage,
+  MidiChannelVoiceMessageType,
+  MidiControllerChange,
+  MidiTrackEvent
+} from '../models'
 import { EventProcessor } from './models'
 import { metaProcessors } from './processors/metaProcessors'
 import {
@@ -19,7 +25,15 @@ import { percussionProcessors } from './processors/percussion/percussionProcesso
 
 const processMidi: EventProcessor<MidiChannelMessage> = (event, ctx, state) => {
   if (isControllerChangeEvent(event)) {
-    return controllerProcessors[event.data1]?.(event, ctx, state)
+    const processor = controllerProcessors[event.data1]
+    if (!processor) {
+      return console.log(
+        'unhandled controller change event',
+        MidiControllerChange[event.data1]
+      )
+    }
+
+    return processor(event, ctx, state)
   }
 
   if (isPercussionEvent(event)) {
@@ -49,6 +63,10 @@ const processMidi: EventProcessor<MidiChannelMessage> = (event, ctx, state) => {
   if (isChannelPressureEvent(event)) {
     return voiceMessageProcessors.channelPressure(event, ctx, state)
   }
+  console.log(
+    'unhandled midi event',
+    MidiChannelVoiceMessageType[event.messageType]
+  )
 }
 
 export const processEvent: EventProcessor<MidiTrackEvent> = (
@@ -60,6 +78,12 @@ export const processEvent: EventProcessor<MidiTrackEvent> = (
     return processMidi(event, ctx, state)
   }
   if (isMetaEvent(event)) {
-    return metaProcessors[event.metaType]?.(event, ctx, state)
+    const processor = metaProcessors[event.metaType]
+    if (!processor) {
+      console.log('unhandled meta event', MetaEventType[event.metaType], event)
+      return
+    }
+    return processor(event, ctx, state)
   }
+  console.log('unhandled top level event', event)
 }

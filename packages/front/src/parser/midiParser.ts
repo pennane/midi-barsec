@@ -1,4 +1,5 @@
 import { calculateMidiDuration } from '../lib/midiUtils'
+import { readEvent } from './eventReader'
 import {
   EventType,
   MidiChunk,
@@ -7,7 +8,6 @@ import {
   MidiReader,
   MidiTrackEvent
 } from './spec'
-import { readEvent } from './eventReader'
 
 /**
  * k-way merge

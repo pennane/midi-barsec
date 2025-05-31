@@ -6,13 +6,13 @@ import {
   calculatePosition,
   loadMidi,
   pausePlayback,
-  startPlayback,
-  seekTo
+  seekTo,
+  startPlayback
 } from './lib'
 import {
   MidiPlayer,
-  MidiPlayerEventType,
   MidiPlayerEventMap,
+  MidiPlayerEventType,
   PlayerState
 } from './models'
 

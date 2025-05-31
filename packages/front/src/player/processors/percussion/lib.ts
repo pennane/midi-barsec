@@ -1,3 +1,4 @@
+import { Channel, Note } from '../../models'
 import { PercussionConfig } from './models'
 
 export const calculateVolume = (
@@ -199,7 +200,7 @@ export const createPercussionSound = (
 }
 
 export const stopExistingNote = (
-  existingNote: { oscillator: any; gain: GainNode },
+  existingNote: { oscillator: OscillatorNode; gain: GainNode },
   scheduledTime: number
 ): void => {
   try {
@@ -225,9 +226,9 @@ export const startPercussionSource = (
 }
 
 export const scheduleNoteCleanup = (
-  channel: any,
+  channel: Channel,
   noteNumber: number,
-  note: any,
+  note: Note,
   duration: number
 ): void => {
   setTimeout(() => {
@@ -238,7 +239,7 @@ export const scheduleNoteCleanup = (
 }
 
 export const stopLongPercussionNote = (
-  note: { oscillator: any; gain: GainNode },
+  note: { oscillator: OscillatorNode; gain: GainNode },
   scheduledTime: number
 ): void => {
   note.gain.gain.cancelScheduledValues(scheduledTime)

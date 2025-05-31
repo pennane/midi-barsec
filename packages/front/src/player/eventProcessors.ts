@@ -24,7 +24,7 @@ import {
 } from './processors/midiProcessors'
 import { percussionProcessors } from './processors/percussion/percussionProcessors'
 
-const processMidi: EventProcessor<MidiChannelMessage> = (event, ctx, state) => {
+const processMidi: EventProcessor<MidiChannelMessage> = (ctx, event) => {
   if (isControllerChangeEvent(event)) {
     const processor = controllerProcessors[event.data1]
     if (!processor) {
@@ -34,35 +34,35 @@ const processMidi: EventProcessor<MidiChannelMessage> = (event, ctx, state) => {
       )
     }
 
-    return processor(event, ctx, state)
+    return processor(ctx, event)
   }
 
   if (isPercussionEvent(event)) {
     if (isEffectiveNoteOn(event)) {
-      return percussionProcessors.noteOn(event, ctx, state)
+      return percussionProcessors.noteOn(ctx, event)
     }
 
     if (isEffectiveNoteOff(event)) {
-      return percussionProcessors.noteOff(event, ctx, state)
+      return percussionProcessors.noteOff(ctx, event)
     }
 
     return
   }
 
   if (isEffectiveNoteOn(event)) {
-    return voiceMessageProcessors.noteOn(event, ctx, state)
+    return voiceMessageProcessors.noteOn(ctx, event)
   }
 
   if (isEffectiveNoteOff(event)) {
-    return voiceMessageProcessors.noteOff(event, ctx, state)
+    return voiceMessageProcessors.noteOff(ctx, event)
   }
 
   if (isPitchBendEvent(event)) {
-    return voiceMessageProcessors.pitchBend(event, ctx, state)
+    return voiceMessageProcessors.pitchBend(ctx, event)
   }
 
   if (isChannelPressureEvent(event)) {
-    return voiceMessageProcessors.channelPressure(event, ctx, state)
+    return voiceMessageProcessors.channelPressure(ctx, event)
   }
   console.log(
     'unhandled midi event',
@@ -70,13 +70,9 @@ const processMidi: EventProcessor<MidiChannelMessage> = (event, ctx, state) => {
   )
 }
 
-export const processEvent: EventProcessor<MidiTrackEvent> = (
-  event,
-  ctx,
-  state
-) => {
+export const processEvent: EventProcessor<MidiTrackEvent> = (ctx, event) => {
   if (isMidiEvent(event)) {
-    return processMidi(event, ctx, state)
+    return processMidi(ctx, event)
   }
   if (isMetaEvent(event)) {
     const processor = metaProcessors[event.metaType]
@@ -84,7 +80,7 @@ export const processEvent: EventProcessor<MidiTrackEvent> = (
       console.log('unhandled meta event', MetaEventType[event.metaType], event)
       return
     }
-    return processor(event, ctx, state)
+    return processor(ctx, event)
   }
   console.log('unhandled top level event', event)
 }

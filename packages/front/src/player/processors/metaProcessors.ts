@@ -4,21 +4,21 @@ import { MetaEvent, MetaEventType } from '../../spec'
 import { announce } from '../../ui/textAnnouncer'
 import { EventProcessor } from '../models'
 
-const announceMessage: EventProcessor<MetaEvent> = (event, ctx, state) => {
+const announceMessage: EventProcessor<MetaEvent> = (ctx, event) => {
   const text = new TextDecoder().decode(event.data)
   const currentTime = ctx.audioContext.currentTime
-  const delaySeconds = Math.max(0, state.scheduledTime - currentTime)
+  const delaySeconds = Math.max(0, ctx.scheduledTime - currentTime)
   const delayMs = delaySeconds * 1000
 
   setTimeout(() => {
-    if (state.isPlaying) {
+    if (ctx.isPlaying) {
       announce(text)
     }
   }, delayMs)
 }
 
-const stopNotes: EventProcessor<MetaEvent> = (_event, ctx, state) => {
-  for (const channel of state.channels.values()) {
+const stopNotes: EventProcessor<MetaEvent> = (ctx) => {
+  for (const channel of ctx.channels.values()) {
     for (const note of channel.notes.values()) {
       try {
         note.oscillator.stop(ctx.audioContext.currentTime)
@@ -28,9 +28,9 @@ const stopNotes: EventProcessor<MetaEvent> = (_event, ctx, state) => {
 }
 
 export const metaProcessors = {
-  [MetaEventType.SetTempo]: (event, ctx, state) => {
+  [MetaEventType.SetTempo]: (ctx, event) => {
     const newTempo = readUint24BE(event.data, 0)
-    state.tickDuration = calculateTickDuration(newTempo, ctx.division)
+    ctx.tickDuration = calculateTickDuration(newTempo, ctx.division)
   },
   [MetaEventType.Lyric]: announceMessage,
   [MetaEventType.CopyrightNotice]: announceMessage,

@@ -217,7 +217,6 @@ export const startPercussionSource = (
   scheduledTime: number
 ): void => {
   if (config.type === 'hybrid') {
-    // Hybrid sources are already started in createHybridSource
     return
   }
 

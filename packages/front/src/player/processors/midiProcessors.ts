@@ -4,6 +4,7 @@ import {
   MidiChannelMessage,
   MidiControllerChange
 } from '../../spec'
+import { instrumentForProgramNumber } from '../instruments'
 
 import { EventProcessor } from '../models'
 import { getOrCreateChannel } from './lib'
@@ -70,6 +71,12 @@ export const voiceMessageProcessors = {
       const finalGain = Math.min(modulatedGain, 1)
       note.gain.gain.linearRampToValueAtTime(finalGain, ctx.scheduledTime)
     }
+  },
+  programChange: (ctx, event) => {
+    const channel = getOrCreateChannel(ctx, event.channel)
+    const programNumber = event.data1 ?? 0
+    const newInstrument = instrumentForProgramNumber(programNumber)
+    channel.instrument = newInstrument
   }
 } as const satisfies Record<string, EventProcessor<MidiChannelMessage>>
 

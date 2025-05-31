@@ -1,4 +1,30 @@
+import { MidiParser } from '../parser/midiParser'
 import { MTrkEvent } from '../spec'
+
+export type MidiPlayerEventMap = {
+  progressUpdate: {
+    position: number
+    duration: number
+    currentTime: number
+    isPlaying: boolean
+  }
+}
+export type MidiPlayerEventType = keyof MidiPlayerEventMap
+
+export type MidiPlayer = {
+  pause: () => void
+  play: () => Promise<void>
+  position: () => number
+  duration: () => number
+  isPlaying(): boolean
+  seek: (position: number) => void
+  load: (midi: MidiParser) => Promise<void>
+  addEventListener: <T extends MidiPlayerEventType>(
+    type: T,
+    listener: (event: CustomEvent<MidiPlayerEventMap[T]>) => void
+  ) => void
+  removeEventListener: (type: string, listener: EventListener) => void
+}
 
 export type Note = {
   gain: GainNode
@@ -44,14 +70,24 @@ export type Channel = {
 export type PlaybackContext = {
   audioContext: AudioContext
   gainNode: GainNode
-  analyserNode: AnalyserNode
   channels: Map<number, Channel>
   eventIterator: Iterator<MTrkEvent, void, void>
   division: number
   tickDuration: number
   scheduledTime: number
   startTime: number
-  animationFrameId?: number
+}
+
+export type PlayerState = {
+  currentMidi: MidiParser | null
+  playbackContext: PlaybackContext | null
+  isPlaying: boolean
+  totalDuration: number
+  pausedPosition: number
 }
 
 export type EventProcessor<T> = (ctx: PlaybackContext, event: T) => void
+export type EventProcessorPredicate<IN, OUT extends IN> = [
+  pred: (event: IN) => event is OUT,
+  EventProcessor<OUT>
+]

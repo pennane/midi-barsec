@@ -1,10 +1,9 @@
-import { getState } from '../main'
+import { MidiPlayer, MidiPlayerEventMap } from '../player/midiPlayer'
 
 let progressFill: HTMLElement
 let currentTimeDisplay: HTMLElement
 let totalDurationDisplay: HTMLElement
 let progressBar: HTMLElement
-let updateInterval: number | null = null
 
 function formatTime(seconds: number): string {
   const minutes = Math.floor(seconds / 60)
@@ -12,62 +11,27 @@ function formatTime(seconds: number): string {
   return `${minutes}:${secs.toString().padStart(2, '0')}`
 }
 
-function updateDisplay(): void {
-  const state = getState()
-  if (!state.currentPlayback) return
-
-  const position = state.currentPlayback.getCurrentPosition()
-  const totalDuration = state.currentPlayback.getTotalDuration()
-  const currentTime = position * totalDuration
-
+function updateProgressBar(
+  event: CustomEvent<MidiPlayerEventMap['progressUpdate']>
+): void {
+  const { position, currentTime, duration } = event.detail
   progressFill.style.width = `${position * 100}%`
   currentTimeDisplay.textContent = formatTime(currentTime)
-  totalDurationDisplay.textContent = formatTime(totalDuration)
+  totalDurationDisplay.textContent = formatTime(duration)
 }
 
-export function initProgressBar(): void {
+export function initProgressBar(player: MidiPlayer): void {
   progressFill = document.getElementById('progress-fill')!
   currentTimeDisplay = document.getElementById('current-time')!
   totalDurationDisplay = document.getElementById('total-time')!
   progressBar = document.getElementById('progress-bar')!
 
-  progressBar.addEventListener('click', (event) => {
-    const state = getState()
-    if (!state.currentPlayback) return
+  player.addEventListener('progressUpdate', updateProgressBar)
 
+  progressBar.addEventListener('click', (event) => {
     const rect = progressBar.getBoundingClientRect()
     const clickX = event.clientX - rect.left
-    const position = clickX / rect.width
-
-    state.currentPlayback.seekTo(Math.max(0, Math.min(1, position)))
-    updateDisplay()
+    const position = Math.max(0, Math.min(1, clickX / rect.width))
+    player.seek(position)
   })
-}
-
-export function updateProgressBar(): void {
-  updateDisplay()
-}
-
-export function startProgressUpdates(): void {
-  if (updateInterval) {
-    clearInterval(updateInterval)
-  }
-  updateInterval = setInterval(updateDisplay, 100)
-}
-
-export function stopProgressUpdates(): void {
-  if (updateInterval) {
-    clearInterval(updateInterval)
-    updateInterval = null
-  }
-}
-
-export function resetProgressBar(): void {
-  progressFill.style.width = '0%'
-  currentTimeDisplay.textContent = '0:00'
-  totalDurationDisplay.textContent = '0:00'
-}
-
-export function setTotalDuration(duration: number): void {
-  totalDurationDisplay.textContent = formatTime(duration)
 }

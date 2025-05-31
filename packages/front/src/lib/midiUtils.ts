@@ -1,12 +1,12 @@
 import { MidiReader, MTrkEvent } from '../spec'
-import {
-  DEFAULT_TEMPO,
-  MICROSECONDS_IN_SECOND,
-  MIDI_NOTE_A4,
-  MIDI_NOTE_A4_FREQUENCY
-} from './constants'
+import { DEFAULT_TEMPO } from './constants'
 import { readUint24BE } from './dataUtils'
 import { isTempoEvent } from './typeGuards'
+
+/** MIDI note constants */
+export const MIDI_NOTE_A4 = 69
+export const MIDI_NOTE_A4_FREQUENCY = 440
+export const MICROSECONDS_IN_SECOND = 1_000_000
 
 /**
  * Converts a MIDI note number to its corresponding frequency in Hz.

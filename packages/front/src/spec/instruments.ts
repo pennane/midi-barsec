@@ -9,6 +9,7 @@ const invert = <
 ): {
   [K in R[keyof R]]: { [P in keyof R]: R[P] extends K ? P : never }[keyof R]
 } => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const result: any = {}
   for (const [key, value] of Object.entries(x)) {
     result[value as keyof typeof result] = key

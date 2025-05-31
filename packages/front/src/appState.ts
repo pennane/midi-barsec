@@ -2,6 +2,7 @@ import type { MidiParser } from './parser/midiParser'
 import type { PlaybackControl } from './player/playTrack'
 
 type AppState = {
+  playing: boolean
   selectedMidi: MidiParser
   selectedWaveform: OscillatorType
   currentPlayback: PlaybackControl | null
@@ -26,7 +27,8 @@ export function initAppState(
     audioContext,
     gainNode,
     analyserNode,
-    percussion: true
+    percussion: true,
+    playing: false
   }
 }
 
@@ -35,10 +37,7 @@ export function getState(): AppState {
 }
 
 export function setSelectedMidi(midi: MidiParser): void {
-  if (state.currentPlayback?.isPlaying()) {
-    state.currentPlayback.pause()
-  }
-
+  state.currentPlayback?.pause()
   state.selectedMidi = midi
   state.currentPlayback = null
 }

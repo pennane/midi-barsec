@@ -11,9 +11,7 @@ const announceMessage: EventProcessor<MetaEvent> = (ctx, event) => {
   const delayMs = delaySeconds * 1000
 
   setTimeout(() => {
-    if (ctx.isPlaying) {
-      announce(text)
-    }
+    announce(text)
   }, delayMs)
 }
 

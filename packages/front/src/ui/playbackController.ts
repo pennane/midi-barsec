@@ -7,31 +7,33 @@ import {
 } from './progressBar'
 
 export function initPlaybackController(): void {
-  document.getElementById('display')!.addEventListener('click', setPlayback)
+  document.getElementById('display')!.addEventListener('click', togglePlayback)
   document.addEventListener('keydown', (event) => {
-    if (event.code === 'Space' && !event.repeat) {
-      event.preventDefault()
-      setPlayback()
-    }
+    if (event.code !== 'Space' || event.repeat) return
+    event.preventDefault()
+    togglePlayback()
   })
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-      getState().currentPlayback?.pause()
-      stopProgressUpdates()
+      setPlayback(false)
     }
   })
 }
 
-async function setPlayback() {
+function togglePlayback() {
   const state = getState()
+  const next = !state.playing
 
-  if (state.currentPlayback?.isPlaying()) {
-    state.currentPlayback.pause()
+  setPlayback(next)
+}
+
+async function setPlayback(enable: boolean) {
+  const state = getState()
+  state.playing = enable
+
+  if (!enable) {
+    state.currentPlayback?.pause()
     stopProgressUpdates()
-    return
-  } else if (state.currentPlayback?.isPaused()) {
-    await state.currentPlayback.resume()
-    startProgressUpdates()
     return
   }
 
@@ -44,15 +46,19 @@ async function setPlayback() {
     }
   }
 
-  const playback = playMidi(
-    state.audioContext,
-    state.gainNode,
-    state.analyserNode,
-    state.selectedMidi,
-    state.selectedWaveform
-  )
+  if (state.currentPlayback) {
+    await state.currentPlayback?.resume()
+  } else {
+    const playback = playMidi(
+      state.audioContext,
+      state.gainNode,
+      state.analyserNode,
+      state.selectedMidi,
+      state.selectedWaveform
+    )
+    setCurrentPlayback(playback)
+  }
 
-  setCurrentPlayback(playback)
   updateProgressBar()
   startProgressUpdates()
 }

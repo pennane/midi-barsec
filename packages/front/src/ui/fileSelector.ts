@@ -1,12 +1,9 @@
-import { setSelectedMidi } from '../main'
 import { MidiParser } from '../parser/midiParser'
-import {
-  resetProgressBar,
-  setTotalDuration,
-  stopProgressUpdates
-} from './progressBar'
+import { MidiPlayer } from '../player/midiPlayer'
 
-export function initFileSelector(): void {
+let midiPlayer: MidiPlayer
+export function initFileSelector(player: MidiPlayer): void {
+  midiPlayer = player
   document.getElementById('input')!.addEventListener('change', selectFile)
 }
 
@@ -31,10 +28,7 @@ async function selectFile(event: Event): Promise<void> {
 
   try {
     const midi = new MidiParser(arrayBuffer)
-    stopProgressUpdates()
-    await setSelectedMidi(midi)
-    resetProgressBar()
-    setTotalDuration(midi.duration())
+    await midiPlayer.load(midi)
   } catch (e) {
     alert(e)
   }

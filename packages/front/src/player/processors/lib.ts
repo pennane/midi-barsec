@@ -1,4 +1,4 @@
-import { createDefaultInstrument } from '../instruments'
+import { instruments } from '../instruments'
 import { Channel, PlaybackContext } from '../models'
 
 export function getOrCreateChannel(
@@ -14,12 +14,11 @@ export function getOrCreateChannel(
   const panner = ctx.audioContext.createStereoPanner()
   panner.connect(gain)
   gain.connect(ctx.gainNode)
-  gain.connect(ctx.analyserNode)
 
   channel = {
     gain,
     panner,
-    instrument: createDefaultInstrument(),
+    instrument: instruments.basic.default(),
     notes: new Map(),
     sustain: false,
     pitchBend: 0,

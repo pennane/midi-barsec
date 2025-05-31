@@ -85,6 +85,17 @@ export function isControllerChangeEvent(
   )
 }
 
+export function isProgramChangeEvent(
+  event: MidiTrackEvent
+): event is MidiChannelControllerChangeMessage & {
+  messageType: MidiChannelVoiceMessageType.ProgramChange
+} {
+  return (
+    isMidiEvent(event) &&
+    event.messageType === MidiChannelVoiceMessageType.ProgramChange
+  )
+}
+
 export function isPercussionEvent(
   event: MidiTrackEvent
 ): event is MidiChannelMessage & { channel: 9 } {

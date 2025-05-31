@@ -1,5 +1,3 @@
-import { ceilPowerOfTwo } from '../../lib'
-
 const canvas = document.createElement('canvas')
 const ctx = canvas.getContext('2d')!
 
@@ -12,9 +10,10 @@ let width: number
 let height: number
 
 const updateSize = () => {
-  width = Math.round(target.offsetWidth)
-  height = Math.round(target.offsetHeight)
-  analyser.fftSize = ceilPowerOfTwo(width) * 2
+  const size = 200
+  width = size
+  height = size
+  analyser.fftSize = 4096 // ceilPowerOfTwo(width) * 2
   bufferLength = analyser.frequencyBinCount
   domainData = new Uint8Array(bufferLength)
   canvas.width = width
@@ -44,7 +43,7 @@ const draw = () => {
 
   ctx.clearRect(0, 0, width, height)
   ctx.beginPath()
-  ctx.lineWidth = 3
+  ctx.lineWidth = 2
   ctx.strokeStyle = '#006aff'
 
   const centerY = height / 2

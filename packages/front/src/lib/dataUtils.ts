@@ -38,3 +38,9 @@ export function readUint24BE(view: DataView, offset: number): number {
     view.getUint8(offset + 2)
   )
 }
+
+export function ceilPowerOfTwo(n: number) {
+  if (n <= 1) return 1
+  const exponent = Math.ceil(Math.log2(n))
+  return 2 ** exponent
+}

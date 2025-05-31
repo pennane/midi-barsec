@@ -16,11 +16,22 @@ const announceMessage: EventProcessor<MetaEvent> = (event, ctx, state) => {
   }, delayMs)
 }
 
+const stopNotes: EventProcessor<MetaEvent> = (_event, ctx, state) => {
+  for (const channel of state.channels.values()) {
+    for (const note of channel.notes.values()) {
+      try {
+        note.oscillator.stop(ctx.audioContext.currentTime)
+      } catch {}
+    }
+  }
+}
+
 export const metaProcessors = {
   [MetaEventType.SetTempo]: (event, ctx, state) => {
     const newTempo = readUint24BE(event.data, 0)
     state.tickDuration = calculateTickDuration(newTempo, ctx.division)
   },
   [MetaEventType.Lyric]: announceMessage,
-  [MetaEventType.CopyrightNotice]: announceMessage
+  [MetaEventType.CopyrightNotice]: announceMessage,
+  [MetaEventType.EndOfTrack]: stopNotes
 } as { [key in MetaEventType]?: EventProcessor<MetaEvent> }

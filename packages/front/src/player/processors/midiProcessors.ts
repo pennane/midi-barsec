@@ -11,6 +11,9 @@ export const voiceMessageProcessors = {
   noteOn: (event, ctx, state) => {
     const channel = getOrCreateChannel(state, ctx, event.channel)
     const velocity = (event.data2 ?? 0) / 127
+    const baseGain = velocity
+    const baseFrequency = midiNoteToFrequency(event.data1)
+
     const existingNote = channel.notes.get(event.data1)
 
     if (existingNote?.sustained) {
@@ -27,14 +30,13 @@ export const voiceMessageProcessors = {
       channel.notes.delete(event.data1)
     }
 
-    const oscillator = ctx.audioContext.createOscillator()
     const gain = ctx.audioContext.createGain()
+    gain.gain.setValueAtTime(baseGain, state.scheduledTime)
 
-    gain.gain.setValueAtTime(velocity, state.scheduledTime)
+    const oscillator = ctx.audioContext.createOscillator()
     oscillator.type = ctx.waveform
     oscillator.frequency.setValueAtTime(
-      midiNoteToFrequency(event.data1) *
-        pitchBendToMultiplier(channel.pitchBend),
+      baseFrequency * pitchBendToMultiplier(channel.pitchBend),
       state.scheduledTime
     )
 
@@ -45,7 +47,9 @@ export const voiceMessageProcessors = {
     channel.notes.set(event.data1, {
       oscillator,
       gain,
-      sustained: false
+      baseFrequency,
+      baseGain,
+      sustained: channel.sustain
     })
   },
   noteOff: (event, ctx, state) => {
@@ -69,10 +73,9 @@ export const voiceMessageProcessors = {
 
     const bendMultiplier = pitchBendToMultiplier(value)
 
-    for (const [noteNumber, note] of channel.notes) {
-      const baseFreq = midiNoteToFrequency(noteNumber)
+    for (const note of channel.notes.values()) {
       note.oscillator.frequency.setValueAtTime(
-        baseFreq * bendMultiplier,
+        note.baseFrequency * bendMultiplier,
         state.scheduledTime
       )
     }
@@ -83,10 +86,9 @@ export const voiceMessageProcessors = {
     channel.pressure = pressure
 
     for (const note of channel.notes.values()) {
-      note.gain.gain.linearRampToValueAtTime(
-        note.gain.gain.value + pressure * 0.1,
-        state.scheduledTime + 0.01
-      )
+      const modulatedGain = note.baseGain * (1 + pressure * 0.1)
+      const finalGain = Math.min(modulatedGain, 1)
+      note.gain.gain.linearRampToValueAtTime(finalGain, state.scheduledTime)
     }
   }
 } as const satisfies Record<string, EventProcessor<MidiChannelMessage>>

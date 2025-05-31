@@ -6,7 +6,7 @@ import {
   MidiFileHeader,
   MidiReader,
   MidiTrackEvent
-} from '../models'
+} from '../spec'
 import { readEvent } from './eventReader'
 
 /**

@@ -1,4 +1,4 @@
-import { MidiReader, MTrkEvent } from '../models'
+import { MidiReader, MTrkEvent } from '../spec'
 import {
   DEFAULT_TEMPO,
   MICROSECONDS_IN_SECOND,

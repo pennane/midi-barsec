@@ -14,7 +14,8 @@ import {
   MidiChannelVoiceMessageType,
   MidiControllerChange,
   MidiTrackEvent
-} from '../models'
+} from '../spec'
+
 import { EventProcessor } from './models'
 import { metaProcessors } from './processors/metaProcessors'
 import {

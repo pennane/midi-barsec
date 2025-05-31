@@ -1,4 +1,4 @@
-import { MTrkEvent } from '../models'
+import { MTrkEvent } from '../spec'
 
 export type Note = {
   gain: GainNode

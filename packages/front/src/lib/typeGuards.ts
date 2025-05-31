@@ -6,8 +6,7 @@ import {
   MidiChannelMessage,
   MidiChannelVoiceMessageType,
   MidiTrackEvent
-} from '../models'
-
+} from '../spec'
 export function isMidiEvent(
   event: MidiTrackEvent
 ): event is MidiChannelMessage {

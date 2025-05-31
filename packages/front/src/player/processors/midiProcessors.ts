@@ -3,7 +3,8 @@ import {
   MidiChannelControllerChangeMessage,
   MidiChannelMessage,
   MidiControllerChange
-} from '../../models'
+} from '../../spec'
+
 import { EventProcessor } from '../models'
 import { getOrCreateChannel } from './lib'
 

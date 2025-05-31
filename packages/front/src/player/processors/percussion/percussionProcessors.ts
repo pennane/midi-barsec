@@ -21,7 +21,7 @@ export const percussionProcessors = {
 
     const noteNumber = event.data1 as Percussion
     const config = PERCUSSION_CONFIGS[noteNumber]
-    if (!config || !ctx.includePercussion) return
+    if (!config) return
     const volume = calculateVolume(config.volume, velocity)
 
     const existingNote = channel.notes.get(noteNumber)

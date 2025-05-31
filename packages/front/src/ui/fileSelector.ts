@@ -1,4 +1,4 @@
-import { setSelectedMidi } from '../appState'
+import { setSelectedMidi } from '../main'
 import { MidiParser } from '../parser/midiParser'
 import {
   resetProgressBar,
@@ -32,7 +32,7 @@ async function selectFile(event: Event): Promise<void> {
   try {
     const midi = new MidiParser(arrayBuffer)
     stopProgressUpdates()
-    setSelectedMidi(midi)
+    await setSelectedMidi(midi)
     resetProgressBar()
     setTotalDuration(midi.duration())
   } catch (e) {

@@ -1,15 +1,15 @@
-import { setPlayback, togglePlayback } from '../appState'
+import { setPlayback, togglePlayback } from '../main'
 
 export function initPlaybackController(): void {
   document.getElementById('display')!.addEventListener('click', togglePlayback)
-  document.addEventListener('keydown', (event) => {
+  document.addEventListener('keydown', async (event) => {
     if (event.code !== 'Space' || event.repeat) return
     event.preventDefault()
-    togglePlayback()
+    await togglePlayback()
   })
-  document.addEventListener('visibilitychange', () => {
+  document.addEventListener('visibilitychange', async () => {
     if (document.hidden) {
-      setPlayback(false)
+      await setPlayback(false)
     }
   })
 }

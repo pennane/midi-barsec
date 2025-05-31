@@ -1,4 +1,4 @@
-import { getState } from '../appState'
+import { getState } from '../main'
 
 let progressFill: HTMLElement
 let currentTimeDisplay: HTMLElement

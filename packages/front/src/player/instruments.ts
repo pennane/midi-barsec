@@ -9,7 +9,7 @@ export const createDefaultInstrument = (): Instrument => {
       gain.gain.setValueAtTime(velocity, ctx.scheduledTime)
 
       const oscillator = ctx.audioContext.createOscillator()
-      oscillator.type = ctx.waveform
+      oscillator.type = 'sine'
       oscillator.frequency.setValueAtTime(
         baseFrequency * pitchBendToMultiplier(channel.pitchBend),
         ctx.scheduledTime
@@ -29,7 +29,7 @@ export const createDefaultInstrument = (): Instrument => {
       }
       return note
     },
-    stopNote(ctx, channel, note, { reapplied }) {
+    stopNote(ctx, _channel, note) {
       note.oscillator.stop(ctx.scheduledTime)
     }
   }

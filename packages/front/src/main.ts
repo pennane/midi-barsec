@@ -1,16 +1,29 @@
 import defaultMidiFile from './chaozfantasy.mid?arraybuffer'
 import './style.css'
 
-import { initAppState } from './appState'
 import { MidiParser } from './parser/midiParser'
+import { playMidi, type PlaybackControl } from './player/playTrack'
 import { initFileSelector } from './ui/fileSelector'
 import { initPlaybackController } from './ui/playbackController'
-import { initProgressBar, setTotalDuration } from './ui/progressBar'
+import {
+  initProgressBar,
+  setTotalDuration,
+  startProgressUpdates,
+  stopProgressUpdates,
+  updateProgressBar
+} from './ui/progressBar'
 import { initializeVisualizer } from './ui/visualizer2/visualizer'
 import { initVolumeControl } from './ui/volumeControl'
-import { initWaveformSelector } from './ui/waveformSelector'
 
-const audioContext = new (window.AudioContext ||
+// Global state variables
+let selectedMidi: MidiParser
+let currentPlayback: PlaybackControl | null = null
+let audioContext: AudioContext
+let gainNode: GainNode
+let analyserNode: AnalyserNode
+
+// Initialize audio context and nodes
+audioContext = new (window.AudioContext ||
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window as any).webkitAudioContext)()
 
@@ -34,13 +47,69 @@ compressor.connect(volumeControlGain)
 const analyser = audioContext.createAnalyser()
 analyser.connect(masterGain)
 
-const DEFAULT_MIDI = new MidiParser(defaultMidiFile)
-initAppState(DEFAULT_MIDI, audioContext, masterGain, analyser)
+// Set global references
+gainNode = masterGain
+analyserNode = analyser
+
+// Initialize with default MIDI
+selectedMidi = new MidiParser(defaultMidiFile)
+
+// State management functions
+export function getState() {
+  return {
+    selectedMidi,
+    currentPlayback,
+    audioContext,
+    gainNode,
+    analyserNode
+  }
+}
+
+export async function setSelectedMidi(midi: MidiParser) {
+  await setPlayback(false)
+  selectedMidi = midi
+  currentPlayback = null
+}
+
+export function setCurrentPlayback(playback: PlaybackControl | null): void {
+  currentPlayback = playback
+}
+
+export async function togglePlayback() {
+  const isPlaying = currentPlayback?.isPlaying()
+  const next = !isPlaying
+
+  await setPlayback(next)
+}
+
+export async function setPlayback(enable: boolean) {
+  if (!enable) {
+    currentPlayback?.pause()
+    stopProgressUpdates()
+    return
+  }
+
+  if (currentPlayback) {
+    await currentPlayback?.resume()
+  } else {
+    const playback = playMidi(
+      audioContext,
+      gainNode,
+      analyserNode,
+      selectedMidi
+    )
+    setCurrentPlayback(playback)
+  }
+
+  updateProgressBar()
+  startProgressUpdates()
+}
+
+// Initialize everything
 initProgressBar()
-initWaveformSelector()
 initVolumeControl(volumeControlGain)
 initFileSelector()
 initPlaybackController()
-setTotalDuration(DEFAULT_MIDI.duration())
+setTotalDuration(selectedMidi.duration())
 
 initializeVisualizer(document.getElementById('display')!, analyser)

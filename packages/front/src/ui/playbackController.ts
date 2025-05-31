@@ -7,16 +7,22 @@ import {
 } from './progressBar'
 
 export function initPlaybackController(): void {
-  document.getElementById('display')!.addEventListener('click', togglePlayback)
+  document.getElementById('display')!.addEventListener('click', setPlayback)
   document.addEventListener('keydown', (event) => {
     if (event.code === 'Space' && !event.repeat) {
       event.preventDefault()
-      togglePlayback()
+      setPlayback()
+    }
+  })
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      getState().currentPlayback?.pause()
+      stopProgressUpdates()
     }
   })
 }
 
-async function togglePlayback() {
+async function setPlayback() {
   const state = getState()
 
   if (state.currentPlayback?.isPlaying()) {

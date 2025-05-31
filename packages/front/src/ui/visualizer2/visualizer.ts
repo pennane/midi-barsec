@@ -1,7 +1,7 @@
 const canvas = document.createElement('canvas')
 const ctx = canvas.getContext('2d')!
+const target = document.getElementById('display')!
 
-let target: HTMLElement
 let analyser: AnalyserNode
 let bufferLength: number
 let domainData: Uint8Array<ArrayBuffer>
@@ -20,12 +20,8 @@ const updateSize = () => {
   canvas.height = height
 }
 
-export const initializeVisualizer = (
-  element: HTMLElement,
-  node: AnalyserNode
-) => {
+export const initializeVisualizer = (node: AnalyserNode) => {
   cancelAnimationFrame(animationFrameId!)
-  target = element
   analyser = node
   updateSize()
   target.appendChild(canvas)

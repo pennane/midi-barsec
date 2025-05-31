@@ -44,10 +44,10 @@ const player = createPlayer(audioContext, splitterGain)
 async function initialize() {
   await player.load(defaultMidi)
   initProgressBar(player)
-  initVolumeControl(volumeGain)
   initFileSelector(player)
   initPlaybackController(player)
-  initializeVisualizer(document.getElementById('display')!, analyserNode)
+  initVolumeControl(volumeGain)
+  initializeVisualizer(analyserNode)
 }
 
 void initialize()

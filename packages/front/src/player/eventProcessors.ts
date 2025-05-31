@@ -28,7 +28,7 @@ const processMidi: EventProcessor<MidiChannelMessage> = (ctx, event) => {
   if (isControllerChangeEvent(event)) {
     const processor = controllerProcessors[event.data1]
     if (!processor) {
-      return console.log(
+      return console.info(
         'unhandled controller change event',
         MidiControllerChange[event.data1]
       )
@@ -64,7 +64,7 @@ const processMidi: EventProcessor<MidiChannelMessage> = (ctx, event) => {
   if (isChannelPressureEvent(event)) {
     return voiceMessageProcessors.channelPressure(ctx, event)
   }
-  console.log(
+  console.info(
     'unhandled midi event',
     MidiChannelVoiceMessageType[event.messageType]
   )
@@ -77,10 +77,10 @@ export const processEvent: EventProcessor<MidiTrackEvent> = (ctx, event) => {
   if (isMetaEvent(event)) {
     const processor = metaProcessors[event.metaType]
     if (!processor) {
-      console.log('unhandled meta event', MetaEventType[event.metaType], event)
+      console.info('unhandled meta event', MetaEventType[event.metaType], event)
       return
     }
     return processor(ctx, event)
   }
-  console.log('unhandled top level event', event)
+  console.info('unhandled top level event', event)
 }

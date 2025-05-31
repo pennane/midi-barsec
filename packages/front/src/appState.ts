@@ -21,7 +21,7 @@ export function initAppState(
 ): void {
   state = {
     selectedMidi: defaultMidi,
-    selectedWaveform: 'sawtooth',
+    selectedWaveform: 'sine',
     currentPlayback: null,
     audioContext,
     gainNode,

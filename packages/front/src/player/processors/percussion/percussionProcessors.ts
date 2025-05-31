@@ -1,4 +1,5 @@
-import { GeneralMidiPercussion, MidiChannelMessage } from '../../../models'
+import { MidiChannelMessage } from '../../../spec/auxiliary'
+import { Percussion } from '../../../spec/instruments'
 import { EventProcessor, Note } from '../../models'
 import { getOrCreateChannel } from '../lib'
 import { PERCUSSION_CONFIGS } from './config'
@@ -18,7 +19,7 @@ export const percussionProcessors = {
     const channel = getOrCreateChannel(state, ctx, event.channel, true)
     const velocity = event.data2 ?? 127
 
-    const noteNumber = event.data1 as GeneralMidiPercussion
+    const noteNumber = event.data1 as Percussion
     const config = PERCUSSION_CONFIGS[noteNumber]
     if (!config || !ctx.percussion) return
     const volume = calculateVolume(config.volume, velocity)
@@ -51,7 +52,7 @@ export const percussionProcessors = {
 
   noteOff: (event: MidiChannelMessage, ctx, state) => {
     const channel = getOrCreateChannel(state, ctx, event.channel, true)
-    const noteNumber = event.data1 as GeneralMidiPercussion
+    const noteNumber = event.data1 as Percussion
     const note = channel.notes.get(noteNumber)
     const config = PERCUSSION_CONFIGS[noteNumber]
 

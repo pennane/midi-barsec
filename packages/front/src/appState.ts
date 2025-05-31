@@ -7,7 +7,6 @@ import {
 } from './ui/progressBar'
 
 type AppState = {
-  playing: boolean
   selectedMidi: MidiParser
   selectedWaveform: OscillatorType
   currentPlayback: PlaybackControl | null
@@ -32,8 +31,7 @@ export function initAppState(
     audioContext,
     gainNode,
     analyserNode,
-    percussion: true,
-    playing: false
+    percussion: true
   }
 }
 
@@ -73,29 +71,19 @@ export function getPercussion(): boolean {
 }
 
 export function togglePlayback() {
-  const state = getState()
-  const next = !state.playing
+  const state = getState().currentPlayback?.isPlaying()
+  const next = !state
 
   setPlayback(next)
 }
 
 export async function setPlayback(enable: boolean) {
   const state = getState()
-  state.playing = enable
 
   if (!enable) {
     state.currentPlayback?.pause()
     stopProgressUpdates()
     return
-  }
-
-  if (state.audioContext.state === 'suspended') {
-    try {
-      await state.audioContext.resume()
-    } catch (error) {
-      console.error('Failed to resume AudioContext:', error)
-      return
-    }
   }
 
   if (state.currentPlayback) {

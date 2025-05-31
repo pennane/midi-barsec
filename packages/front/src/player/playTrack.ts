@@ -15,6 +15,7 @@ export type PlaybackControl = {
   setPercussion: (enabled: boolean) => void
   getCurrentPosition: () => number // 0-1 ratio
   getTotalDuration: () => number // seconds
+  isPlaying(): boolean
   seekTo: (position: number) => void // 0-1 ratio
 }
 
@@ -79,6 +80,11 @@ function scheduleEvents(ctx: PlaybackContext): void {
 function startAudioPlayer(ctx: PlaybackContext): void {
   scheduleEvents(ctx)
 
+  if (ctx.animationFrameId) {
+    window.cancelAnimationFrame(ctx.animationFrameId)
+    ctx.animationFrameId = undefined
+  }
+
   ctx.animationFrameId = requestAnimationFrame(() => {
     startAudioPlayer(ctx)
   })
@@ -129,6 +135,7 @@ export function playMidi(
   }
 
   startAudioPlayer(ctx)
+  let isPlaying = true
 
   function seekTo(position: number): void {
     const targetTime = position * totalDuration
@@ -147,12 +154,21 @@ export function playMidi(
     ctx.scheduledTime = ctx.audioContext.currentTime
     ctx.startTime = ctx.audioContext.currentTime - actualPosition
 
-    startAudioPlayer(ctx)
+    if (isPlaying) {
+      startAudioPlayer(ctx)
+    }
   }
 
   return {
-    pause: () => pausePlayback(ctx),
-    resume: () => resumePlayback(ctx),
+    isPlaying: () => isPlaying,
+    pause: () => {
+      isPlaying = false
+      pausePlayback(ctx)
+    },
+    resume: async () => {
+      isPlaying = true
+      await resumePlayback(ctx)
+    },
     setWaveform: (newWaveform: OscillatorType) => setWaveform(ctx, newWaveform),
     getCurrentPosition: () => {
       if (totalDuration === 0) return 0

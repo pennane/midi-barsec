@@ -1,15 +1,11 @@
 import defaultMidiFile from './chaozfantasy.mid?arraybuffer'
 import './style.css'
 
-import { MidiParser } from './parser/midiParser'
-import { createPlayer } from './player/midiPlayer'
-import { initFileSelector } from './ui/fileSelector'
-import { initPlaybackController } from './ui/playbackController'
-import { initProgressBar } from './ui/progressBar'
-import { initializeVisualizer } from './ui/visualizer2/visualizer'
-import { initVolumeControl } from './ui/volumeControl'
+import { createMidiParser } from './parser'
+import { createPlayer } from './player'
+import { initializeUi } from './ui'
 
-const defaultMidi = new MidiParser(defaultMidiFile)
+const defaultMidi = createMidiParser(defaultMidiFile)
 
 const audioContext = new (window.AudioContext ||
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,15 +35,6 @@ splitterGain.connect(masterGain)
 masterGain.connect(compressor)
 compressor.connect(volumeGain)
 
-const player = createPlayer(audioContext, splitterGain)
-
-async function initialize() {
-  await player.load(defaultMidi)
-  initProgressBar(player)
-  initFileSelector(player)
-  initPlaybackController(player)
-  initVolumeControl(volumeGain)
-  initializeVisualizer(analyserNode)
-}
-
-void initialize()
+void createPlayer(audioContext, splitterGain)
+  .load(defaultMidi)
+  .then((player) => initializeUi(player, volumeGain, analyserNode))

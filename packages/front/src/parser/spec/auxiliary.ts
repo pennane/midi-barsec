@@ -9,6 +9,13 @@ import {
 /** 0-255 */
 type Byte = number
 
+export type MidiParser = {
+  reader(): MidiReader
+  /** seconds */
+  duration(): number
+  header: MidiFileHeader
+}
+
 export type MidiReader = Generator<MTrkEvent, void, void>
 
 export type MidiChunk = {

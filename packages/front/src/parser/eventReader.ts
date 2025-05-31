@@ -6,7 +6,7 @@ import {
   MidiChannelVoiceMessageType,
   MidiTrackEvent,
   SystemExclusiveMessage
-} from '../spec'
+} from './spec'
 
 type Result<T> = {
   event: T

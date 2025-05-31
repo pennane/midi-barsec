@@ -1,7 +1,9 @@
-import { MidiReader, MTrkEvent } from '../spec'
+import type { MidiReader, MidiParser } from '../parser'
 import { DEFAULT_TEMPO } from './constants'
 import { readUint24BE } from './dataUtils'
 import { isTempoEvent } from './typeGuards'
+
+// Avoid circular dependency by using import type
 
 /** MIDI note constants */
 export const MIDI_NOTE_A4 = 69
@@ -63,55 +65,49 @@ export function calculateMidiDuration(
 }
 
 /**
- * Creates a new MIDI reader that starts from a specific time position.
- * This function consumes the reader to find the seek position, but this is
- * acceptable since we're creating a new reader for seeking purposes.
+ * Creates a MIDI reader that starts from a specific time position.
+ * This generator function seeks to the target time and then yields events directly
+ * without storing them in memory, making it more memory efficient.
  *
- * @param reader Original MIDI reader
- * @param division MIDI division
- * @param targetTimeSeconds Target time in seconds to seek to
- * @returns Object with new reader and actual position reached
+ * @param parser MIDI parser containing the data and header
+ * @param startingTimeSeconds Starting time in seconds to seek to
+ * @returns Generator that yields MIDI events from the starting time
  */
-export function createSeekableReader(
-  reader: MidiReader,
-  division: number,
-  targetTimeSeconds: number
-): { reader: MidiReader; actualPosition: number } {
-  const events: MTrkEvent[] = []
+export function* withStartingTime(
+  parser: MidiParser,
+  startingTimeSeconds: number
+): MidiReader {
+  const division = parser.header.division
+  if (typeof division !== 'number') {
+    throw new Error('Unsupported division type for seeking')
+  }
+
+  const reader = parser.reader()
   let currentTime = 0
   let currentTempo = DEFAULT_TEMPO
   let tickDuration = calculateTickDuration(currentTempo, division)
-  let seekIndex = 0
   let found = false
 
   for (const event of reader) {
-    events.push(event)
-
     if (isTempoEvent(event.event)) {
       currentTempo = readUint24BE(event.event.data, 0)
       tickDuration = calculateTickDuration(currentTempo, division)
     }
 
     const eventTime = event.deltaTime * tickDuration
-    if (!found && currentTime + eventTime >= targetTimeSeconds) {
-      seekIndex = events.length - 1
-      found = true
-    }
 
     if (!found) {
-      currentTime += eventTime
+      if (currentTime + eventTime >= startingTimeSeconds) {
+        found = true
+        // Yield this event and all subsequent ones
+        yield event
+      } else {
+        currentTime += eventTime
+      }
+    } else {
+      // We've found our starting point, yield all remaining events
+      yield event
     }
-  }
-
-  function* createReaderFromPosition(): MidiReader {
-    for (let i = seekIndex; i < events.length; i++) {
-      yield events[i]
-    }
-  }
-
-  return {
-    reader: createReaderFromPosition(),
-    actualPosition: currentTime
   }
 }
 

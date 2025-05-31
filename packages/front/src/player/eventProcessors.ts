@@ -10,15 +10,7 @@ import {
   isPitchBendEvent,
   isProgramChangeEvent
 } from '../lib'
-import {
-  MetaEvent,
-  MetaEventType,
-  MidiChannelControllerChangeMessage,
-  MidiChannelMessage,
-  MidiChannelVoiceMessageType,
-  MidiControllerChange,
-  MidiTrackEvent
-} from '../spec'
+import { Spec } from '../parser'
 
 import { EventProcessor, EventProcessorPredicate } from './models'
 import { metaProcessors } from './processors/metaProcessors'
@@ -44,20 +36,20 @@ const processPercussionEvent = matchEvent(
 )
 
 const processControllerEvent: EventProcessor<
-  MidiChannelControllerChangeMessage
+  Spec.MidiChannelControllerChangeMessage
 > = (ctx, event) => {
   const processor = controllerProcessors[event.data1]
   if (!processor) {
     console.info(
       'unhandled controller change event',
-      MidiControllerChange[event.data1]
+      Spec.MidiControllerChange[event.data1]
     )
     return
   }
   return processor(ctx, event)
 }
 
-const processMidi: EventProcessor<MidiChannelMessage> = matchEvent(
+const processMidi: EventProcessor<Spec.MidiChannelMessage> = matchEvent(
   [isControllerChangeEvent, processControllerEvent],
   [isPercussionEvent, processPercussionEvent],
   [isEffectiveNoteOn, voiceMessageProcessors.noteOn],
@@ -70,21 +62,21 @@ const processMidi: EventProcessor<MidiChannelMessage> = matchEvent(
     (_, event) =>
       console.info(
         'unhandled midi event',
-        MidiChannelVoiceMessageType[event.messageType]
+        Spec.MidiChannelVoiceMessageType[event.messageType]
       )
   ]
 )
 
-const processMetaEvent: EventProcessor<MetaEvent> = (ctx, event) => {
+const processMetaEvent: EventProcessor<Spec.MetaEvent> = (ctx, event) => {
   const processor = metaProcessors[event.metaType]
   if (!processor) {
-    console.info('unhandled meta event', MetaEventType[event.metaType])
+    console.info('unhandled meta event', Spec.MetaEventType[event.metaType])
     return
   }
   return processor(ctx, event)
 }
 
-export const processEvent: EventProcessor<MidiTrackEvent> = matchEvent(
+export const processEvent: EventProcessor<Spec.MidiTrackEvent> = matchEvent(
   [isMidiEvent, processMidi],
   [isMetaEvent, processMetaEvent],
   [

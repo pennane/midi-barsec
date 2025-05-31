@@ -1,10 +1,10 @@
-import { MidiPlayer } from '../player/models'
+import { MidiPlayer } from '../player'
 
 async function toggle(player: MidiPlayer): Promise<void> {
   if (player.isPlaying()) {
     player.pause()
   } else {
-    await player.play()
+    void player.play()
   }
 }
 
@@ -17,9 +17,14 @@ export function initPlaybackController(player: MidiPlayer): void {
     event.preventDefault()
     await toggle(player)
   })
+  let pausedByVisibilityChange = false
   document.addEventListener('visibilitychange', async () => {
-    if (document.hidden) {
+    if (document.hidden && player.isPlaying()) {
       player.pause()
+      pausedByVisibilityChange = true
+    } else if (!document.hidden && pausedByVisibilityChange) {
+      pausedByVisibilityChange = false
+      void player.play()
     }
   })
 }

@@ -1,12 +1,12 @@
 import { SCHEDULE_AHEAD_TIME } from '../lib'
-import { MidiParser } from '../parser/midiParser'
+import { MidiParser } from '../parser'
 import { processEvent } from './eventProcessors'
 
 import {
   calculatePosition,
   loadMidi,
   pausePlayback,
-  resumePlayback,
+  startPlayback,
   seekTo
 } from './lib'
 import {
@@ -18,16 +18,15 @@ import {
 
 function createInitialState(): PlayerState {
   return {
-    currentMidi: null,
+    midi: null as unknown as MidiParser,
     playbackContext: null,
     isPlaying: false,
-    totalDuration: 0,
     pausedPosition: 0
   }
 }
 
-export class Player implements MidiPlayer {
-  private state: PlayerState = createInitialState()
+class Player implements MidiPlayer {
+  private state: PlayerState
   private readonly audioContext: AudioContext
   private readonly gainNode: GainNode
   private readonly eventTarget = new EventTarget()
@@ -37,6 +36,7 @@ export class Player implements MidiPlayer {
   constructor(audioContext: AudioContext, gainNode: GainNode) {
     this.audioContext = audioContext
     this.gainNode = gainNode
+    this.state = createInitialState()
   }
 
   addEventListener<T extends MidiPlayerEventType>(
@@ -90,15 +90,14 @@ export class Player implements MidiPlayer {
         } catch {}
       }
     }
-    this.state.playbackContext.channels.clear()
   }
 
   private emitProgress() {
     const position = this.position()
     this.emit('progressUpdate', {
       position,
-      duration: this.state.totalDuration,
-      currentTime: position * this.state.totalDuration,
+      duration: this.state.midi?.duration() ?? 0,
+      currentTime: position * (this.state.midi?.duration() ?? 0),
       isPlaying: this.state.isPlaying
     })
   }
@@ -113,7 +112,7 @@ export class Player implements MidiPlayer {
   }
 
   async play() {
-    if (!this.state.currentMidi) {
+    if (!this.state.midi) {
       console.warn('No MIDI file loaded')
       return
     }
@@ -127,7 +126,7 @@ export class Player implements MidiPlayer {
       }
     }
 
-    this.state = resumePlayback(this.state, this.audioContext, this.gainNode)
+    this.state = startPlayback(this.state, this.audioContext, this.gainNode)
     this.schedulingId = requestAnimationFrame(this.scheduleEvents)
     this.progressInterval = setInterval(() => this.emitProgress(), 100)
     this.emitProgress()
@@ -138,7 +137,7 @@ export class Player implements MidiPlayer {
   }
 
   duration() {
-    return this.state.totalDuration
+    return this.state.midi.duration()
   }
 
   isPlaying() {
@@ -146,7 +145,7 @@ export class Player implements MidiPlayer {
   }
 
   seek(position: number) {
-    if (!this.state.currentMidi || !this.state.playbackContext) return
+    if (!this.state.midi || !this.state.playbackContext) return
 
     this.stopAllNotes()
     this.stopScheduling()
@@ -162,6 +161,7 @@ export class Player implements MidiPlayer {
     this.pause()
     this.state = loadMidi(this.state, midi)
     this.emitProgress()
+    return this
   }
 }
 

@@ -1,4 +1,4 @@
-import { GeneralMidiInstrument } from '../../../spec'
+import { GeneralMidiInstrument } from '../../../parser/spec'
 import { PercussionConfig } from './models'
 
 export const PERCUSSION_CONFIGS = {

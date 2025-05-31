@@ -1,5 +1,5 @@
-import { MidiChannelMessage } from '../../../spec/auxiliary'
-import { Percussion } from '../../../spec/instruments'
+import { MidiChannelMessage } from '../../../parser/spec/auxiliary'
+import { Percussion } from '../../../parser/spec/instruments'
 import { EventProcessor, Note } from '../../models'
 import { getOrCreateChannel } from '../lib'
 import { PERCUSSION_CONFIGS } from './config'

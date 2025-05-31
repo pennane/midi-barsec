@@ -1,5 +1,5 @@
 import { midiNoteToFrequency, pitchBendToMultiplier } from '../lib'
-import { GeneralMidiInstrument } from '../spec'
+import { Spec } from '../parser'
 import { Instrument, Note } from './models'
 
 type EnvelopeConfig = {
@@ -262,24 +262,27 @@ export const instruments = {
 
 export const instrumentForProgramNumber = (programNumber: number) => {
   const conditions: [(number: number) => boolean, () => Instrument][] = [
-    [GeneralMidiInstrument.isPiano, instruments.groups.piano],
+    [Spec.GeneralMidiInstrument.isPiano, instruments.groups.piano],
     [
-      GeneralMidiInstrument.isChromaticPercussion,
+      Spec.GeneralMidiInstrument.isChromaticPercussion,
       instruments.groups.chromaticPercussion
     ],
-    [GeneralMidiInstrument.isOrgan, instruments.groups.organ],
-    [GeneralMidiInstrument.isGuitar, instruments.groups.guitar],
-    [GeneralMidiInstrument.isBass, instruments.groups.bass],
-    [GeneralMidiInstrument.isStrings, instruments.groups.strings],
-    [GeneralMidiInstrument.isEnsemble, instruments.groups.ensemble],
-    [GeneralMidiInstrument.isBrass, instruments.groups.brass],
-    [GeneralMidiInstrument.isReed, instruments.groups.reed],
-    [GeneralMidiInstrument.isPipe, instruments.groups.pipe],
-    [GeneralMidiInstrument.isSynthLead, instruments.groups.synthLead],
-    [GeneralMidiInstrument.isSynthPad, instruments.groups.synthPad],
-    [GeneralMidiInstrument.isSynthEffects, instruments.groups.synthEffects],
-    [GeneralMidiInstrument.isEthnic, instruments.groups.ethnic],
-    [GeneralMidiInstrument.isSoundEffects, instruments.groups.soundEffects]
+    [Spec.GeneralMidiInstrument.isOrgan, instruments.groups.organ],
+    [Spec.GeneralMidiInstrument.isGuitar, instruments.groups.guitar],
+    [Spec.GeneralMidiInstrument.isBass, instruments.groups.bass],
+    [Spec.GeneralMidiInstrument.isStrings, instruments.groups.strings],
+    [Spec.GeneralMidiInstrument.isEnsemble, instruments.groups.ensemble],
+    [Spec.GeneralMidiInstrument.isBrass, instruments.groups.brass],
+    [Spec.GeneralMidiInstrument.isReed, instruments.groups.reed],
+    [Spec.GeneralMidiInstrument.isPipe, instruments.groups.pipe],
+    [Spec.GeneralMidiInstrument.isSynthLead, instruments.groups.synthLead],
+    [Spec.GeneralMidiInstrument.isSynthPad, instruments.groups.synthPad],
+    [
+      Spec.GeneralMidiInstrument.isSynthEffects,
+      instruments.groups.synthEffects
+    ],
+    [Spec.GeneralMidiInstrument.isEthnic, instruments.groups.ethnic],
+    [Spec.GeneralMidiInstrument.isSoundEffects, instruments.groups.soundEffects]
   ]
 
   return (

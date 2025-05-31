@@ -1,107 +1,109 @@
-import {
-  EventType,
-  MetaEvent,
-  MetaEventType,
-  MidiChannelControllerChangeMessage,
-  MidiChannelMessage,
-  MidiChannelVoiceMessageType,
-  MidiTrackEvent
-} from '../spec'
+import { Spec } from '../parser'
+
 export function isMidiEvent(
-  event: MidiTrackEvent
-): event is MidiChannelMessage {
-  return event.type === EventType.Midi
+  event: Spec.MidiTrackEvent
+): event is Spec.MidiChannelMessage {
+  return event.type === Spec.EventType.Midi
 }
 
-export function isMetaEvent(event: MidiTrackEvent): event is MetaEvent {
-  return event.type === EventType.Meta
+export function isMetaEvent(
+  event: Spec.MidiTrackEvent
+): event is Spec.MetaEvent {
+  return event.type === Spec.EventType.Meta
 }
+
 export function isPitchBendEvent(
-  event: MidiTrackEvent
-): event is MidiChannelMessage & {
-  messageType: MidiChannelVoiceMessageType.PitchBendChange
+  event: Spec.MidiTrackEvent
+): event is Spec.MidiChannelMessage & {
+  messageType: Spec.MidiChannelVoiceMessageType.PitchBendChange
 } {
   return (
     isMidiEvent(event) &&
-    event.messageType === MidiChannelVoiceMessageType.PitchBendChange
+    event.messageType === Spec.MidiChannelVoiceMessageType.PitchBendChange
   )
 }
 
 export function isChannelPressureEvent(
-  event: MidiTrackEvent
-): event is MidiChannelMessage & {
-  messageType: MidiChannelVoiceMessageType.ChannelPressure
+  event: Spec.MidiTrackEvent
+): event is Spec.MidiChannelMessage & {
+  messageType: Spec.MidiChannelVoiceMessageType.ChannelPressure
 } {
   return (
     isMidiEvent(event) &&
-    event.messageType === MidiChannelVoiceMessageType.ChannelPressure
+    event.messageType === Spec.MidiChannelVoiceMessageType.ChannelPressure
   )
 }
 
-function isNoteOnEvent(event: MidiTrackEvent): event is MidiChannelMessage {
+function isNoteOnEvent(
+  event: Spec.MidiTrackEvent
+): event is Spec.MidiChannelMessage {
   return (
     isMidiEvent(event) &&
-    event.messageType === MidiChannelVoiceMessageType.NoteOn
+    event.messageType === Spec.MidiChannelVoiceMessageType.NoteOn
   )
 }
 
-function isNoteOffEvent(event: MidiTrackEvent): event is MidiChannelMessage {
+function isNoteOffEvent(
+  event: Spec.MidiTrackEvent
+): event is Spec.MidiChannelMessage {
   return (
     isMidiEvent(event) &&
-    event.messageType === MidiChannelVoiceMessageType.NoteOff
+    event.messageType === Spec.MidiChannelVoiceMessageType.NoteOff
   )
 }
 
 function isNoteOnWithZeroVelocity(
-  event: MidiTrackEvent
-): event is MidiChannelMessage & { data2: 0 } {
+  event: Spec.MidiTrackEvent
+): event is Spec.MidiChannelMessage & { data2: 0 } {
   return isNoteOnEvent(event) && event.data2 === 0
 }
 
 export function isEffectiveNoteOff(
-  event: MidiTrackEvent
-): event is MidiChannelMessage &
+  event: Spec.MidiTrackEvent
+): event is Spec.MidiChannelMessage &
   (
-    | { messageType: MidiChannelVoiceMessageType.NoteOff }
-    | { messageType: MidiChannelVoiceMessageType.NoteOn; data2: 0 }
+    | { messageType: Spec.MidiChannelVoiceMessageType.NoteOff }
+    | { messageType: Spec.MidiChannelVoiceMessageType.NoteOn; data2: 0 }
   ) {
   return isNoteOffEvent(event) || isNoteOnWithZeroVelocity(event)
 }
 
 export function isEffectiveNoteOn(
-  event: MidiTrackEvent
-): event is MidiChannelMessage & {
-  messageType: MidiChannelVoiceMessageType.NoteOn
+  event: Spec.MidiTrackEvent
+): event is Spec.MidiChannelMessage & {
+  messageType: Spec.MidiChannelVoiceMessageType.NoteOn
 } {
   return isNoteOnEvent(event) && !isNoteOnWithZeroVelocity(event)
 }
 
 export function isControllerChangeEvent(
-  event: MidiTrackEvent
-): event is MidiChannelControllerChangeMessage {
+  event: Spec.MidiTrackEvent
+): event is Spec.MidiChannelControllerChangeMessage {
   return (
     isMidiEvent(event) &&
-    event.messageType === MidiChannelVoiceMessageType.ControlChange
+    event.messageType === Spec.MidiChannelVoiceMessageType.ControlChange
   )
 }
 
 export function isProgramChangeEvent(
-  event: MidiTrackEvent
-): event is MidiChannelControllerChangeMessage & {
-  messageType: MidiChannelVoiceMessageType.ProgramChange
+  event: Spec.MidiTrackEvent
+): event is Spec.MidiChannelControllerChangeMessage & {
+  messageType: Spec.MidiChannelVoiceMessageType.ProgramChange
 } {
   return (
     isMidiEvent(event) &&
-    event.messageType === MidiChannelVoiceMessageType.ProgramChange
+    event.messageType === Spec.MidiChannelVoiceMessageType.ProgramChange
   )
 }
 
 export function isPercussionEvent(
-  event: MidiTrackEvent
-): event is MidiChannelMessage & { channel: 9 } {
+  event: Spec.MidiTrackEvent
+): event is Spec.MidiChannelMessage & { channel: 9 } {
   return isMidiEvent(event) && event.channel === 9
 }
 
-export function isTempoEvent(event: MidiTrackEvent): event is MetaEvent {
-  return isMetaEvent(event) && event.metaType === MetaEventType.SetTempo
+export function isTempoEvent(
+  event: Spec.MidiTrackEvent
+): event is Spec.MetaEvent {
+  return isMetaEvent(event) && event.metaType === Spec.MetaEventType.SetTempo
 }

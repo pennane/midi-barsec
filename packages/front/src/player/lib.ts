@@ -1,14 +1,15 @@
-import { DEFAULT_TEMPO, calculateTickDuration } from '../lib'
-import { MidiParser } from '../parser/midiParser'
+import { DEFAULT_TEMPO, calculateTickDuration, withStartingTime } from '../lib'
+import { MidiParser } from '../parser'
+
 import { PlaybackContext, PlayerState } from './models'
 
 export function calculatePosition(
   audioContext: AudioContext,
   state: PlayerState
 ): number {
-  if (!state.playbackContext || state.totalDuration === 0) return 0
+  if (!state.playbackContext || state.midi?.duration() === 0) return 0
   const elapsed = audioContext.currentTime - state.playbackContext.startTime
-  return Math.min(elapsed / state.totalDuration, 1)
+  return Math.min(elapsed / state.midi.duration(), 1)
 }
 
 export function createPlaybackContext(
@@ -39,9 +40,8 @@ export function createPlaybackContext(
 export function loadMidi(state: PlayerState, midi: MidiParser): PlayerState {
   return {
     ...state,
-    currentMidi: midi,
+    midi: midi,
     playbackContext: null,
-    totalDuration: midi.duration(),
     pausedPosition: 0,
     isPlaying: false
   }
@@ -54,49 +54,50 @@ export function pausePlayback(
   return { ...state, isPlaying: false, pausedPosition: currentPosition }
 }
 
-export function resumePlayback(
+export function startPlayback(
   state: PlayerState,
   audioContext: AudioContext,
   gainNode: GainNode
 ): PlayerState {
-  if (!state.currentMidi) return state
-
-  let context = state.playbackContext
-  if (!context) {
-    context = createPlaybackContext(state.currentMidi, audioContext, gainNode)
-  } else {
-    const now = audioContext.currentTime
-    const elapsedTime = state.pausedPosition * state.totalDuration
-    context.scheduledTime = now
-    context.startTime = now - elapsedTime
-
-    if (state.pausedPosition > 0) {
-      const targetTime = state.pausedPosition * state.totalDuration
-      const { reader } = state.currentMidi.createSeekReader(targetTime)
-      context.eventIterator = reader[Symbol.iterator]()
+  if (!state.midi) {
+    return state
+  }
+  if (!state.playbackContext) {
+    return {
+      ...state,
+      playbackContext: createPlaybackContext(
+        state.midi,
+        audioContext,
+        gainNode
+      ),
+      isPlaying: true
     }
   }
 
-  return { ...state, isPlaying: true, playbackContext: context }
+  const now = audioContext.currentTime
+  const elapsedTime = state.pausedPosition * state.midi.duration()
+  state.playbackContext.scheduledTime = now
+  state.playbackContext.startTime = now - elapsedTime
+
+  return { ...state, isPlaying: true }
 }
 
 export function seekTo(state: PlayerState, position: number): PlayerState {
-  if (!state.currentMidi || !state.playbackContext) return state
+  if (!state.midi || !state.playbackContext) return state
 
-  const targetTime = position * state.totalDuration
-  const { reader, actualPosition } =
-    state.currentMidi.createSeekReader(targetTime)
+  const targetTime = position * state.midi.duration()
+  const reader = withStartingTime(state.midi, targetTime)
 
   const updatedContext = {
     ...state.playbackContext,
     eventIterator: reader[Symbol.iterator](),
     scheduledTime: state.playbackContext.audioContext.currentTime,
-    startTime: state.playbackContext.audioContext.currentTime - actualPosition
+    startTime: state.playbackContext.audioContext.currentTime - targetTime
   }
 
   return {
     ...state,
     playbackContext: updatedContext,
-    pausedPosition: actualPosition / state.totalDuration
+    pausedPosition: position
   }
 }

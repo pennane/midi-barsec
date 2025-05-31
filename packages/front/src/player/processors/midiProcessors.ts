@@ -3,7 +3,7 @@ import {
   MidiChannelControllerChangeMessage,
   MidiChannelMessage,
   MidiControllerChange
-} from '../../spec'
+} from '../../parser/spec'
 import { instrumentForProgramNumber } from '../instruments'
 
 import { EventProcessor } from '../models'

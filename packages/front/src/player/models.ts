@@ -1,5 +1,4 @@
-import { MidiParser } from '../parser/midiParser'
-import { MTrkEvent } from '../spec'
+import { MidiParser, Spec } from '../parser'
 
 export type MidiPlayerEventMap = {
   progressUpdate: {
@@ -18,7 +17,7 @@ export type MidiPlayer = {
   duration: () => number
   isPlaying(): boolean
   seek: (position: number) => void
-  load: (midi: MidiParser) => Promise<void>
+  load: (midi: MidiParser) => Promise<MidiPlayer>
   addEventListener: <T extends MidiPlayerEventType>(
     type: T,
     listener: (event: CustomEvent<MidiPlayerEventMap[T]>) => void
@@ -71,7 +70,7 @@ export type PlaybackContext = {
   audioContext: AudioContext
   gainNode: GainNode
   channels: Map<number, Channel>
-  eventIterator: Iterator<MTrkEvent, void, void>
+  eventIterator: Iterator<Spec.MTrkEvent, void, void>
   division: number
   tickDuration: number
   scheduledTime: number
@@ -79,10 +78,9 @@ export type PlaybackContext = {
 }
 
 export type PlayerState = {
-  currentMidi: MidiParser | null
+  midi: MidiParser
   playbackContext: PlaybackContext | null
   isPlaying: boolean
-  totalDuration: number
   pausedPosition: number
 }
 

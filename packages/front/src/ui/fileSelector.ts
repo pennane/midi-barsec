@@ -1,5 +1,5 @@
-import { MidiParser } from '../parser/midiParser'
-import { MidiPlayer } from '../player/models'
+import { createMidiParser } from '../parser'
+import { MidiPlayer } from '../player'
 
 let midiPlayer: MidiPlayer
 export function initFileSelector(player: MidiPlayer): void {
@@ -27,7 +27,7 @@ async function selectFile(event: Event): Promise<void> {
   }
 
   try {
-    const midi = new MidiParser(arrayBuffer)
+    const midi = createMidiParser(arrayBuffer)
     await midiPlayer.load(midi)
   } catch (e) {
     alert(e)

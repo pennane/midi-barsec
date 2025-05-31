@@ -1,5 +1,5 @@
 import { calculateTickDuration, readUint24BE } from '../../lib'
-import { MetaEvent, MetaEventType } from '../../spec'
+import { MetaEvent, MetaEventType } from '../../parser/spec'
 
 import { announce } from '../../ui/textAnnouncer'
 import { EventProcessor } from '../models'

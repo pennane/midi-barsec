@@ -1,5 +1,5 @@
 import { Spec } from '../../../parser'
-import { EventProcessor, MidiPlayerStrategies, Note } from '../../models'
+import { EventProcessor, Note } from '../../models'
 import { getOrCreateChannel } from '../lib'
 import { PERCUSSION_CONFIGS } from './config'
 
@@ -12,8 +12,10 @@ import {
   stopLongPercussionNote
 } from './lib'
 
-const basePercussionProcessors = {
+export const percussionProcessors = {
   noteOn: (ctx, event) => {
+    if (ctx.strategies.percussion.type === 'disabled') return
+
     const channel = getOrCreateChannel(ctx, event.channel, true)
     const velocity = event.data2 ?? 127
 
@@ -49,6 +51,8 @@ const basePercussionProcessors = {
   },
 
   noteOff: (ctx, event) => {
+    if (ctx.strategies.percussion.type === 'disabled') return
+
     const channel = getOrCreateChannel(ctx, event.channel, true)
     const noteNumber = event.data1 as Spec.GeneralMidiInstrument.Percussion
     const note = channel.notes.get(noteNumber)
@@ -62,20 +66,3 @@ const basePercussionProcessors = {
     }
   }
 } as const satisfies Record<string, EventProcessor<Spec.MidiChannelMessage>>
-
-const disabledPercussionProcessors = {
-  noteOn: () => {},
-  noteOff: () => {}
-} as const satisfies Record<string, EventProcessor<Spec.MidiChannelMessage>>
-
-export function createPercussionProcessors(
-  strategy: MidiPlayerStrategies['percussion']
-) {
-  switch (strategy.type) {
-    case 'disabled':
-      return disabledPercussionProcessors
-    case 'enabled':
-    default:
-      return basePercussionProcessors
-  }
-}

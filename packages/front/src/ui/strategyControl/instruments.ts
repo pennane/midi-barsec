@@ -11,11 +11,11 @@ const formatGroupName = (name: string): string =>
   name.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())
 
 const createInstrumentOptions = (): UiStrategyOption[] => [
-  createOption('instruments', 'Auto'),
+  createOption('instruments', 'Multi instrument'),
   createOption('disabled', 'Disabled'),
-  ...Object.keys(Instruments.instruments.basic).map((name) =>
-    createOption(`fixed-${name}`, formatInstrumentName(name))
-  ),
+  ...Object.keys(Instruments.instruments.basic)
+    .filter((key) => key !== 'default')
+    .map((name) => createOption(`fixed-${name}`, formatInstrumentName(name))),
   ...Object.keys(Instruments.instruments.groups).map((name) =>
     createOption(`fixed-${name}`, formatGroupName(name))
   )
@@ -55,6 +55,7 @@ const updateInstrumentsStrategy = (player: MidiPlayer, value: string): void => {
   }
 
   if (value === 'disabled') {
+    console.log('DISABLIN')
     player.updateStrategies({ instruments: { type: 'disabled' } })
     return
   }

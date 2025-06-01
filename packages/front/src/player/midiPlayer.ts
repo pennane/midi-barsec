@@ -152,6 +152,8 @@ class Player implements MidiPlayer {
 
     if (!this.state.playbackContext) return
 
+    this.state.playbackContext.strategies = this.strategies
+
     for (const [
       number,
       channel

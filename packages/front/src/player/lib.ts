@@ -80,10 +80,19 @@ export function startPlayback(
 
   const now = audioContext.currentTime
   const elapsedTime = state.pausedPosition * state.midi.duration()
-  state.playbackContext.scheduledTime = now
-  state.playbackContext.startTime = now - elapsedTime
 
-  return { ...state, isPlaying: true }
+  const updatedContext: PlaybackContext = {
+    ...state.playbackContext,
+    strategies,
+    scheduledTime: now,
+    startTime: now - elapsedTime
+  }
+
+  return {
+    ...state,
+    isPlaying: true,
+    playbackContext: updatedContext
+  }
 }
 
 export function seekTo(state: PlayerState, position: number): PlayerState {

@@ -55,7 +55,6 @@ const updateInstrumentsStrategy = (player: MidiPlayer, value: string): void => {
   }
 
   if (value === 'disabled') {
-    console.log('DISABLIN')
     player.updateStrategies({ instruments: { type: 'disabled' } })
     return
   }

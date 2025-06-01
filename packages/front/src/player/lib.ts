@@ -81,12 +81,11 @@ export function startPlayback(
   const now = audioContext.currentTime
   const elapsedTime = state.pausedPosition * state.midi.duration()
 
-  const updatedContext: PlaybackContext = {
-    ...state.playbackContext,
-    strategies,
-    scheduledTime: now,
-    startTime: now - elapsedTime
-  }
+  const updatedContext = state.playbackContext
+
+  updatedContext.strategies = strategies
+  updatedContext.scheduledTime = now
+  updatedContext.startTime = now - elapsedTime
 
   return {
     ...state,

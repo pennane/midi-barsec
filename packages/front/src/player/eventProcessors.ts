@@ -30,25 +30,21 @@ function matchEvent<IN>(
   }
 }
 
-const processPercussionEvent: EventProcessor<Spec.MidiChannelMessage> =
-  matchEvent(
-    [
-      isEffectiveNoteOn,
-      (ctx, event) => percussionProcessors.noteOn(ctx, event)
-    ],
-    [
-      isEffectiveNoteOff,
-      (ctx, event) => percussionProcessors.noteOff(ctx, event)
-    ],
-    [
-      (_): _ is any => true,
-      (_, event) =>
-        console.info(
-          'unhandled percussion event',
-          Spec.MidiChannelVoiceMessageType[event.messageType]
-        )
-    ]
-  )
+const processPercussionEvent = matchEvent(
+  [isEffectiveNoteOn, (ctx, event) => percussionProcessors.noteOn(ctx, event)],
+  [
+    isEffectiveNoteOff,
+    (ctx, event) => percussionProcessors.noteOff(ctx, event)
+  ],
+  [
+    (_): _ is any => true,
+    (_, event) =>
+      console.info(
+        'unhandled percussion event',
+        Spec.MidiChannelVoiceMessageType[event.messageType]
+      )
+  ]
+)
 
 const processControllerEvent: EventProcessor<
   Spec.MidiChannelControllerChangeMessage
@@ -61,6 +57,7 @@ const processControllerEvent: EventProcessor<
     )
     return
   }
+  if (ctx.strategies.controllers.type === 'disabled') return
   return processor(ctx, event)
 }
 
@@ -85,7 +82,10 @@ const processMidi: EventProcessor<Spec.MidiChannelMessage> = matchEvent(
 const processMetaEvent: EventProcessor<Spec.MetaEvent> = (ctx, event) => {
   const processor = metaProcessors[event.metaType]
   if (!processor) {
-    console.info('unhandled meta event', Spec.MetaEventType[event.metaType])
+    console.info(
+      'unhandled meta event',
+      Spec.MetaEventType[event.metaType] ?? 'unknown ' + event.metaType
+    )
     return
   }
   return processor(ctx, event)

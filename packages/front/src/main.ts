@@ -1,4 +1,4 @@
-import defaultMidiFile from './axelf.mid?arraybuffer'
+import defaultMidiFile from './chaozfantasy.mid?arraybuffer'
 import './style.css'
 
 import { createMidiParser } from './parser'

@@ -31,5 +31,6 @@ export const metaProcessors = {
   },
   [Spec.MetaEventType.Lyric]: announceMessage,
   [Spec.MetaEventType.CopyrightNotice]: announceMessage,
-  [Spec.MetaEventType.EndOfTrack]: stopNotes
+  [Spec.MetaEventType.EndOfTrack]: stopNotes,
+  [Spec.MetaEventType.TextEvent]: announceMessage
 } as { [key in Spec.MetaEventType]?: EventProcessor<Spec.MetaEvent> }

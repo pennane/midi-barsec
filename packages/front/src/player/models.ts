@@ -62,7 +62,8 @@ export type Instrument = {
 export type Channel = {
   gain: GainNode
   panner: StereoPannerNode
-  instrument: Instrument
+  instrument: () => Instrument
+  updateProgram: (programNumber: Spec.GeneralMidiInstrument.Instrument) => void
   notes: Map<number, Note>
   sustain: boolean
   /** 0.0–1.0 */

@@ -1,5 +1,24 @@
-import { instruments } from '../instruments'
+import { Spec } from '../../parser'
+import { instrumentForProgramNumber, instruments, silent } from '../instruments'
 import { Channel, PlaybackContext } from '../models'
+
+const instrumentHandler = (ctx: PlaybackContext) => {
+  let programInstrument = instruments.basic.default()
+
+  return {
+    instrument: () => {
+      if (ctx.strategies.instruments.type === 'disabled') {
+        return silent
+      } else if (ctx.strategies.instruments.type === 'fixed') {
+        return ctx.strategies.instruments.instrument
+      }
+      return programInstrument
+    },
+    updateProgram: (programNumber: Spec.GeneralMidiInstrument.Instrument) => {
+      programInstrument = instrumentForProgramNumber(programNumber)
+    }
+  }
+}
 
 export function getOrCreateChannel(
   ctx: PlaybackContext,
@@ -15,17 +34,10 @@ export function getOrCreateChannel(
   panner.connect(gain)
   gain.connect(ctx.gainNode)
 
-  let instrument
-  if (ctx.strategies.instruments.type === 'fixed') {
-    instrument = ctx.strategies.instruments.instrument
-  } else {
-    instrument = instruments.basic.default()
-  }
-
   channel = {
     gain,
     panner,
-    instrument,
+    ...instrumentHandler(ctx),
     notes: new Map(),
     sustain: false,
     pitchBend: 0,

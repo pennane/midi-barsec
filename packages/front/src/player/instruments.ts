@@ -89,7 +89,7 @@ const createGenericInstrument = (config: InstrumentConfig): Instrument => {
   }
 }
 
-const silent = createGenericInstrument({
+export const silent = createGenericInstrument({
   oscillatorType: 'triangle',
   envelope: {},
   gainMultiplier: 0
@@ -126,144 +126,163 @@ export const instruments = {
   groups: {
     piano: () =>
       createGenericInstrument({
-        oscillatorType: 'triangle',
+        oscillatorType: 'square',
         envelope: {
-          attack: 0.01,
-          decay: 0.3,
-          sustainLevel: 0.7,
-          release: 0.75
+          attack: 0.005,
+          decay: 0.1,
+          sustainLevel: 0.8,
+          release: 0.2
         }
       }),
     chromaticPercussion: () =>
       createGenericInstrument({
         oscillatorType: 'square',
         envelope: {
-          decay: 1,
-          attack: 1,
-          sustainLevel: 0.001,
-          release: 0.5
+          attack: 0.002,
+          decay: 0.1,
+          sustainLevel: 0.2,
+          release: 0.1
         }
       }),
     organ: () =>
       createGenericInstrument({
         oscillatorType: 'sawtooth',
         envelope: {
-          release: 0.1
+          attack: 0.005,
+          decay: 0.1,
+          sustainLevel: 1.0,
+          release: 0.2
         },
-        gainMultiplier: 0.8
+        gainMultiplier: 1.0
       }),
     guitar: () =>
       createGenericInstrument({
         oscillatorType: 'sawtooth',
         envelope: {
-          attack: 0.005,
-          decay: 1.0,
-          sustainLevel: 0.3,
-          release: 0.2
+          attack: 0.003,
+          decay: 0.15,
+          sustainLevel: 0.6,
+          release: 0.15
         }
       }),
     bass: () =>
       createGenericInstrument({
-        oscillatorType: 'triangle',
+        oscillatorType: 'square',
         envelope: {
-          attack: 0.02,
-          release: 0.3
+          attack: 0.002,
+          decay: 0.1,
+          sustainLevel: 0.9,
+          release: 0.15
         }
       }),
     strings: () =>
       createGenericInstrument({
         oscillatorType: 'sawtooth',
         envelope: {
-          attack: 0.1,
-          release: 0.4
+          attack: 0.01,
+          decay: 0.2,
+          sustainLevel: 0.7,
+          release: 0.2
         },
-        gainMultiplier: 0.7
+        gainMultiplier: 0.9
       }),
     ensemble: () =>
       createGenericInstrument({
-        oscillatorType: 'sine',
+        oscillatorType: 'sawtooth',
         envelope: {
-          attack: 0.15,
-          release: 0.6
+          attack: 0.01,
+          decay: 0.1,
+          sustainLevel: 0.8,
+          release: 0.3
         },
-        gainMultiplier: 0.6
+        gainMultiplier: 0.85
       }),
     brass: () =>
       createGenericInstrument({
         oscillatorType: 'square',
         envelope: {
-          attack: 0.05,
-          decay: 0.2,
-          sustainLevel: 0.8,
-          release: 0.2
+          attack: 0.01,
+          decay: 0.1,
+          sustainLevel: 0.9,
+          release: 0.15
         }
       }),
     reed: () =>
       createGenericInstrument({
-        oscillatorType: 'triangle',
+        oscillatorType: 'square',
         envelope: {
-          attack: 0.08,
-          release: 0.3
+          attack: 0.01,
+          decay: 0.1,
+          sustainLevel: 0.85,
+          release: 0.2
         },
-        gainMultiplier: 0.7
+        gainMultiplier: 0.9
       }),
     pipe: () =>
       createGenericInstrument({
-        oscillatorType: 'sine',
+        oscillatorType: 'triangle',
         envelope: {
-          attack: 0.06,
-          release: 0.25
+          attack: 0.01,
+          decay: 0.1,
+          sustainLevel: 0.75,
+          release: 0.2
         },
-        gainMultiplier: 0.6
+        gainMultiplier: 0.8
       }),
     synthLead: () =>
       createGenericInstrument({
         oscillatorType: 'sawtooth',
         envelope: {
+          attack: 0.002,
+          decay: 0.05,
+          sustainLevel: 1.0,
           release: 0.1
         },
-        gainMultiplier: 0.8
+        gainMultiplier: 1.0
       }),
     synthPad: () =>
       createGenericInstrument({
-        oscillatorType: 'sine',
+        oscillatorType: 'triangle',
         envelope: {
-          attack: 0.3,
-          release: 1.0
+          attack: 0.01,
+          decay: 0.1,
+          sustainLevel: 0.9,
+          release: 0.3
         },
-        gainMultiplier: 0.5
+        gainMultiplier: 0.8
       }),
     synthEffects: () =>
       createGenericInstrument({
         oscillatorType: 'square',
         envelope: {
-          attack: 0.1,
-          decay: 0.5,
-          sustainLevel: 0.3,
-          release: 0.8
+          attack: 0.005,
+          decay: 0.15,
+          sustainLevel: 0.7,
+          release: 0.2
         },
-        gainMultiplier: 0.6
+        gainMultiplier: 0.9
       }),
     ethnic: () =>
       createGenericInstrument({
-        oscillatorType: 'triangle',
+        oscillatorType: 'square',
         envelope: {
-          attack: 0.03,
-          decay: 0.8,
-          sustainLevel: 0.4,
-          release: 0.4
+          attack: 0.005,
+          decay: 0.2,
+          sustainLevel: 0.6,
+          release: 0.2
         },
-        gainMultiplier: 0.7
+        gainMultiplier: 0.8
       }),
     soundEffects: () =>
       createGenericInstrument({
         oscillatorType: 'square',
         envelope: {
-          decay: 0.2,
-          sustainLevel: 0.8,
-          release: 1.0
+          attack: 0.002,
+          decay: 0.1,
+          sustainLevel: 1.0,
+          release: 0.3
         },
-        gainMultiplier: 0.5
+        gainMultiplier: 0.9
       })
   }
 }

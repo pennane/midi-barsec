@@ -1,7 +1,6 @@
 import { SCHEDULE_AHEAD_TIME } from '../lib'
 import { MidiParser } from '../parser'
 import { processEvent } from './eventProcessors'
-import { instruments } from './instruments'
 
 import {
   calculatePosition,
@@ -153,20 +152,6 @@ class Player implements MidiPlayer {
     if (!this.state.playbackContext) return
 
     this.state.playbackContext.strategies = this.strategies
-
-    for (const [
-      number,
-      channel
-    ] of this.state.playbackContext.channels.entries()) {
-      // Skip percussion channel
-      if (number === 9) continue
-
-      if (curr.instruments?.type === 'fixed') {
-        channel.instrument = curr.instruments.instrument
-      } else if (curr.instruments?.type === 'instruments') {
-        channel.instrument = instruments.basic.default()
-      }
-    }
   }
 
   currentStrategies() {

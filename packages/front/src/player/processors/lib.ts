@@ -15,10 +15,20 @@ export function getOrCreateChannel(
   panner.connect(gain)
   gain.connect(ctx.gainNode)
 
+  // Determine the initial instrument based on strategies
+  let instrument
+  if (ctx.strategies.instruments.type === 'fixed') {
+    // Use the fixed instrument from strategy
+    instrument = ctx.strategies.instruments.instrument
+  } else {
+    // Use default instrument (will be overridden by program change events)
+    instrument = instruments.basic.default()
+  }
+
   channel = {
     gain,
     panner,
-    instrument: instruments.basic.default(),
+    instrument,
     notes: new Map(),
     sustain: false,
     pitchBend: 0,

@@ -1,8 +1,8 @@
-import { GeneralMidiInstrument } from '../../../parser/spec'
+import { Spec } from '../../../parser'
 import { PercussionConfig } from './models'
 
 export const PERCUSSION_CONFIGS = {
-  [GeneralMidiInstrument.Percussion.AcousticBassDrum]: {
+  [Spec.GeneralMidiInstrument.Percussion.AcousticBassDrum]: {
     type: 'oscillator',
     frequency: 60,
     duration: 0.5,
@@ -11,7 +11,7 @@ export const PERCUSSION_CONFIGS = {
     filterFrequency: 200,
     envelope: { attack: 0.01, decay: 0.1, sustain: 0.3, release: 0.4 }
   },
-  [GeneralMidiInstrument.Percussion.BassDrum1]: {
+  [Spec.GeneralMidiInstrument.Percussion.BassDrum1]: {
     type: 'oscillator',
     frequency: 50,
     duration: 0.4,
@@ -20,7 +20,7 @@ export const PERCUSSION_CONFIGS = {
     filterFrequency: 180,
     envelope: { attack: 0.01, decay: 0.08, sustain: 0.2, release: 0.3 }
   },
-  [GeneralMidiInstrument.Percussion.AcousticSnare]: {
+  [Spec.GeneralMidiInstrument.Percussion.AcousticSnare]: {
     type: 'hybrid',
     frequency: 200,
     duration: 0.2,
@@ -30,7 +30,7 @@ export const PERCUSSION_CONFIGS = {
     filterQ: 1,
     envelope: { attack: 0.01, decay: 0.05, sustain: 0.1, release: 0.14 }
   },
-  [GeneralMidiInstrument.Percussion.ElectricSnare]: {
+  [Spec.GeneralMidiInstrument.Percussion.ElectricSnare]: {
     type: 'hybrid',
     frequency: 250,
     duration: 0.15,
@@ -40,7 +40,7 @@ export const PERCUSSION_CONFIGS = {
     filterQ: 1.5,
     envelope: { attack: 0.005, decay: 0.04, sustain: 0.05, release: 0.1 }
   },
-  [GeneralMidiInstrument.Percussion.ClosedHiHat]: {
+  [Spec.GeneralMidiInstrument.Percussion.ClosedHiHat]: {
     type: 'noise',
     duration: 0.1,
     volume: 0.6,
@@ -49,7 +49,7 @@ export const PERCUSSION_CONFIGS = {
     filterQ: 2,
     envelope: { attack: 0.001, decay: 0.02, sustain: 0.01, release: 0.07 }
   },
-  [GeneralMidiInstrument.Percussion.PedalHiHat]: {
+  [Spec.GeneralMidiInstrument.Percussion.PedalHiHat]: {
     type: 'noise',
     duration: 0.08,
     volume: 0.5,
@@ -58,7 +58,7 @@ export const PERCUSSION_CONFIGS = {
     filterQ: 2.5,
     envelope: { attack: 0.001, decay: 0.015, sustain: 0.005, release: 0.06 }
   },
-  [GeneralMidiInstrument.Percussion.OpenHiHat]: {
+  [Spec.GeneralMidiInstrument.Percussion.OpenHiHat]: {
     type: 'noise',
     duration: 0.3,
     volume: 0.6,
@@ -67,7 +67,7 @@ export const PERCUSSION_CONFIGS = {
     filterQ: 1.5,
     envelope: { attack: 0.001, decay: 0.05, sustain: 0.2, release: 0.25 }
   },
-  [GeneralMidiInstrument.Percussion.CrashCymbal1]: {
+  [Spec.GeneralMidiInstrument.Percussion.CrashCymbal1]: {
     type: 'noise',
     duration: 2.0,
     volume: 0.5,
@@ -76,7 +76,7 @@ export const PERCUSSION_CONFIGS = {
     filterQ: 0.5,
     envelope: { attack: 0.01, decay: 0.3, sustain: 0.4, release: 1.3 }
   },
-  [GeneralMidiInstrument.Percussion.CrashCymbal2]: {
+  [Spec.GeneralMidiInstrument.Percussion.CrashCymbal2]: {
     type: 'noise',
     duration: 1.8,
     volume: 0.4,
@@ -85,7 +85,7 @@ export const PERCUSSION_CONFIGS = {
     filterQ: 0.6,
     envelope: { attack: 0.01, decay: 0.25, sustain: 0.35, release: 1.2 }
   },
-  [GeneralMidiInstrument.Percussion.RideCymbal1]: {
+  [Spec.GeneralMidiInstrument.Percussion.RideCymbal1]: {
     type: 'noise',
     duration: 1.0,
     volume: 0.5,
@@ -94,7 +94,7 @@ export const PERCUSSION_CONFIGS = {
     filterQ: 1,
     envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 0.6 }
   },
-  [GeneralMidiInstrument.Percussion.RideCymbal2]: {
+  [Spec.GeneralMidiInstrument.Percussion.RideCymbal2]: {
     type: 'noise',
     duration: 0.8,
     volume: 0.5,
@@ -103,7 +103,7 @@ export const PERCUSSION_CONFIGS = {
     filterQ: 1.2,
     envelope: { attack: 0.005, decay: 0.08, sustain: 0.25, release: 0.5 }
   },
-  [GeneralMidiInstrument.Percussion.LowFloorTom]: {
+  [Spec.GeneralMidiInstrument.Percussion.LowFloorTom]: {
     type: 'oscillator',
     frequency: 80,
     duration: 0.4,
@@ -112,7 +112,7 @@ export const PERCUSSION_CONFIGS = {
     filterFrequency: 500,
     envelope: { attack: 0.01, decay: 0.1, sustain: 0.2, release: 0.3 }
   },
-  [GeneralMidiInstrument.Percussion.LowTom]: {
+  [Spec.GeneralMidiInstrument.Percussion.LowTom]: {
     type: 'oscillator',
     frequency: 100,
     duration: 0.35,
@@ -121,7 +121,7 @@ export const PERCUSSION_CONFIGS = {
     filterFrequency: 600,
     envelope: { attack: 0.01, decay: 0.08, sustain: 0.15, release: 0.26 }
   },
-  [GeneralMidiInstrument.Percussion.LowMidTom]: {
+  [Spec.GeneralMidiInstrument.Percussion.LowMidTom]: {
     type: 'oscillator',
     frequency: 120,
     duration: 0.3,
@@ -130,7 +130,7 @@ export const PERCUSSION_CONFIGS = {
     filterFrequency: 700,
     envelope: { attack: 0.01, decay: 0.07, sustain: 0.12, release: 0.22 }
   },
-  [GeneralMidiInstrument.Percussion.HiMidTom]: {
+  [Spec.GeneralMidiInstrument.Percussion.HiMidTom]: {
     type: 'oscillator',
     frequency: 150,
     duration: 0.25,
@@ -139,7 +139,7 @@ export const PERCUSSION_CONFIGS = {
     filterFrequency: 800,
     envelope: { attack: 0.01, decay: 0.06, sustain: 0.1, release: 0.18 }
   },
-  [GeneralMidiInstrument.Percussion.HighFloorTom]: {
+  [Spec.GeneralMidiInstrument.Percussion.HighFloorTom]: {
     type: 'oscillator',
     frequency: 180,
     duration: 0.2,
@@ -148,7 +148,7 @@ export const PERCUSSION_CONFIGS = {
     filterFrequency: 900,
     envelope: { attack: 0.01, decay: 0.05, sustain: 0.08, release: 0.14 }
   },
-  [GeneralMidiInstrument.Percussion.HighTom]: {
+  [Spec.GeneralMidiInstrument.Percussion.HighTom]: {
     type: 'oscillator',
     frequency: 200,
     duration: 0.18,
@@ -157,7 +157,7 @@ export const PERCUSSION_CONFIGS = {
     filterFrequency: 1000,
     envelope: { attack: 0.01, decay: 0.04, sustain: 0.06, release: 0.12 }
   },
-  [GeneralMidiInstrument.Percussion.SideStick]: {
+  [Spec.GeneralMidiInstrument.Percussion.SideStick]: {
     type: 'oscillator',
     frequency: 1000,
     duration: 0.05,
@@ -166,7 +166,7 @@ export const PERCUSSION_CONFIGS = {
     filterFrequency: 800,
     envelope: { attack: 0.001, decay: 0.01, sustain: 0.02, release: 0.04 }
   },
-  [GeneralMidiInstrument.Percussion.HandClap]: {
+  [Spec.GeneralMidiInstrument.Percussion.HandClap]: {
     type: 'noise',
     duration: 0.1,
     volume: 0.7,
@@ -175,7 +175,7 @@ export const PERCUSSION_CONFIGS = {
     filterQ: 2,
     envelope: { attack: 0.01, decay: 0.03, sustain: 0.02, release: 0.05 }
   },
-  [GeneralMidiInstrument.Percussion.SplashCymbal]: {
+  [Spec.GeneralMidiInstrument.Percussion.SplashCymbal]: {
     type: 'noise',
     duration: 0.8,
     volume: 0.5,
@@ -184,7 +184,7 @@ export const PERCUSSION_CONFIGS = {
     filterQ: 1.5,
     envelope: { attack: 0.005, decay: 0.1, sustain: 0.2, release: 0.5 }
   },
-  [GeneralMidiInstrument.Percussion.RideBell]: {
+  [Spec.GeneralMidiInstrument.Percussion.RideBell]: {
     type: 'oscillator',
     frequency: 2000,
     duration: 0.3,
@@ -194,17 +194,17 @@ export const PERCUSSION_CONFIGS = {
     filterQ: 3,
     envelope: { attack: 0.005, decay: 0.05, sustain: 0.1, release: 0.2 }
   },
-  [GeneralMidiInstrument.Percussion.Cowbell]: {
+  [Spec.GeneralMidiInstrument.Percussion.Cowbell]: {
     type: 'oscillator',
     frequency: 800,
     duration: 0.2,
-    volume: 0.6,
+    volume: 0.7,
     filterType: 'bandpass',
     filterFrequency: 800,
-    filterQ: 5,
+    filterQ: 2,
     envelope: { attack: 0.01, decay: 0.05, sustain: 0.05, release: 0.1 }
   },
-  [GeneralMidiInstrument.Percussion.Tambourine]: {
+  [Spec.GeneralMidiInstrument.Percussion.Tambourine]: {
     type: 'noise',
     duration: 0.3,
     volume: 0.4,
@@ -213,4 +213,4 @@ export const PERCUSSION_CONFIGS = {
     filterQ: 1,
     envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.2 }
   }
-} as { [key in GeneralMidiInstrument.Percussion]?: PercussionConfig }
+} as { [key in Spec.GeneralMidiInstrument.Percussion]?: PercussionConfig }

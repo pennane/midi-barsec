@@ -1,7 +1,7 @@
 import { DEFAULT_TEMPO, calculateTickDuration, withStartingTime } from '../lib'
 import { MidiParser } from '../parser'
 
-import { PlaybackContext, PlayerState } from './models'
+import { MidiPlayerStrategies, PlaybackContext, PlayerState } from './models'
 
 export function calculatePosition(
   audioContext: AudioContext,
@@ -15,7 +15,8 @@ export function calculatePosition(
 export function createPlaybackContext(
   midi: MidiParser,
   audioContext: AudioContext,
-  gainNode: GainNode
+  gainNode: GainNode,
+  strategies: MidiPlayerStrategies
 ): PlaybackContext {
   const division = midi.header.division
   if (typeof division !== 'number') {
@@ -26,6 +27,7 @@ export function createPlaybackContext(
 
   const now = audioContext.currentTime
   return {
+    strategies,
     audioContext,
     gainNode,
     division,
@@ -57,7 +59,8 @@ export function pausePlayback(
 export function startPlayback(
   state: PlayerState,
   audioContext: AudioContext,
-  gainNode: GainNode
+  gainNode: GainNode,
+  strategies: MidiPlayerStrategies
 ): PlayerState {
   if (!state.midi) {
     return state
@@ -68,7 +71,8 @@ export function startPlayback(
       playbackContext: createPlaybackContext(
         state.midi,
         audioContext,
-        gainNode
+        gainNode,
+        strategies
       ),
       isPlaying: true
     }

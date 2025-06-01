@@ -10,10 +10,19 @@ export type MidiPlayerEventMap = {
 }
 export type MidiPlayerEventType = keyof MidiPlayerEventMap
 
+export type MidiPlayerStrategies = {
+  percussion: { type: 'enabled' } | { type: 'disabled' }
+  instruments:
+    | { type: 'instruments' }
+    | { type: 'fixed'; instrument: Instrument }
+    | { type: 'disabled' }
+  controllers: { type: 'enabled' } | { type: 'disabled' }
+}
+
 export type MidiPlayer = {
   pause: () => void
   play: () => Promise<void>
-  position: () => number
+  position: () => MidiPlayerEventMap['progressUpdate']
   duration: () => number
   isPlaying(): boolean
   seek: (position: number) => void
@@ -23,6 +32,7 @@ export type MidiPlayer = {
     listener: (event: CustomEvent<MidiPlayerEventMap[T]>) => void
   ) => void
   removeEventListener: (type: string, listener: EventListener) => void
+  updateStrategies: (strategies: Partial<MidiPlayerStrategies>) => void
 }
 
 export type Note = {
@@ -67,6 +77,7 @@ export type Channel = {
 }
 
 export type PlaybackContext = {
+  strategies: MidiPlayerStrategies
   audioContext: AudioContext
   gainNode: GainNode
   channels: Map<number, Channel>

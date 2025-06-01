@@ -1,10 +1,10 @@
 import { calculateTickDuration, readUint24BE } from '../../lib'
-import { MetaEvent, MetaEventType } from '../../parser/spec'
+import { Spec } from '../../parser'
 
 import { announce } from '../../ui/textAnnouncer'
 import { EventProcessor } from '../models'
 
-const announceMessage: EventProcessor<MetaEvent> = (ctx, event) => {
+const announceMessage: EventProcessor<Spec.MetaEvent> = (ctx, event) => {
   const text = new TextDecoder().decode(event.data)
   const currentTime = ctx.audioContext.currentTime
   const delaySeconds = Math.max(0, ctx.scheduledTime - currentTime)
@@ -15,7 +15,7 @@ const announceMessage: EventProcessor<MetaEvent> = (ctx, event) => {
   }, delayMs)
 }
 
-const stopNotes: EventProcessor<MetaEvent> = (ctx) => {
+const stopNotes: EventProcessor<Spec.MetaEvent> = (ctx) => {
   for (const channel of ctx.channels.values()) {
     for (const note of channel.notes.values()) {
       try {
@@ -26,11 +26,11 @@ const stopNotes: EventProcessor<MetaEvent> = (ctx) => {
 }
 
 export const metaProcessors = {
-  [MetaEventType.SetTempo]: (ctx, event) => {
+  [Spec.MetaEventType.SetTempo]: (ctx, event) => {
     const newTempo = readUint24BE(event.data, 0)
     ctx.tickDuration = calculateTickDuration(newTempo, ctx.division)
   },
-  [MetaEventType.Lyric]: announceMessage,
-  [MetaEventType.CopyrightNotice]: announceMessage,
-  [MetaEventType.EndOfTrack]: stopNotes
-} as { [key in MetaEventType]?: EventProcessor<MetaEvent> }
+  [Spec.MetaEventType.Lyric]: announceMessage,
+  [Spec.MetaEventType.CopyrightNotice]: announceMessage,
+  [Spec.MetaEventType.EndOfTrack]: stopNotes
+} as { [key in Spec.MetaEventType]?: EventProcessor<Spec.MetaEvent> }

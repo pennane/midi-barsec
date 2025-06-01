@@ -1,5 +1,5 @@
 import type { MidiParser, MidiReader } from '../parser'
-import { DEFAULT_TEMPO } from './constants'
+import { DEFAULT_TEMPO } from '../player/constants'
 import { readUint24BE } from './dataUtils'
 import { isTempoEvent } from './typeGuards'
 

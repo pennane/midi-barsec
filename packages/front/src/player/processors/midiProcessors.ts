@@ -1,15 +1,11 @@
 import { pitchBendToMultiplier } from '../../lib'
-import {
-  MidiChannelControllerChangeMessage,
-  MidiChannelMessage,
-  MidiControllerChange
-} from '../../parser/spec'
+import { Spec } from '../../parser'
 import { instrumentForProgramNumber } from '../instruments'
 
-import { EventProcessor } from '../models'
+import { EventProcessor, Instrument, MidiPlayerStrategies } from '../models'
 import { getOrCreateChannel } from './lib'
 
-export const voiceMessageProcessors = {
+const baseVoiceMessageProcessors = {
   noteOn: (ctx, event) => {
     const channel = getOrCreateChannel(ctx, event.channel)
     const velocity = (event.data2 ?? 0) / 127
@@ -78,23 +74,55 @@ export const voiceMessageProcessors = {
     const newInstrument = instrumentForProgramNumber(programNumber)
     channel.instrument = newInstrument
   }
-} as const satisfies Record<string, EventProcessor<MidiChannelMessage>>
+} as const satisfies Record<string, EventProcessor<Spec.MidiChannelMessage>>
+
+function createFixedVoiceMessageProcessors(fixedInstrument: Instrument) {
+  return {
+    ...baseVoiceMessageProcessors,
+    programChange: (ctx, event) => {
+      const channel = getOrCreateChannel(ctx, event.channel)
+      channel.instrument = fixedInstrument
+    }
+  } as const satisfies Record<string, EventProcessor<Spec.MidiChannelMessage>>
+}
+
+const disabledVoiceMessageProcessors = {
+  noteOn: () => {},
+  noteOff: () => {},
+  pitchBend: () => {},
+  channelPressure: () => {},
+  programChange: () => {}
+} as const satisfies Record<string, EventProcessor<Spec.MidiChannelMessage>>
+
+export function createVoiceMessageProcessors(
+  strategy: MidiPlayerStrategies['instruments']
+) {
+  switch (strategy.type) {
+    case 'disabled':
+      return disabledVoiceMessageProcessors
+    case 'fixed':
+      return createFixedVoiceMessageProcessors(strategy.instrument)
+    case 'instruments':
+    default:
+      return baseVoiceMessageProcessors
+  }
+}
 
 export const controllerProcessors = {
-  [MidiControllerChange.ChannelVolumeMSB]: (ctx, event) => {
+  [Spec.MidiControllerChange.ChannelVolumeMSB]: (ctx, event) => {
     if (event.data2 === undefined) return
     const channel = getOrCreateChannel(ctx, event.channel)
     const volume = event.data2 / 127
     channel.gain.gain.setValueAtTime(volume, ctx.scheduledTime)
   },
-  [MidiControllerChange.PanMSB]: (ctx, event) => {
+  [Spec.MidiControllerChange.PanMSB]: (ctx, event) => {
     const channel = getOrCreateChannel(ctx, event.channel)
     if (!channel || event.data2 === undefined) return
 
     const pan = (event.data2 - 64) / 64 // Convert 0–127 to -1.0–1.0
     channel.panner.pan.setValueAtTime(pan, ctx.scheduledTime)
   },
-  [MidiControllerChange.SustainPedal]: (ctx, event) => {
+  [Spec.MidiControllerChange.SustainPedal]: (ctx, event) => {
     if (event.data2 === undefined) return
     const isDown = event.data2 >= 64
     const channel = getOrCreateChannel(ctx, event.channel)
@@ -109,7 +137,7 @@ export const controllerProcessors = {
       }
     }
   },
-  [MidiControllerChange.ResetAllControllers]: (ctx, event): void => {
+  [Spec.MidiControllerChange.ResetAllControllers]: (ctx, event): void => {
     const channel = ctx.channels.get(event.channel)
     if (!channel) return
 
@@ -117,14 +145,14 @@ export const controllerProcessors = {
     channel.panner.pan.setValueAtTime(0, ctx.scheduledTime)
     channel.gain.gain.setValueAtTime(1, ctx.scheduledTime)
   },
-  [MidiControllerChange.AllNotesOff]: (ctx, event) => {
+  [Spec.MidiControllerChange.AllNotesOff]: (ctx, event) => {
     const channel = getOrCreateChannel(ctx, event.channel)
     for (const [key, note] of channel.notes.entries()) {
       note.oscillator.stop(ctx.scheduledTime)
       channel.notes.delete(key)
     }
   },
-  [MidiControllerChange.ExpressionControllerMSB]: (ctx, event) => {
+  [Spec.MidiControllerChange.ExpressionControllerMSB]: (ctx, event) => {
     const value = event.data2 ?? 0
     const channel = getOrCreateChannel(ctx, event.channel)
     channel.expression = value / 127
@@ -135,5 +163,16 @@ export const controllerProcessors = {
     )
   }
 } as {
-  [key in MidiControllerChange]?: EventProcessor<MidiChannelControllerChangeMessage>
+  [key in Spec.MidiControllerChange]?: EventProcessor<Spec.MidiChannelControllerChangeMessage>
+}
+
+export function createControllerProcessors(
+  strategy: MidiPlayerStrategies['controllers']
+) {
+  if (strategy.type === 'disabled') {
+    return Object.fromEntries(
+      Object.keys(controllerProcessors).map((key) => [key, () => {}])
+    ) as typeof controllerProcessors
+  }
+  return controllerProcessors
 }

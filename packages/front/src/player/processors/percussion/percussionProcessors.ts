@@ -1,6 +1,5 @@
-import { MidiChannelMessage } from '../../../parser/spec/auxiliary'
-import { Percussion } from '../../../parser/spec/instruments'
-import { EventProcessor, Note } from '../../models'
+import { Spec } from '../../../parser'
+import { EventProcessor, MidiPlayerStrategies, Note } from '../../models'
 import { getOrCreateChannel } from '../lib'
 import { PERCUSSION_CONFIGS } from './config'
 
@@ -13,13 +12,12 @@ import {
   stopLongPercussionNote
 } from './lib'
 
-// thanks chatgpt
-export const percussionProcessors = {
+const basePercussionProcessors = {
   noteOn: (ctx, event) => {
     const channel = getOrCreateChannel(ctx, event.channel, true)
     const velocity = event.data2 ?? 127
 
-    const noteNumber = event.data1 as Percussion
+    const noteNumber = event.data1 as Spec.GeneralMidiInstrument.Percussion
     const config = PERCUSSION_CONFIGS[noteNumber]
     if (!config) return
     const volume = calculateVolume(config.volume, velocity)
@@ -52,7 +50,7 @@ export const percussionProcessors = {
 
   noteOff: (ctx, event) => {
     const channel = getOrCreateChannel(ctx, event.channel, true)
-    const noteNumber = event.data1 as Percussion
+    const noteNumber = event.data1 as Spec.GeneralMidiInstrument.Percussion
     const note = channel.notes.get(noteNumber)
     const config = PERCUSSION_CONFIGS[noteNumber]
 
@@ -63,4 +61,21 @@ export const percussionProcessors = {
       channel.notes.delete(noteNumber)
     }
   }
-} as const satisfies Record<string, EventProcessor<MidiChannelMessage>>
+} as const satisfies Record<string, EventProcessor<Spec.MidiChannelMessage>>
+
+const disabledPercussionProcessors = {
+  noteOn: () => {},
+  noteOff: () => {}
+} as const satisfies Record<string, EventProcessor<Spec.MidiChannelMessage>>
+
+export function createPercussionProcessors(
+  strategy: MidiPlayerStrategies['percussion']
+) {
+  switch (strategy.type) {
+    case 'disabled':
+      return disabledPercussionProcessors
+    case 'enabled':
+    default:
+      return basePercussionProcessors
+  }
+}

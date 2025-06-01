@@ -73,9 +73,10 @@ const createGenericInstrument = (config: InstrumentConfig): Instrument => {
       }
       return note
     },
-    stopNote(ctx, _channel, note) {
-      if (release > 0) {
-        note.gain.gain.exponentialRampToValueAtTime(
+    stopNote(ctx, channel, note, { reapplied }) {
+      if (release > 0 && !reapplied) {
+        note.gain.gain.cancelScheduledValues(ctx.scheduledTime)
+        note.gain.gain.linearRampToValueAtTime(
           0.001,
           ctx.scheduledTime + release
         )
@@ -83,6 +84,7 @@ const createGenericInstrument = (config: InstrumentConfig): Instrument => {
       } else {
         note.oscillator.stop(ctx.scheduledTime)
       }
+      channel.notes.delete(note.noteNumber)
     }
   }
 }
@@ -129,7 +131,7 @@ export const instruments = {
           attack: 0.01,
           decay: 0.3,
           sustainLevel: 0.7,
-          release: 0.5
+          release: 0.75
         }
       }),
     chromaticPercussion: () =>

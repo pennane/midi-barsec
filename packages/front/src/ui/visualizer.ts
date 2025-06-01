@@ -13,7 +13,7 @@ const updateSize = () => {
   const size = 200
   width = size
   height = size
-  analyser.fftSize = 4096 // ceilPowerOfTwo(width) * 2
+  analyser.fftSize = 2048 // ceilPowerOfTwo(width) * 2
   bufferLength = analyser.frequencyBinCount
   domainData = new Uint8Array(bufferLength)
   canvas.width = width

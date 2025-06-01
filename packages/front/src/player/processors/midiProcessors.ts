@@ -121,10 +121,9 @@ export const controllerProcessors = {
     channel.sustain = isDown
     if (isDown) return
 
-    for (const [key, note] of channel.notes.entries()) {
+    for (const note of channel.notes.values()) {
       if (note.sustained) {
-        note.oscillator.stop(ctx.scheduledTime)
-        channel.notes.delete(key)
+        channel.instrument.stopNote(ctx, channel, note, { reapplied: false })
       }
     }
   },
@@ -140,9 +139,8 @@ export const controllerProcessors = {
   [Spec.MidiControllerChange.AllNotesOff]: (ctx, event) => {
     if (ctx.strategies.controllers.type === 'disabled') return
     const channel = getOrCreateChannel(ctx, event.channel)
-    for (const [key, note] of channel.notes.entries()) {
-      note.oscillator.stop(ctx.scheduledTime)
-      channel.notes.delete(key)
+    for (const note of channel.notes.values()) {
+      channel.instrument.stopNote(ctx, channel, note, { reapplied: false })
     }
   },
   [Spec.MidiControllerChange.ExpressionControllerMSB]: (ctx, event) => {

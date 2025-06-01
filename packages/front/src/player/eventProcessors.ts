@@ -67,26 +67,11 @@ const processControllerEvent: EventProcessor<
 const processMidi: EventProcessor<Spec.MidiChannelMessage> = matchEvent(
   [isControllerChangeEvent, processControllerEvent],
   [isPercussionEvent, processPercussionEvent],
-  [
-    isEffectiveNoteOn,
-    (ctx, event) => voiceMessageProcessors.noteOn(ctx, event)
-  ],
-  [
-    isEffectiveNoteOff,
-    (ctx, event) => voiceMessageProcessors.noteOff(ctx, event)
-  ],
-  [
-    isPitchBendEvent,
-    (ctx, event) => voiceMessageProcessors.pitchBend(ctx, event)
-  ],
-  [
-    isChannelPressureEvent,
-    (ctx, event) => voiceMessageProcessors.channelPressure(ctx, event)
-  ],
-  [
-    isProgramChangeEvent,
-    (ctx, event) => voiceMessageProcessors.programChange(ctx, event)
-  ],
+  [isEffectiveNoteOn, voiceMessageProcessors.noteOn],
+  [isEffectiveNoteOff, voiceMessageProcessors.noteOff],
+  [isPitchBendEvent, voiceMessageProcessors.pitchBend],
+  [isChannelPressureEvent, voiceMessageProcessors.channelPressure],
+  [isProgramChangeEvent, voiceMessageProcessors.programChange],
   [
     (_): _ is any => true,
     (_, event) =>

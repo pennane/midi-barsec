@@ -87,6 +87,12 @@ const createGenericInstrument = (config: InstrumentConfig): Instrument => {
   }
 }
 
+const silent = createGenericInstrument({
+  oscillatorType: 'triangle',
+  envelope: {},
+  gainMultiplier: 0
+})
+
 export const instruments = {
   basic: {
     default: () =>
@@ -130,9 +136,10 @@ export const instruments = {
       createGenericInstrument({
         oscillatorType: 'square',
         envelope: {
-          decay: 1.0,
+          decay: 1,
+          attack: 1,
           sustainLevel: 0.001,
-          release: 0
+          release: 0.5
         }
       }),
     organ: () =>
@@ -284,8 +291,17 @@ export const instrumentForProgramNumber = (programNumber: number) => {
     [Spec.GeneralMidiInstrument.isSoundEffects, instruments.groups.soundEffects]
   ]
 
-  return (
-    conditions.find(([pred, _]) => pred(programNumber))?.[1]() ??
-    instruments.basic.default()
-  )
+  const match = conditions.find(([pred, _]) => pred(programNumber))
+
+  if (!match) {
+    console.info(
+      'unhandled instrument',
+      Spec.GeneralMidiInstrument.InstrumentLookup[
+        programNumber as Spec.GeneralMidiInstrument.Instrument
+      ]
+    )
+    return silent
+  }
+
+  return match[1]()
 }

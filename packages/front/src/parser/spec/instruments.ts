@@ -33,9 +33,9 @@ const Piano = {
   Clavinet: 7
 } as const
 
-const PianoIndex = invert(Piano)
+const PianoLookup = invert(Piano)
 type Piano = (typeof Piano)[keyof typeof Piano]
-export const isPiano = createTypeGuard<Piano>(PianoIndex)
+export const isPiano = createTypeGuard<Piano>(PianoLookup)
 
 const ChromaticPercussion = {
   Celesta: 8,
@@ -48,11 +48,11 @@ const ChromaticPercussion = {
   Dulcimer: 15
 } as const
 
-const ChromaticPercussionIndex = invert(ChromaticPercussion)
+const ChromaticPercussionLookup = invert(ChromaticPercussion)
 export type ChromaticPercussion =
   (typeof ChromaticPercussion)[keyof typeof ChromaticPercussion]
 export const isChromaticPercussion = createTypeGuard<ChromaticPercussion>(
-  ChromaticPercussionIndex
+  ChromaticPercussionLookup
 )
 
 const Organ = {
@@ -66,9 +66,9 @@ const Organ = {
   TangoAccordion: 23
 } as const
 
-const OrganIndex = invert(Organ)
+const OrganLookup = invert(Organ)
 export type Organ = (typeof Organ)[keyof typeof Organ]
-export const isOrgan = createTypeGuard<Organ>(OrganIndex)
+export const isOrgan = createTypeGuard<Organ>(OrganLookup)
 
 const Guitar = {
   NylonStringGuitar: 24,
@@ -81,9 +81,9 @@ const Guitar = {
   GuitarHarmonics: 31
 } as const
 
-const GuitarIndex = invert(Guitar)
+const GuitarLookup = invert(Guitar)
 export type Guitar = (typeof Guitar)[keyof typeof Guitar]
-export const isGuitar = createTypeGuard<Guitar>(GuitarIndex)
+export const isGuitar = createTypeGuard<Guitar>(GuitarLookup)
 
 const Bass = {
   AcousticBass: 32,
@@ -96,9 +96,9 @@ const Bass = {
   SynthBass2: 39
 } as const
 
-const BassIndex = invert(Bass)
+const BassLookup = invert(Bass)
 export type Bass = (typeof Bass)[keyof typeof Bass]
-export const isBass = createTypeGuard<Bass>(BassIndex)
+export const isBass = createTypeGuard<Bass>(BassLookup)
 
 const Strings = {
   Violin: 40,
@@ -111,9 +111,9 @@ const Strings = {
   Timpani: 47
 } as const
 
-const StringsIndex = invert(Strings)
+const StringsLookup = invert(Strings)
 export type Strings = (typeof Strings)[keyof typeof Strings]
-export const isStrings = createTypeGuard<Strings>(StringsIndex)
+export const isStrings = createTypeGuard<Strings>(StringsLookup)
 
 const Ensemble = {
   StringEnsemble1: 48,
@@ -126,9 +126,9 @@ const Ensemble = {
   OrchestraHit: 55
 } as const
 
-const EnsembleIndex = invert(Ensemble)
+const EnsembleLookup = invert(Ensemble)
 export type Ensemble = (typeof Ensemble)[keyof typeof Ensemble]
-export const isEnsemble = createTypeGuard<Ensemble>(EnsembleIndex)
+export const isEnsemble = createTypeGuard<Ensemble>(EnsembleLookup)
 
 const Brass = {
   Trumpet: 56,
@@ -141,9 +141,9 @@ const Brass = {
   SynthBrass2: 63
 } as const
 
-const BrassIndex = invert(Brass)
+const BrassLookup = invert(Brass)
 export type Brass = (typeof Brass)[keyof typeof Brass]
-export const isBrass = createTypeGuard<Brass>(BrassIndex)
+export const isBrass = createTypeGuard<Brass>(BrassLookup)
 
 const Reed = {
   SopranoSax: 64,
@@ -156,9 +156,9 @@ const Reed = {
   Clarinet: 71
 } as const
 
-const ReedIndex = invert(Reed)
+const ReedLookup = invert(Reed)
 export type Reed = (typeof Reed)[keyof typeof Reed]
-export const isReed = createTypeGuard<Reed>(ReedIndex)
+export const isReed = createTypeGuard<Reed>(ReedLookup)
 
 const Pipe = {
   Piccolo: 72,
@@ -171,9 +171,9 @@ const Pipe = {
   Ocarina: 79
 } as const
 
-const PipeIndex = invert(Pipe)
+const PipeLookup = invert(Pipe)
 export type Pipe = (typeof Pipe)[keyof typeof Pipe]
-export const isPipe = createTypeGuard<Pipe>(PipeIndex)
+export const isPipe = createTypeGuard<Pipe>(PipeLookup)
 
 const SynthLead = {
   Lead1Square: 80,
@@ -186,9 +186,9 @@ const SynthLead = {
   Lead8BassLead: 87
 } as const
 
-const SynthLeadIndex = invert(SynthLead)
+const SynthLeadLookup = invert(SynthLead)
 export type SynthLead = (typeof SynthLead)[keyof typeof SynthLead]
-export const isSynthLead = createTypeGuard<SynthLead>(SynthLeadIndex)
+export const isSynthLead = createTypeGuard<SynthLead>(SynthLeadLookup)
 
 const SynthPad = {
   Pad1NewAge: 88,
@@ -201,9 +201,9 @@ const SynthPad = {
   Pad8Sweep: 95
 } as const
 
-const SynthPadIndex = invert(SynthPad)
+const SynthPadLookup = invert(SynthPad)
 export type SynthPad = (typeof SynthPad)[keyof typeof SynthPad]
-export const isSynthPad = createTypeGuard<SynthPad>(SynthPadIndex)
+export const isSynthPad = createTypeGuard<SynthPad>(SynthPadLookup)
 
 const SynthEffects = {
   FX1Rain: 96,
@@ -216,9 +216,9 @@ const SynthEffects = {
   FX8SciFi: 103
 } as const
 
-const SynthEffectsIndex = invert(SynthEffects)
+const SynthEffectsLookup = invert(SynthEffects)
 export type SynthEffects = (typeof SynthEffects)[keyof typeof SynthEffects]
-export const isSynthEffects = createTypeGuard<SynthEffects>(SynthEffectsIndex)
+export const isSynthEffects = createTypeGuard<SynthEffects>(SynthEffectsLookup)
 
 const Ethnic = {
   Sitar: 104,
@@ -231,9 +231,9 @@ const Ethnic = {
   Shanai: 111
 } as const
 
-const EthnicIndex = invert(Ethnic)
+const EthnicLookup = invert(Ethnic)
 export type Ethnic = (typeof Ethnic)[keyof typeof Ethnic]
-export const isEthnic = createTypeGuard<Ethnic>(EthnicIndex)
+export const isEthnic = createTypeGuard<Ethnic>(EthnicLookup)
 
 const Percussive = {
   TinkleBell: 112,
@@ -245,9 +245,9 @@ const Percussive = {
   SynthDrum: 118,
   ReverseCymbal: 119
 } as const
-const PercussiveIndex = invert(Percussive)
+const PercussiveLookup = invert(Percussive)
 export type Percussive = (typeof Percussive)[keyof typeof Percussive]
-export const isPercussive = createTypeGuard<Percussive>(PercussiveIndex)
+export const isPercussive = createTypeGuard<Percussive>(PercussiveLookup)
 
 const SoundEffects = {
   GuitarFretNoise: 120,
@@ -260,9 +260,9 @@ const SoundEffects = {
   Gunshot: 127
 } as const
 
-const SoundEffectsIndex = invert(SoundEffects)
+const SoundEffectsLookup = invert(SoundEffects)
 export type SoundEffects = (typeof SoundEffects)[keyof typeof SoundEffects]
-export const isSoundEffects = createTypeGuard<SoundEffects>(SoundEffectsIndex)
+export const isSoundEffects = createTypeGuard<SoundEffects>(SoundEffectsLookup)
 
 export const Instrument = {
   ...Piano,
@@ -283,9 +283,9 @@ export const Instrument = {
   ...SoundEffects
 }
 
-const InstrumentIndex = invert(Instrument)
+export const InstrumentLookup = invert(Instrument)
 export type Instrument = (typeof Instrument)[keyof typeof Instrument]
-export const isInstrument = createTypeGuard<Instrument>(InstrumentIndex)
+export const isInstrument = createTypeGuard<Instrument>(InstrumentLookup)
 
 export const Percussion = {
   AcousticBassDrum: 35,
@@ -337,6 +337,6 @@ export const Percussion = {
   OpenTriangle: 81
 } as const
 
-const PercussionIndex = invert(Percussion)
+const PercussionLookup = invert(Percussion)
 export type Percussion = (typeof Percussion)[keyof typeof Percussion]
-export const isPercussion = createTypeGuard<Percussion>(PercussionIndex)
+export const isPercussion = createTypeGuard<Percussion>(PercussionLookup)

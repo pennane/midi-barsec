@@ -20,7 +20,7 @@ const updateSize = () => {
   canvas.height = height
 }
 
-export const initializeVisualizer = (node: AnalyserNode) => {
+export const initVisualizer = (node: AnalyserNode) => {
   cancelAnimationFrame(animationFrameId!)
   analyser = node
   updateSize()

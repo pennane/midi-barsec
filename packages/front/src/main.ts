@@ -3,7 +3,7 @@ import './style.css'
 
 import { createMidiParser } from './parser'
 import { createPlayer } from './player'
-import { initializeUi } from './ui'
+import { initUi } from './ui'
 
 const defaultMidi = createMidiParser(defaultMidiFile)
 
@@ -37,4 +37,4 @@ compressor.connect(volumeGain)
 
 void createPlayer(audioContext, splitterGain)
   .load(defaultMidi)
-  .then((player) => initializeUi(player, volumeGain, analyserNode))
+  .then((player) => initUi(player, volumeGain, analyserNode))

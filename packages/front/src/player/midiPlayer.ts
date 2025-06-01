@@ -1,7 +1,6 @@
 import { SCHEDULE_AHEAD_TIME } from '../lib'
 import { MidiParser } from '../parser'
 import { processEvent } from './eventProcessors'
-import { instruments } from './instruments'
 
 import {
   calculatePosition,
@@ -28,10 +27,7 @@ function createInitialState(): PlayerState {
 }
 
 const defaultStrategies: MidiPlayerStrategies = {
-  instruments: {
-    type: 'fixed',
-    instrument: instruments.groups.ensemble()
-  },
+  instruments: { type: 'instruments' },
   percussion: { type: 'enabled' },
   controllers: { type: 'enabled' }
 }
@@ -153,6 +149,9 @@ class Player implements MidiPlayer {
     if (this.state.playbackContext) {
       this.state.playbackContext.strategies = this.strategies
     }
+  }
+  currentStrategies() {
+    return this.strategies
   }
 
   position() {

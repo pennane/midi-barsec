@@ -14,7 +14,7 @@ export type MidiPlayerStrategies = {
   percussion: { type: 'enabled' } | { type: 'disabled' }
   instruments:
     | { type: 'instruments' }
-    | { type: 'fixed'; instrument: Instrument }
+    | { type: 'fixed'; instrument: Instrument; name: string }
     | { type: 'disabled' }
   controllers: { type: 'enabled' } | { type: 'disabled' }
 }
@@ -33,6 +33,7 @@ export type MidiPlayer = {
   ) => void
   removeEventListener: (type: string, listener: EventListener) => void
   updateStrategies: (strategies: Partial<MidiPlayerStrategies>) => void
+  currentStrategies(): MidiPlayerStrategies
 }
 
 export type Note = {

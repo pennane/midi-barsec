@@ -1,3 +1,11 @@
+:root {
+  --bg-primary: #000714;
+  --text-primary: hsl(219 100% 90%);
+  --foreground: white;
+  --shadow: black;
+  --neutral: hsl(0deg 0% 55.98%);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -11,11 +19,67 @@ body {
   height: 100vh;
   width: 100%;
   overflow: hidden;
-  background-color: #000714;
+  background-color: var(--bg-primary);
   margin: 0;
   flex-direction: column;
-  color: hsl(219 100% 90% / 1);
+  color: var(--text-primary);
 }
+
+input,
+select {
+  padding: 0.2rem;
+  background: transparent;
+  border: 1px solid rgb(from var(--foreground) r g b / 0.3);
+  border-radius: 4px;
+  color: var(--foreground);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+input:focus,
+select:focus {
+  outline: 2px solid rgb(from var(--foreground) r g b / 0.5);
+  outline-offset: 1px;
+  background: rgb(from var(--foreground) r g b / 0.15);
+}
+
+input[type='range'] {
+  width: 80px;
+  height: 4px;
+  border-radius: 2px;
+  outline: none;
+  border: none;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--foreground);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+input[type='range']::-webkit-slider-thumb:hover {
+  background: rgb(from var(--foreground) r g b / 0.9);
+}
+
+input[type='range']::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: var(--foreground);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.2s ease;
+}
+
+input[type='range']::-moz-range-thumb:hover {
+  background: rgb(from var(--foreground) r g b / 0.9);
+}
+
 #settings {
   z-index: 10;
   margin: 0.75rem;
@@ -47,17 +111,10 @@ body {
   opacity: 1;
 }
 
-#settings input,
-#settings button {
-  cursor: pointer;
-  margin: 0;
-}
-
 #volume-control {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-
   font-family: sans-serif;
   font-size: 0.9rem;
 }
@@ -66,33 +123,22 @@ body {
   white-space: nowrap;
 }
 
-#volume-slider {
-  width: 80px;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 2px;
-  outline: none;
-  cursor: pointer;
+#strategy-controls {
+  display: contents !important;
 }
 
-#volume-slider::-webkit-slider-thumb {
-  appearance: none;
-  width: 12px;
-  height: 12px;
-  background: white;
-  border-radius: 50%;
-  cursor: pointer;
+#strategy-controls > div {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-#volume-slider::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
-  background: white;
-  border-radius: 50%;
-  cursor: pointer;
-  border: none;
+#strategy-controls label {
+  white-space: nowrap;
+  font-size: 0.8rem;
 }
 
+/* Main Content */
 #display {
   position: relative;
   margin-top: auto;
@@ -104,7 +150,7 @@ canvas {
   height: 25vmin;
   image-rendering: pixelated;
   cursor: pointer;
-  filter: drop-shadow(2px 4px 100px rgb(255 255 255 / 0.2));
+  filter: drop-shadow(2px 4px 100px rgb(from var(--foreground) r g b / 0.2));
 }
 
 #controls {
@@ -129,23 +175,23 @@ canvas {
 
 #progress-bar-background {
   flex: 1;
-  background-color: hsl(0deg 0% 55.98%);
+  background-color: var(--neutral);
   border-radius: 4px;
   cursor: pointer;
-  outline: 1px solid hsl(0deg 0% 0%);
+  outline: 1px solid var(--shadow);
   height: 0.25rem;
 }
 
 #progress-fill {
   height: 100%;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: rgb(from var(--foreground) r g b / 0.8);
   border-radius: 4px;
   width: 0%;
   transition: width 0.1s ease;
 }
 
 #progress-bar:hover #progress-fill {
-  background-color: white;
+  background-color: var(--foreground);
 }
 
 #time-display {
@@ -153,7 +199,7 @@ canvas {
   justify-content: space-between;
   font-family: monospace;
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgb(from var(--foreground) r g b / 0.8);
   align-items: center;
   gap: 0.5rem;
   width: min(90vw, 400px);
@@ -179,8 +225,8 @@ canvas {
 }
 
 .toast {
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
+  background: rgb(from var(--shadow) r g b / 0.8);
+  color: var(--foreground);
   padding: 0.5em 1em;
   margin-top: 0.5em;
   border-radius: 0.25em;
@@ -214,7 +260,7 @@ canvas {
 footer {
   font-family: system-ui;
   font-size: 0.75rem;
-  color: hsl(219 100% 90% / 0.5);
+  color: rgb(from var(--text-primary) r g b / 0.5);
   padding: 2rem;
   padding-top: 0;
 }

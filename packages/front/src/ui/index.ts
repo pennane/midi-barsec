@@ -2,10 +2,11 @@ import { MidiPlayer } from '../player'
 import { initFileSelector } from './fileSelector'
 import { initPlaybackController } from './playbackController'
 import { initProgressBar } from './progressBar'
-import { initializeVisualizer } from './visualizer'
+import { initStrategyControl } from './strategyControl'
+import { initVisualizer } from './visualizer'
 import { initVolumeControl } from './volumeControl'
 
-export function initializeUi(
+export function initUi(
   player: MidiPlayer,
   gainNode: GainNode,
   analyserNode: AnalyserNode
@@ -13,6 +14,7 @@ export function initializeUi(
   initProgressBar(player)
   initFileSelector(player)
   initPlaybackController(player)
+  initStrategyControl(player)
   initVolumeControl(gainNode)
-  initializeVisualizer(analyserNode)
+  initVisualizer(analyserNode)
 }

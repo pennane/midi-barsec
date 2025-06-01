@@ -1,5 +1,4 @@
-import { calculateTickDuration, readUint24BE } from '../../lib'
-import { Spec } from '../../parser'
+import { Spec, Util } from '../../parser'
 
 import { announce } from '../../ui/textAnnouncer'
 import { EventProcessor } from '../models'
@@ -27,8 +26,8 @@ const stopNotes: EventProcessor<Spec.MetaEvent> = (ctx) => {
 
 export const metaProcessors = {
   [Spec.MetaEventType.SetTempo]: (ctx, event) => {
-    const newTempo = readUint24BE(event.data, 0)
-    ctx.tickDuration = calculateTickDuration(newTempo, ctx.division)
+    const newTempo = Util.readUint24BE(event.data, 0)
+    ctx.tickDuration = Util.calculateTickDuration(newTempo, ctx.division)
   },
   [Spec.MetaEventType.Lyric]: announceMessage,
   [Spec.MetaEventType.CopyrightNotice]: announceMessage,

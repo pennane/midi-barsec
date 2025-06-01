@@ -1,5 +1,4 @@
-import { pitchBendToMultiplier } from '../../lib'
-import { Spec } from '../../parser'
+import { Spec, Util } from '../../parser'
 import { instrumentForProgramNumber } from '../instruments'
 
 import { EventProcessor } from '../models'
@@ -54,7 +53,7 @@ export const voiceMessageProcessors = {
     const value = (msb << 7) | lsb // 14-bit value
     channel.pitchBend = value
 
-    const bendMultiplier = pitchBendToMultiplier(value)
+    const bendMultiplier = Util.pitchBendToMultiplier(value)
 
     for (const note of channel.notes.values()) {
       note.oscillator.frequency.setValueAtTime(

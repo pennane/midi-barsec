@@ -1,4 +1,4 @@
-import { readVariableLengthQuantity } from '../lib'
+import { readVariableLengthQuantity } from './lib'
 import {
   EventType,
   MetaEvent,

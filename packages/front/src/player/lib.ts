@@ -1,5 +1,5 @@
-import { DEFAULT_TEMPO, calculateTickDuration, withStartingTime } from '../lib'
-import { MidiParser } from '../parser'
+import { DEFAULT_TEMPO } from '../lib'
+import { MidiParser, Util } from '../parser'
 
 import { MidiPlayerStrategies, PlaybackContext, PlayerState } from './models'
 
@@ -31,7 +31,7 @@ export function createPlaybackContext(
     audioContext,
     gainNode,
     division,
-    tickDuration: calculateTickDuration(DEFAULT_TEMPO, division),
+    tickDuration: Util.calculateTickDuration(DEFAULT_TEMPO, division),
     scheduledTime: now,
     channels: new Map(),
     eventIterator: midi.reader()[Symbol.iterator](),
@@ -99,7 +99,7 @@ export function seekTo(state: PlayerState, position: number): PlayerState {
   if (!state.midi || !state.playbackContext) return state
 
   const targetTime = position * state.midi.duration()
-  const reader = withStartingTime(state.midi, targetTime)
+  const reader = Util.withStartingTime(state.midi, targetTime)
 
   const updatedContext = {
     ...state.playbackContext,

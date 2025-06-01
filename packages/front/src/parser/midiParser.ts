@@ -1,5 +1,5 @@
-import { calculateMidiDuration } from '../lib/midiUtils'
 import { readEvent } from './eventReader'
+import { calculateMidiDuration } from './lib'
 import {
   EventType,
   MidiChunk,

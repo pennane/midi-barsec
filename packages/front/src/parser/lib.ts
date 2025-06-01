@@ -1,7 +1,6 @@
-import type { MidiParser, MidiReader } from '../parser'
+import type { MidiParser, MidiReader } from '.'
+import { isTempoEvent } from '../lib/typeGuards'
 import { DEFAULT_TEMPO } from '../player/constants'
-import { readUint24BE } from './dataUtils'
-import { isTempoEvent } from './typeGuards'
 
 // Avoid circular dependency by using import type
 
@@ -115,4 +114,45 @@ export function pitchBendToMultiplier(pitchBend: number, range = 2) {
   const bend = (pitchBend - 8192) / 8192 // -1 to +1
   const semitoneOffset = bend * range
   return Math.pow(2, semitoneOffset / 12)
+}
+
+/**
+ * Reads a variable-length quantity from a DataView
+ * core MIDI parsing utility used throughout the MIDI specification
+ *
+ * @param view The DataView to read from
+ * @param offset The byte offset to start reading from
+ * @returns An object containing the parsed value and the number of bytes consumed
+ */
+export function readVariableLengthQuantity(
+  view: DataView,
+  offset: number
+): { value: number; length: number } {
+  let value = 0
+  let length = 0
+  let byte: number
+
+  do {
+    byte = view.getUint8(offset + length)
+    value = (value << 7) | (byte & 0x7f)
+    length++
+  } while (byte & 0x80)
+
+  return { value, length }
+}
+
+/**
+ * Reads a 24-bit big-endian integer from a DataView
+ * used for MIDI tempo values
+ *
+ * @param view The DataView to read from
+ * @param offset The byte offset to start reading from
+ * @returns The 24-bit integer value
+ */
+export function readUint24BE(view: DataView, offset: number): number {
+  return (
+    (view.getUint8(offset) << 16) |
+    (view.getUint8(offset + 1) << 8) |
+    view.getUint8(offset + 2)
+  )
 }

@@ -1,5 +1,4 @@
-import { midiNoteToFrequency, pitchBendToMultiplier } from '../lib'
-import { Spec } from '../parser'
+import { Spec, Util } from '../parser'
 import { Instrument, Note } from './models'
 
 type EnvelopeConfig = {
@@ -31,7 +30,7 @@ const createGenericInstrument = (config: InstrumentConfig): Instrument => {
 
   return {
     playNote(ctx, channel, { noteNumber, velocity }) {
-      const baseFrequency = midiNoteToFrequency(noteNumber)
+      const baseFrequency = Util.midiNoteToFrequency(noteNumber)
       const gain = ctx.audioContext.createGain()
       const finalVelocity = velocity * gainMultiplier
 
@@ -56,7 +55,7 @@ const createGenericInstrument = (config: InstrumentConfig): Instrument => {
       const oscillator = ctx.audioContext.createOscillator()
       oscillator.type = oscillatorType
       oscillator.frequency.setValueAtTime(
-        baseFrequency * pitchBendToMultiplier(channel.pitchBend),
+        baseFrequency * Util.pitchBendToMultiplier(channel.pitchBend),
         ctx.scheduledTime
       )
 

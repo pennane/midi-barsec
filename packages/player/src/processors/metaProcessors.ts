@@ -7,10 +7,11 @@ const announceMessage: EventProcessor<Spec.MetaEvent> = (ctx, event) => {
   const currentTime = ctx.audioContext.currentTime
   const delaySeconds = Math.max(0, ctx.scheduledTime - currentTime)
   const delayMs = delaySeconds * 1000
-
   setTimeout(() => {
-    // TODO: Add announcement functionality or make it configurable
-    console.log('MIDI Text:', text)
+    ctx.emit('announcement', {
+      type: event.metaType,
+      text: text
+    })
   }, delayMs)
 }
 
@@ -24,11 +25,13 @@ const stopNotes: EventProcessor<Spec.MetaEvent> = (ctx) => {
   }
 }
 
+const setTempo: EventProcessor<Spec.MetaEvent> = (ctx, event) => {
+  const newTempo = Util.readUint24BE(event.data, 0)
+  ctx.tickDuration = Util.calculateTickDuration(newTempo, ctx.division)
+}
+
 export const metaProcessors = {
-  [Spec.MetaEventType.SetTempo]: (ctx, event) => {
-    const newTempo = Util.readUint24BE(event.data, 0)
-    ctx.tickDuration = Util.calculateTickDuration(newTempo, ctx.division)
-  },
+  [Spec.MetaEventType.SetTempo]: setTempo,
   [Spec.MetaEventType.Lyric]: announceMessage,
   [Spec.MetaEventType.CopyrightNotice]: announceMessage,
   [Spec.MetaEventType.EndOfTrack]: stopNotes,

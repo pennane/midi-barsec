@@ -7,6 +7,10 @@ export type MidiPlayerEventMap = {
     currentTime: number
     isPlaying: boolean
   }
+  announcement: {
+    type: Spec.MetaEventType
+    text: string
+  }
 }
 export type MidiPlayerEventType = keyof MidiPlayerEventMap
 
@@ -88,6 +92,10 @@ export type PlaybackContext = {
   tickDuration: number
   scheduledTime: number
   startTime: number
+  emit: <T extends MidiPlayerEventType>(
+    type: T,
+    detail: MidiPlayerEventMap[T]
+  ) => void
 }
 
 export type PlayerState = {

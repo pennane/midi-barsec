@@ -137,7 +137,8 @@ class Player implements MidiPlayer {
       this.state,
       this.audioContext,
       this.gainNode,
-      this.strategies
+      this.strategies,
+      this.emit.bind(this)
     )
     this.schedulingId = requestAnimationFrame(this.scheduleEvents)
     this.progressInterval = setInterval(() => this.emitProgress(), 100)

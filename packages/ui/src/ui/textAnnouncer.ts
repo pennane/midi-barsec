@@ -1,6 +1,12 @@
+import { MidiPlayer, MidiPlayerEventMap } from 'player'
+
 const target = document.getElementById('announcer')!
 
-export function announce(message: string) {
+function announce({
+  detail: { text: message }
+}: {
+  detail: MidiPlayerEventMap['announcement']
+}) {
   const formatted = message.trim()
   if (!formatted) return
   const toast = document.createElement('div')
@@ -15,4 +21,8 @@ export function announce(message: string) {
   toast.addEventListener('animationend', () => {
     toast.remove()
   })
+}
+
+export function initTextAnnouncer(player: MidiPlayer): void {
+  player.addEventListener('announcement', announce)
 }

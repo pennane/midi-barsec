@@ -8,11 +8,16 @@
     "build:parser": "pnpm --filter parser build",
     "build:player": "pnpm --filter player build",
     "build:ui": "pnpm --filter ui build",
-    "dev": "pnpm --filter ui dev",
+    "dev": "concurrently -n \"parser,player,ui\" -c \"blue,green,yellow\" \"pnpm run dev:parser\" \"pnpm run dev:player\" \"pnpm run dev:ui\"",
+    "dev:parser": "pnpm --filter parser dev",
+    "dev:player": "pnpm --filter player dev",
+    "dev:ui": "pnpm --filter ui dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "Arttu Pennanen <arttu.pennanen@metropolia.fi>",
   "license": "ISC",
-  "devDependencies": {}
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
 }

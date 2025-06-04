@@ -1,7 +1,13 @@
 import { MidiParser, Util } from 'parser'
 import { DEFAULT_TEMPO } from './constants'
 
-import { MidiPlayerStrategies, PlaybackContext, PlayerState } from './models'
+import {
+  MidiPlayerEventMap,
+  MidiPlayerEventType,
+  MidiPlayerStrategies,
+  PlaybackContext,
+  PlayerState
+} from './models'
 
 export function calculatePosition(
   audioContext: AudioContext,
@@ -16,7 +22,11 @@ function createPlaybackContext(
   midi: MidiParser,
   audioContext: AudioContext,
   gainNode: GainNode,
-  strategies: MidiPlayerStrategies
+  strategies: MidiPlayerStrategies,
+  emit: <T extends MidiPlayerEventType>(
+    type: T,
+    detail: MidiPlayerEventMap[T]
+  ) => void
 ): PlaybackContext {
   const division = midi.header.division
   if (typeof division !== 'number') {
@@ -35,7 +45,8 @@ function createPlaybackContext(
     scheduledTime: now,
     channels: new Map(),
     eventIterator: midi.reader()[Symbol.iterator](),
-    startTime: now
+    startTime: now,
+    emit
   }
 }
 
@@ -60,7 +71,11 @@ export function startPlayback(
   state: PlayerState,
   audioContext: AudioContext,
   gainNode: GainNode,
-  strategies: MidiPlayerStrategies
+  strategies: MidiPlayerStrategies,
+  emit: <T extends MidiPlayerEventType>(
+    type: T,
+    detail: MidiPlayerEventMap[T]
+  ) => void
 ): PlayerState {
   if (!state.midi) {
     return state
@@ -72,7 +87,8 @@ export function startPlayback(
         state.midi,
         audioContext,
         gainNode,
-        strategies
+        strategies,
+        emit
       ),
       isPlaying: true
     }

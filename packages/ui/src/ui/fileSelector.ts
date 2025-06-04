@@ -17,7 +17,6 @@ async function selectFile(event: Event): Promise<void> {
   }
   const file = fileList?.item(0)
   if (!file) {
-    alert('pls select midi file')
     return
   }
   const arrayBuffer = await file?.arrayBuffer()

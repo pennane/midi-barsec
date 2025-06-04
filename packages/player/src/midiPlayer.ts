@@ -196,6 +196,10 @@ class Player implements MidiPlayer {
     this.emitProgress()
     return this
   }
+
+  midi(): MidiParser {
+    return this.state.midi ?? null
+  }
 }
 
 export function createPlayer(

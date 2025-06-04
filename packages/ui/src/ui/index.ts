@@ -1,4 +1,6 @@
 import { MidiPlayer } from 'player'
+
+import { initAudioExport } from './audioExport'
 import { initFileSelector } from './fileSelector'
 import { initPlaybackController } from './playbackController'
 import { initProgressBar } from './progressBar'
@@ -17,6 +19,7 @@ export function initUi(
   initPlaybackController(player)
   initStrategyControl(player)
   initTextAnnouncer(player)
+  initAudioExport(player)
   initVolumeControl(gainNode)
   initVisualizer(analyserNode)
 }

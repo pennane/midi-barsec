@@ -32,7 +32,7 @@ const applyEnvelope = (
 }
 
 const createNoiseBuffer = (
-  audioContext: AudioContext,
+  audioContext: BaseAudioContext,
   duration: number
 ): AudioBuffer => {
   const sampleRate = audioContext.sampleRate
@@ -48,7 +48,7 @@ const createNoiseBuffer = (
 }
 
 const createNoiseSource = (
-  audioContext: AudioContext,
+  audioContext: BaseAudioContext,
   config: PercussionConfig
 ): AudioBufferSourceNode => {
   const bufferSource = audioContext.createBufferSource()
@@ -58,7 +58,7 @@ const createNoiseSource = (
 }
 
 const createOscillatorSource = (
-  audioContext: AudioContext,
+  audioContext: BaseAudioContext,
   config: PercussionConfig,
   scheduledTime: number
 ): OscillatorNode => {
@@ -79,7 +79,7 @@ const createOscillatorSource = (
 }
 
 const createHybridSource = (
-  audioContext: AudioContext,
+  audioContext: BaseAudioContext,
   config: PercussionConfig,
   scheduledTime: number
 ): { source: OscillatorNode; mixGain: GainNode } => {
@@ -118,7 +118,7 @@ const createHybridSource = (
 }
 
 const createAndConnectFilter = (
-  audioContext: AudioContext,
+  audioContext: BaseAudioContext,
   config: PercussionConfig,
   source: AudioNode,
   destination: AudioNode,
@@ -144,7 +144,7 @@ const createAndConnectFilter = (
 
 export const createPercussionSound = (
   config: PercussionConfig,
-  audioContext: AudioContext,
+  audioContext: BaseAudioContext,
   volume: number,
   scheduledTime: number
 ): PercussionNote => {

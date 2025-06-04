@@ -38,6 +38,7 @@ export type MidiPlayer = {
   removeEventListener: (type: string, listener: EventListener) => void
   updateStrategies: (strategies: Partial<MidiPlayerStrategies>) => void
   currentStrategies(): MidiPlayerStrategies
+  midi(): MidiParser
 }
 
 export type Note = {
@@ -92,7 +93,7 @@ export type Channel = {
 
 export type PlaybackContext = {
   strategies: MidiPlayerStrategies
-  audioContext: AudioContext
+  audioContext: BaseAudioContext
   gainNode: GainNode
   channels: Map<number, Channel>
   eventIterator: Iterator<Spec.MTrkEvent, void, void>

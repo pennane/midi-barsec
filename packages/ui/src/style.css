@@ -36,6 +36,13 @@ select {
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
+
+input:disabled {
+  opacity: 0.3;
+  color: var(--foreground);
+  cursor: initial;
+}
+
 option {
   background: var(--bg-primary);
   color: var(--text-primary);

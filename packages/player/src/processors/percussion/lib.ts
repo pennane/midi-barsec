@@ -1,4 +1,4 @@
-import { Channel, Note } from '../../models'
+import { PercussionNote } from '../../models'
 import { PercussionConfig } from './models'
 
 export const calculateVolume = (
@@ -12,6 +12,24 @@ const getDefaultEnvelope = () => ({
   sustain: 0.1,
   release: 0.2
 })
+
+const applyEnvelope = (
+  gain: GainNode,
+  volume: number,
+  envelope: NonNullable<PercussionConfig['envelope']>,
+  scheduledTime: number
+): void => {
+  gain.gain.setValueAtTime(0, scheduledTime)
+  gain.gain.linearRampToValueAtTime(volume, scheduledTime + envelope.attack)
+  gain.gain.linearRampToValueAtTime(
+    volume * envelope.sustain,
+    scheduledTime + envelope.attack + envelope.decay
+  )
+  gain.gain.linearRampToValueAtTime(
+    0,
+    scheduledTime + envelope.attack + envelope.decay + envelope.release
+  )
+}
 
 const createNoiseBuffer = (
   audioContext: AudioContext,
@@ -88,7 +106,6 @@ const createHybridSource = (
   bufferSource.connect(noiseGain)
   noiseGain.connect(mixGain)
 
-  // Mix ratios (60% oscillator, 40% noise for snare-like sounds)
   oscGain.gain.setValueAtTime(0.6, scheduledTime)
   noiseGain.gain.setValueAtTime(0.4, scheduledTime)
 
@@ -125,34 +142,12 @@ const createAndConnectFilter = (
   return filter
 }
 
-const applyEnvelope = (
-  gain: GainNode,
-  volume: number,
-  envelope: NonNullable<PercussionConfig['envelope']>,
-  scheduledTime: number
-): void => {
-  gain.gain.setValueAtTime(0, scheduledTime)
-  gain.gain.linearRampToValueAtTime(volume, scheduledTime + envelope.attack)
-  gain.gain.linearRampToValueAtTime(
-    volume * envelope.sustain,
-    scheduledTime + envelope.attack + envelope.decay
-  )
-  gain.gain.linearRampToValueAtTime(
-    0,
-    scheduledTime + envelope.attack + envelope.decay + envelope.release
-  )
-}
-
 export const createPercussionSound = (
   config: PercussionConfig,
   audioContext: AudioContext,
   volume: number,
   scheduledTime: number
-): {
-  source: OscillatorNode | AudioBufferSourceNode
-  gain: GainNode
-  filter?: BiquadFilterNode
-} => {
+): PercussionNote => {
   const gain = audioContext.createGain()
   const envelope = config.envelope || getDefaultEnvelope()
 
@@ -196,20 +191,14 @@ export const createPercussionSound = (
   }
 
   applyEnvelope(gain, volume, envelope, scheduledTime)
-  return { source, gain, filter }
-}
 
-export const stopExistingNote = (
-  existingNote: { oscillator: OscillatorNode; gain: GainNode },
-  scheduledTime: number
-): void => {
-  try {
-    if ('stop' in existingNote.oscillator) {
-      existingNote.oscillator.stop(scheduledTime)
-    }
-  } catch {}
-  existingNote.oscillator.disconnect()
-  existingNote.gain.disconnect()
+  return {
+    source,
+    gain,
+    filter,
+    startTime: scheduledTime,
+    duration: config.duration
+  }
 }
 
 export const startPercussionSource = (
@@ -223,30 +212,4 @@ export const startPercussionSource = (
 
   source.start(scheduledTime)
   source.stop(scheduledTime + config.duration)
-}
-
-export const scheduleNoteCleanup = (
-  channel: Channel,
-  noteNumber: number,
-  note: Note,
-  duration: number
-): void => {
-  setTimeout(() => {
-    if (channel.notes.get(noteNumber) === note) {
-      channel.notes.delete(noteNumber)
-    }
-  }, (duration + 0.1) * 1000)
-}
-
-export const stopLongPercussionNote = (
-  note: { oscillator: OscillatorNode; gain: GainNode },
-  scheduledTime: number
-): void => {
-  note.gain.gain.cancelScheduledValues(scheduledTime)
-  note.gain.gain.setValueAtTime(note.gain.gain.value, scheduledTime)
-  note.gain.gain.linearRampToValueAtTime(0, scheduledTime + 0.1)
-
-  try {
-    note.oscillator.stop(scheduledTime + 0.1)
-  } catch {}
 }

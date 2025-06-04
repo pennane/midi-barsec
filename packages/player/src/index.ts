@@ -6,3 +6,4 @@ export type {
   MidiPlayerEventMap,
   MidiPlayerStrategies
 } from './models'
+export * from './typeGuards'

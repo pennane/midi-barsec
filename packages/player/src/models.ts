@@ -49,6 +49,14 @@ export type Note = {
   sustained: boolean
 }
 
+export type PercussionNote = {
+  source: OscillatorNode | AudioBufferSourceNode
+  gain: GainNode
+  filter?: BiquadFilterNode
+  startTime: number
+  duration: number
+}
+
 export type Instrument = {
   playNote(
     ctx: PlaybackContext,

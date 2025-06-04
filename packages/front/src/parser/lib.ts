@@ -2,12 +2,9 @@ import type { MidiParser, MidiReader } from '.'
 import { isTempoEvent } from '../lib/typeGuards'
 import { DEFAULT_TEMPO } from '../player/constants'
 
-// Avoid circular dependency by using import type
-
-/** MIDI note constants */
-export const MIDI_NOTE_A4 = 69
-export const MIDI_NOTE_A4_FREQUENCY = 440
-export const MICROSECONDS_IN_SECOND = 1_000_000
+const MIDI_NOTE_A4 = 69
+const MIDI_NOTE_A4_FREQUENCY = 440
+const MICROSECONDS_IN_SECOND = 1_000_000
 
 /**
  * Converts a MIDI note number to its corresponding frequency in Hz.

@@ -12,7 +12,7 @@ export function calculatePosition(
   return Math.min(elapsed / state.midi.duration(), 1)
 }
 
-export function createPlaybackContext(
+function createPlaybackContext(
   midi: MidiParser,
   audioContext: AudioContext,
   gainNode: GainNode,

@@ -23,11 +23,11 @@ import { percussionProcessors } from './processors/percussion/percussionProcesso
 function matchEvent<IN>(
   ...handlers: EventProcessorPredicate<IN, any>[]
 ): EventProcessor<IN> {
-  return (ctx, event) => {
-    for (const [pred, processor] of handlers) {
-      if (pred(event)) return processor(ctx, event)
-    }
-  }
+  return (ctx, event) => handlers.find(([pred]) => pred(event))?.[1](ctx, event)
+}
+
+function fallThrough(_: unknown): _ is any {
+  return true
 }
 
 const processPercussionEvent = matchEvent(
@@ -37,7 +37,7 @@ const processPercussionEvent = matchEvent(
     (ctx, event) => percussionProcessors.noteOff(ctx, event)
   ],
   [
-    (_): _ is any => true,
+    fallThrough,
     (_, event) =>
       console.info(
         'unhandled percussion event',
@@ -70,7 +70,7 @@ const processMidi: EventProcessor<Spec.MidiChannelMessage> = matchEvent(
   [isChannelPressureEvent, voiceMessageProcessors.channelPressure],
   [isProgramChangeEvent, voiceMessageProcessors.programChange],
   [
-    (_): _ is any => true,
+    fallThrough,
     (_, event) =>
       console.info(
         'unhandled midi event',
@@ -94,8 +94,5 @@ const processMetaEvent: EventProcessor<Spec.MetaEvent> = (ctx, event) => {
 export const processEvent = matchEvent(
   [isMidiEvent, processMidi],
   [isMetaEvent, processMetaEvent],
-  [
-    (_): _ is any => true,
-    (_, event) => console.info('unhandled top level event', event)
-  ]
+  [fallThrough, (_, event) => console.info('unhandled top level event', event)]
 )

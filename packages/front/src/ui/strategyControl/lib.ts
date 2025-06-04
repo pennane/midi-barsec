@@ -8,7 +8,7 @@ export const createOption = (
   text
 })
 
-export const createSelectElement = (
+const createSelectElement = (
   id: string,
   options: readonly UiStrategyOption[]
 ): HTMLSelectElement => {
@@ -25,10 +25,7 @@ export const createSelectElement = (
   return select
 }
 
-export const createLabel = (
-  text: string,
-  htmlFor: string
-): HTMLLabelElement => {
+const createLabel = (text: string, htmlFor: string): HTMLLabelElement => {
   const label = document.createElement('label')
   label.textContent = text
   label.htmlFor = htmlFor

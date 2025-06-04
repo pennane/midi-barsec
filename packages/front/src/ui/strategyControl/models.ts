@@ -6,10 +6,7 @@ export type UiStrategyControlConfig = {
   options: readonly UiStrategyOption[]
 }
 
-export type UiStrategyUpdateHandler = (
-  player: MidiPlayer,
-  value: string
-) => void
+type UiStrategyUpdateHandler = (player: MidiPlayer, value: string) => void
 
 export type UiStrategyControlDefinition = {
   config: UiStrategyControlConfig

@@ -25,7 +25,7 @@ export const initVisualizer = (node: AnalyserNode) => {
   analyser = node
   updateSize()
   target.appendChild(canvas)
-  window.addEventListener('resize', updateSize)
+  // window.addEventListener('resize', updateSize)
   loop()
 }
 

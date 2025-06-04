@@ -2,11 +2,11 @@ import { Spec } from '../../parser'
 import { instrumentForProgramNumber, instruments, silent } from '../instruments'
 import { Channel, PlaybackContext } from '../models'
 
-const instrumentHandler = (ctx: PlaybackContext) => {
+const instrumentHandler = () => {
   let programInstrument = instruments.basic.default()
 
   return {
-    instrument: () => {
+    instrument: (ctx: PlaybackContext) => {
       if (ctx.strategies.instruments.type === 'disabled') {
         return silent
       } else if (ctx.strategies.instruments.type === 'fixed') {
@@ -37,7 +37,7 @@ export function getOrCreateChannel(
   channel = {
     gain,
     panner,
-    ...instrumentHandler(ctx),
+    ...instrumentHandler(),
     notes: new Map(),
     sustain: false,
     pitchBend: 0,

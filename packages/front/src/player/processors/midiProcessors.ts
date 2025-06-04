@@ -12,14 +12,14 @@ export const voiceMessageProcessors = {
 
     if (existingNote) {
       try {
-        channel.instrument().stopNote(ctx, channel, existingNote, {
+        channel.instrument(ctx).stopNote(ctx, channel, existingNote, {
           reapplied: existingNote.sustained
         })
       } catch {}
       channel.notes.delete(noteNumber)
     }
 
-    const newNote = channel.instrument().playNote(ctx, channel, {
+    const newNote = channel.instrument(ctx).playNote(ctx, channel, {
       noteNumber,
       velocity
     })
@@ -35,7 +35,7 @@ export const voiceMessageProcessors = {
     if (channel.sustain) {
       note.sustained = true
     } else {
-      channel.instrument().stopNote(ctx, channel, note, { reapplied: false })
+      channel.instrument(ctx).stopNote(ctx, channel, note, { reapplied: false })
       channel.notes.delete(noteNumber)
     }
   },
@@ -100,7 +100,9 @@ export const controllerProcessors = {
 
     for (const note of channel.notes.values()) {
       if (note.sustained) {
-        channel.instrument().stopNote(ctx, channel, note, { reapplied: false })
+        channel
+          .instrument(ctx)
+          .stopNote(ctx, channel, note, { reapplied: false })
       }
     }
   },
@@ -115,7 +117,7 @@ export const controllerProcessors = {
   [Spec.MidiControllerChange.AllNotesOff]: (ctx, event) => {
     const channel = getOrCreateChannel(ctx, event.channel)
     for (const note of channel.notes.values()) {
-      channel.instrument().stopNote(ctx, channel, note, { reapplied: false })
+      channel.instrument(ctx).stopNote(ctx, channel, note, { reapplied: false })
     }
   },
   [Spec.MidiControllerChange.ExpressionControllerMSB]: (ctx, event) => {

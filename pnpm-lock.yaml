@@ -8,7 +8,23 @@ importers:
 
   .: {}
 
-  packages/front:
+  packages/parser:
+    devDependencies:
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
+
+  packages/player:
+    dependencies:
+      parser:
+        specifier: workspace:*
+        version: link:../parser
+    devDependencies:
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
+
+  packages/ui:
     dependencies:
       parser:
         specifier: workspace:*
@@ -38,22 +54,6 @@ importers:
       vite-plugin-arraybuffer:
         specifier: ^0.1.0
         version: 0.1.0
-
-  packages/parser:
-    devDependencies:
-      typescript:
-        specifier: ^5.8.3
-        version: 5.8.3
-
-  packages/player:
-    dependencies:
-      parser:
-        specifier: workspace:*
-        version: link:../parser
-    devDependencies:
-      typescript:
-        specifier: ^5.8.3
-        version: 5.8.3
 
 packages:
 

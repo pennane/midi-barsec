@@ -57,9 +57,6 @@ pnpm build
 pnpm run build:parser
 pnpm run build:player
 pnpm run build:ui
-
-# Clean build artifacts
-pnpm clean
 ```
 
 ## Usage

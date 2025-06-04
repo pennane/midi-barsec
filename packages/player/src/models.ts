@@ -1,4 +1,5 @@
 import { MidiParser, Spec } from 'parser'
+import { Subscriber } from './eventEmitter'
 
 export type MidiPlayerEventMap = {
   progressUpdate: {
@@ -31,14 +32,9 @@ export type MidiPlayer = {
   isPlaying(): boolean
   seek: (position: number) => void
   load: (midi: MidiParser) => Promise<MidiPlayer>
-  addEventListener: <T extends MidiPlayerEventType>(
-    type: T,
-    listener: (event: CustomEvent<MidiPlayerEventMap[T]>) => void
-  ) => void
-  removeEventListener: (type: string, listener: EventListener) => void
   updateStrategies: (strategies: Partial<MidiPlayerStrategies>) => void
   currentStrategies(): MidiPlayerStrategies
-}
+} & Subscriber<MidiPlayerEventMap>
 
 export type Note = {
   gain: GainNode

@@ -2,15 +2,11 @@ import { MidiPlayer, MidiPlayerEventMap } from 'player'
 
 const target = document.getElementById('announcer')!
 
-function announce({
-  detail: { text: message }
-}: {
-  detail: MidiPlayerEventMap['announcement']
-}) {
-  const formatted = message.trim()
+function announce(event: MidiPlayerEventMap['announcement']) {
+  const formatted = event.text.trim()
   if (!formatted) return
   const toast = document.createElement('div')
-  toast.textContent = message
+  toast.textContent = formatted
   toast.className = 'toast'
   target.appendChild(toast)
 

@@ -2,6 +2,7 @@ import { MidiParser } from 'parser'
 import { SCHEDULE_AHEAD_TIME } from './constants'
 import { processEvent } from './eventProcessors'
 
+import { Emitter } from './eventEmitter'
 import {
   calculatePosition,
   loadMidi,
@@ -12,7 +13,6 @@ import {
 import {
   MidiPlayer,
   MidiPlayerEventMap,
-  MidiPlayerEventType,
   MidiPlayerStrategies,
   PlayerState
 } from './models'
@@ -32,11 +32,10 @@ const defaultStrategies: MidiPlayerStrategies = {
   controllers: { type: 'enabled' }
 }
 
-class Player implements MidiPlayer {
+class Player extends Emitter<MidiPlayerEventMap> implements MidiPlayer {
   private state: PlayerState
   private readonly audioContext: AudioContext
   private readonly gainNode: GainNode
-  private readonly eventTarget = new EventTarget()
   private schedulingId?: number
   private progressInterval?: number
   private strategies: MidiPlayerStrategies
@@ -46,28 +45,11 @@ class Player implements MidiPlayer {
     gainNode: GainNode,
     strategies: MidiPlayerStrategies
   ) {
+    super()
     this.audioContext = audioContext
     this.gainNode = gainNode
     this.state = createInitialState()
     this.strategies = strategies
-  }
-
-  addEventListener<T extends MidiPlayerEventType>(
-    type: T,
-    listener: (event: CustomEvent<MidiPlayerEventMap[T]>) => void
-  ) {
-    this.eventTarget.addEventListener(type, listener as EventListener)
-  }
-
-  removeEventListener(type: string, listener: EventListener) {
-    this.eventTarget.removeEventListener(type, listener)
-  }
-
-  private emit<T extends MidiPlayerEventType>(
-    type: T,
-    detail: MidiPlayerEventMap[T]
-  ) {
-    this.eventTarget.dispatchEvent(new CustomEvent(type, { detail }))
   }
 
   private scheduleEvents = () => {

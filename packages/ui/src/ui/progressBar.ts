@@ -11,10 +11,8 @@ function formatTime(seconds: number): string {
   return `${minutes}:${secs.toString().padStart(2, '0')}`
 }
 
-function updateProgressBar(event: {
-  detail: MidiPlayerEventMap['progressUpdate']
-}): void {
-  const { position, currentTime, duration } = event.detail
+function updateProgressBar(event: MidiPlayerEventMap['progressUpdate']): void {
+  const { position, currentTime, duration } = event
   progressFill.style.width = `${position * 100}%`
   currentTimeDisplay.textContent = formatTime(currentTime)
   totalDurationDisplay.textContent = formatTime(duration)
@@ -26,7 +24,7 @@ export function initProgressBar(player: MidiPlayer): void {
   totalDurationDisplay = document.getElementById('total-time')!
   progressBar = document.getElementById('progress-bar')!
 
-  updateProgressBar({ detail: player.position() })
+  updateProgressBar(player.position())
 
   player.addEventListener('progressUpdate', updateProgressBar)
 
